@@ -232,32 +232,6 @@ function Audio() {
             )}
         </>
     );
-
-    // // Play track in session
-    // const playInSession = (e) => {
-    //     if (!isSafari && !isMobileSafari) {
-    //         dispatch( playTrack(index) );
-    //     } else {
-    //         // Play blank sound, then track
-    //         const audioTmp = new Audio("/blank.mp3");
-    //         audioTmp.play();
-
-    //         setTimeout(function() {
-    //             audioTmp.pause();
-    //             dispatch( playTrack(index) );
-    //         }, 1000);
-    //     }
-    // };
-
-    // <Sound
-    //   url="cool_sound.mp3"
-    //   playStatus={Sound.status.PLAYING}
-    //   volume={100}
-    //   onError={() => {}}
-    //   onLoading={this.handleSongLoading}
-    //   onPlaying={this.handleSongPlaying}
-    //   onFinishedPlaying={this.handleSongFinishedPlaying}
-    // />
 }
 
 export default Audio;
