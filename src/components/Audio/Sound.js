@@ -16,6 +16,8 @@ function Sound({
 }) {
     const dispatch = useDispatch();
     const trackUrl = `${process.env.REACT_APP_API}/tracks/${track.id}/audio`;
+    // prettier-ignore
+    // let trackUrl = "https://cdn.merritt.es/file/collection-2001/03+-+Stay+By+Me.flac";
 
     const [audio, state, controls, ref] = useAudio({
         src: trackUrl,
