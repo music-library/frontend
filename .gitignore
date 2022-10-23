@@ -1,3 +1,5 @@
+.env
+.env.local
 
 node_modules/
 data/
@@ -14,9 +16,13 @@ cover.jpg
 /coverage
 
 # production
-/build
+build/
+dist/
+
+coverage/
 
 # misc
+vite-app
 .DS_Store
 .env.local
 .env.development.local
