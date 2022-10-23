@@ -1,0 +1,8 @@
+{
+	"env": {
+		"development": {
+			"compact": false
+		}
+	},
+	"presets": ["react-app", "@linaria"]
+}

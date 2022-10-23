@@ -1,0 +1,9 @@
+{
+    "javascript.validate.enable": true,
+    "editor.formatOnSave": true,
+    "files.autoSave": "onFocusChange",
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "scss.format.spaceAroundSelectorSeparator": true
+}
