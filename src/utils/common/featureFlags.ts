@@ -2,7 +2,7 @@
  * Feature flags
  */
 export const featureFlags = {
-	timerIncrement: import.meta.env.VITE_FEATURE_INCREMENT,
+	timerIncrement: import.meta.env.REACT_APP_FEATURE_INCREMENT,
 	someOtherFeature: false
 };
 

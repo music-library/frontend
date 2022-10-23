@@ -25,10 +25,10 @@ async function bootstrap() {
 	const env = [
 		["NODE_ENV", "development"],
 		["GENERATE_SOURCEMAP", false],
-		["VITE_NAME", appName],
-		["VITE_VERSION", appVersion],
-		["VITE_GIT_BRANCH", gitBranch],
-		["VITE_GIT_COMMIT", gitCommitHashShort],
+		["REACT_APP_NAME", appName],
+		["REACT_APP_VERSION", appVersion],
+		["REACT_APP_GIT_BRANCH", gitBranch],
+		["REACT_APP_GIT_COMMIT", gitCommitHashShort],
 	];
 
 	const isProd = args.length >= 2 && (args[1] === "build" || args[1] === "preview");
