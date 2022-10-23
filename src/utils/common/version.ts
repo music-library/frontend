@@ -1,4 +1,4 @@
-export const appName = "App"; // Optionally use `import.meta.env.VITE_NAME`
+export const appName = "Music Library"; // Optionally use `import.meta.env.VITE_NAME`
 export const appVersion = import.meta.env.VITE_VERSION;
 export const gitBranch = import.meta.env.VITE_GIT_BRANCH;
 export const gitCommitHash = import.meta.env.VITE_GIT_COMMIT;
