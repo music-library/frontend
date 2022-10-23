@@ -1,56 +1,85 @@
 {
-    "name": "music-library-player",
-    "version": "2.11.23",
-    "private": true,
-    "dependencies": {
-        "@bug-catch/browser": "^3.0.1",
-        "axios": "^0.23.0",
-        "chance": "^1.1.6",
-        "cross-env": "^7.0.2",
-        "crypto-js": "^4.0.0",
-        "fuse.js": "^6.2.1",
-        "lodash": "^4.17.15",
-        "moment": "^2.26.0",
-        "oscilloscope": "^1.2.0",
-        "react": "^16.13.1",
-        "react-device-detect": "^1.12.1",
-        "react-dom": "^16.13.1",
-        "react-loading-skeleton": "^2.1.1",
-        "react-redux": "^7.2.0",
-        "react-router-dom": "^5.2.0",
-        "react-scripts": "^4.0.3",
-        "react-sound": "^1.2.0",
-        "react-spring": "^8.0.27",
-        "react-svg": "^11.0.30",
-        "redux": "^4.0.5",
-        "redux-logger": "^3.0.6",
-        "redux-thunk": "^2.3.0",
-        "sass": "^1.43.2",
-        "socket.io-client": "^2.3.0"
-    },
-    "devDependencies": {
-        "@testing-library/jest-dom": "^5.14.1",
-        "@testing-library/react": "^9.3.2",
-        "@testing-library/user-event": "^7.1.2"
-    },
-    "scripts": {
-        "start": "node ./bootstap-start.js start",
-        "build": "node ./bootstap-start.js build",
-        "test": "react-scripts test --watchAll=false",
-        "test:watch": "react-scripts test --watchAll",
-        "test:coverage": "react-scripts test --coverage",
-        "eject": "react-scripts eject"
-    },
-    "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
-        "development": [
-            "last 1 chrome version",
-            "last 1 firefox version",
-            "last 1 safari version"
-        ]
-    }
+  "name": "music-library",
+  "version": "2.12.0",
+  "license": "UNLICENSED",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "build": "tsc && node bootstrap.cjs vite build",
+    "dev": "node bootstrap.cjs vite",
+    "preview": "node bootstrap.cjs vite preview",
+    "test": "node bootstrap.cjs vitest run",
+    "test:ui": "node bootstrap.cjs vitest --ui",
+    "test:coverage": "node bootstrap.cjs vitest run --coverage",
+    "test:watch": "node bootstrap.cjs vitest watch"
+  },
+  "dependencies": {
+    "@linaria/core": "^4.1.4",
+    "@linaria/react": "^4.1.5",
+    "@reduxjs/toolkit": "^1.8.5",
+    "classnames": "^2.3.2",
+    "dayjs": "^1.11.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.4",
+    "react-router-dom": "^6.4.1",
+    "redux-logger": "^3.0.6",
+    "sass": "^1.55.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.19.3",
+    "@linaria/babel-preset": "^4.2.2",
+    "@rollup/pluginutils": "^4.2.1",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/react-hooks": "^8.0.1",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/node": "^18.7.23",
+    "@types/react": "^18.0.21",
+    "@types/react-dom": "^18.0.6",
+    "@types/react-redux": "^7.1.24",
+    "@types/redux-logger": "^3.0.9",
+    "@vitejs/plugin-react": "^2.1.0",
+    "@vitest/coverage-c8": "^0.24.3",
+    "@vitest/ui": "^0.24.3",
+    "babel-preset-react-app": "^10.0.1",
+    "cross-env": "^7.0.3",
+    "happy-dom": "^7.5.14",
+    "rollup-plugin-workbox": "^6.2.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.1.0",
+    "vite-tsconfig-paths": "^3.5.1",
+    "vitest": "^0.24.3",
+    "workbox-build": "^6.5.4",
+    "workbox-core": "^6.5.4",
+    "workbox-expiration": "^6.5.4",
+    "workbox-precaching": "^6.5.4",
+    "workbox-routing": "^6.5.4",
+    "workbox-strategies": "^6.5.4"
+  },
+  "optionalDependencies": {
+    "npm-upgrade": "^3.1.0",
+    "source-map-explorer": "^2.5.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
