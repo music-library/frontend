@@ -9,7 +9,7 @@ export const LogoDiscogsVinyl = memo((props: SVGProps<SVGSVGElement>) => (
 		x="0px"
 		y="0px"
 		viewBox="0 0 1000 1000"
-		enable-background="new 0 0 1000 1000"
+		enableBackground="new 0 0 1000 1000"
 		xmlSpace="preserve"
 		{...props}
 	>

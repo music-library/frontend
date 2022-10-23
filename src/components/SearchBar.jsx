@@ -7,7 +7,7 @@ import { updateUserSearch } from "store/actions";
 
 function SearchBar() {
 	const dispatch = useDispatch();
-	const history = useNavigate();
+	const navigate = useNavigate();
 	const location = useLocation();
 
 	// Search input value in store
@@ -53,7 +53,7 @@ function SearchBar() {
 							location.pathname.match(/\/albums\/.*/)) &&
 						search.length > 0
 					)
-						history.push("/albums");
+						navigate("/albums");
 				},
 				!isMobile ? 300 : 500
 			)

@@ -130,7 +130,7 @@ function AlbumIndividual() {
 											isLoading
 												? "example"
 												: `${
-														process.env
+														import.meta.env
 															.REACT_APP_API
 												  }/tracks/${
 														tracks[album.tracks[0]]

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { isMobile } from "react-device-detect";
 
 import { fetchTracks } from "store/actions";
@@ -48,14 +48,16 @@ function App() {
 
 					{/* Routes */}
 					<div className="app-page">
-						<Route path="/" element={<Home />} />
-						<Route path="/albums" element={<Albums />} />
-						<Route
-							path="/albums/:id"
-							element={<AlbumIndividual />}
-						/>
-						<Route path="/playlists" element={<Playlists />} />
-						<Route path="/tracks" element={<Tracks />} />
+						<Routes>
+							<Route path="/" element={<Home />} />
+							<Route path="/albums" element={<Albums />} />
+							<Route
+								path="/albums/:id"
+								element={<AlbumIndividual />}
+							/>
+							<Route path="/playlists" element={<Playlists />} />
+							<Route path="/tracks" element={<Tracks />} />
+						</Routes>
 					</div>
 
 					{/* Audio Control Bar */}

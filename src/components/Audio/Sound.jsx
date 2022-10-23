@@ -15,7 +15,9 @@ function Sound({
 	onError
 }) {
 	const dispatch = useDispatch();
-	const trackUrl = `${process.env.REACT_APP_API}/tracks/${track.id}/audio`;
+	const trackUrl = `${import.meta.env.REACT_APP_API}/tracks/${
+		track.id
+	}/audio`;
 	// prettier-ignore
 	// let trackUrl = "https://cdn.merritt.es/file/collection-2001/03+-+Stay+By+Me.flac";
 

@@ -76,7 +76,9 @@ function TrackBig({ index, size }) {
 		>
 			<div className="track-col image">
 				<Image
-					src={`${process.env.REACT_APP_API}/tracks/${albumCoverId}/cover/50`}
+					src={`${
+						import.meta.env.REACT_APP_API
+					}/tracks/${albumCoverId}/cover/50`}
 					fallback={`fallback--album-cover`}
 					alt="album-cover"
 					draggable="false"

@@ -21,7 +21,7 @@ import { Icon } from "components/Icon";
 
 function AudioControlBar(props) {
 	const dispatch = useDispatch();
-	const history = useNavigate();
+	const navigate = useNavigate();
 
 	// Get session state from store
 	const playingIndex = useSelector((state) => state.session.playing.index);
@@ -53,7 +53,7 @@ function AudioControlBar(props) {
 			const albumId = sha1(
 				track.metadata.album + track.metadata.album_artist
 			).toString();
-			history.push("/albums/" + albumId);
+			navigate("/albums/" + albumId);
 		}
 	};
 
@@ -104,7 +104,9 @@ function AudioControlBar(props) {
 					<div className="track col" onClick={handleGoToAlbum}>
 						<div className="track-cover">
 							<Image
-								src={`${process.env.REACT_APP_API}/tracks/${albumCoverId}/cover/50`}
+								src={`${
+									import.meta.env.REACT_APP_API
+								}/tracks/${albumCoverId}/cover/50`}
 								fallback={`fallback--album-cover`}
 								alt="album-cover"
 								draggable="false"

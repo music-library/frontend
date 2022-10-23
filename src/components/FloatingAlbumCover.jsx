@@ -12,7 +12,7 @@ import { Icon } from "components/Icon";
 
 function FloatingAlbumCover() {
 	const dispatch = useDispatch();
-	const history = useNavigate();
+	const navigate = useNavigate();
 
 	// Track and session data from store
 	const playingIndex = useSelector((state) => state.session.playing.index);
@@ -34,7 +34,7 @@ function FloatingAlbumCover() {
 			const albumId = sha1(
 				track.metadata.album + track.metadata.album_artist
 			).toString();
-			history.push("/albums/" + albumId);
+			navigate("/albums/" + albumId);
 		}
 	};
 
@@ -58,7 +58,9 @@ function FloatingAlbumCover() {
 			onClick={handleGoToAlbum}
 		>
 			<Image
-				src={`${process.env.REACT_APP_API}/tracks/${albumCoverId}/cover/400`}
+				src={`${
+					import.meta.env.REACT_APP_API
+				}/tracks/${albumCoverId}/cover/400`}
 				fallback={`fallback--album-cover`}
 				alt="album-cover"
 				draggable="false"
