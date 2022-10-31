@@ -36,16 +36,15 @@ function Queue() {
 							setData={setNewQueue}
 							renderWith={(props) => (
 								<Track
-									index={props?.id}
-									// size="compact"
+									index={Number(props?.id)}
 									size="big"
 									{...props}
 								/>
 							)}
 							// grid
 							gutter={5}
-							minWidth={10000}
-							maxWidth={10000}
+							minWidth={"100%"}
+							maxWidth={"1fr"}
 						/>
 					</div>
 				</section>
