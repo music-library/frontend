@@ -6,7 +6,7 @@ import { playTrack, queuePush, queueRemove } from "store/actions";
 
 import { Icon } from "components/Icon";
 
-function Track({ index, trackNumber, size }) {
+function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
 	const dispatch = useDispatch();
 
 	// Track and session data from store
@@ -21,6 +21,9 @@ function Track({ index, trackNumber, size }) {
 	);
 	const colors = useSelector((state) => state.color.colors);
 	const colorIndex = useSelector((state) => state.color.current);
+
+	// Hide if track doesn't exist
+	if (!track && hideIfNonExistent) return null;
 
 	// Is this track currently playing?
 	const isTrackPlaying = track.id === playingId;

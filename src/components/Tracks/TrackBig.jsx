@@ -7,7 +7,7 @@ import { playTrack, queuePush, queueRemove } from "store/actions";
 
 import Image from "../Image";
 
-function TrackBig({ index, size }) {
+function TrackBig({ index, size, hideIfNonExistent = false }) {
 	const dispatch = useDispatch();
 
 	// Track and session data from store
@@ -20,6 +20,9 @@ function TrackBig({ index, size }) {
 	const queuePosition = useSelector((state) =>
 		state.music.tracks.queue.indexOf(index)
 	);
+
+	// Hide if track doesn't exist
+	if (!track && hideIfNonExistent) return null;
 
 	// Is this track currently playing?
 	let isTrackPlaying = false;

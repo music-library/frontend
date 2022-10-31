@@ -59,6 +59,7 @@ function Queue() {
 										: playingIndex + i;
 									return (
 										<TrackBig
+											hideIfNonExistent={true}
 											index={index + 1}
 											size="big"
 										/>
