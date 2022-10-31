@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { css } from "@linaria/core";
 import cx from "classnames";
@@ -12,18 +11,15 @@ function Queue() {
 	const dispatch = useDispatch();
 	const queue = useSelector((state) => state.music.tracks.queue);
 
-	const [newQueue, setNewQueue] = useState(
-		queue?.map((trackId) => {
-			return {
-				id: String(trackId)
-			};
-		})
-	);
+	const newQueue = queue.map((trackId) => ({
+		id: String(trackId)
+	}));
 
-	// Update queue when newQueue changes
-	useEffect(() => {
-		dispatch(queueNew(newQueue.map((track) => Number(track.id))));
-	}, [newQueue]);
+	const setNewQueue = (newNewQueue) => {
+		dispatch(
+			queueNew(newNewQueue(newQueue).map((track) => Number(track.id)))
+		);
+	};
 
 	return (
 		<>
