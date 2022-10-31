@@ -65,6 +65,13 @@ export const queuePush = (trackIndex) => (dispatch) => {
 };
 
 /*
+ * Overwrite entire queue with a new array
+ */
+export const queueNew = (newQueue) => (dispatch) => {
+	dispatch({ type: QUEUE_NEW, payload: newQueue });
+};
+
+/*
  * Play a new track (adds to current session)
  */
 export const playTrack = (trackIndex) => (dispatch) => {
@@ -214,17 +221,17 @@ export const playPreviousTrack = (trackIndex) => (dispatch, getState) => {
  */
 export const playNextTrackBasedOnSession =
 	(playNext = true) =>
-	(dispatch, getState) => {
-		const state = getState();
+		(dispatch, getState) => {
+			const state = getState();
 
-		if (state.session.actions.shuffle) return dispatch(playRandomTrack());
+			if (state.session.actions.shuffle) return dispatch(playRandomTrack());
 
-		if (playNext) {
-			dispatch(playNextTrack(state.session.playing.index));
-		} else {
-			dispatch(playPreviousTrack(state.session.playing.index));
-		}
-	};
+			if (playNext) {
+				dispatch(playNextTrack(state.session.playing.index));
+			} else {
+				dispatch(playPreviousTrack(state.session.playing.index));
+			}
+		};
 
 /*
  * Pause currently playing track

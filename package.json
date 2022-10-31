@@ -1,6 +1,6 @@
 {
   "name": "music-library",
-  "version": "2.12.1",
+  "version": "2.13.1",
   "license": "UNLICENSED",
   "type": "module",
   "private": true,
@@ -17,6 +17,9 @@
   },
   "dependencies": {
     "@bug-catch/browser": "^3.0.3",
+    "@dnd-kit/core": "^6.0.5",
+    "@dnd-kit/sortable": "^7.0.1",
+    "@dnd-kit/utilities": "^3.2.0",
     "@linaria/core": "^4.1.4",
     "@linaria/react": "^4.1.5",
     "@reduxjs/toolkit": "^1.8.5",

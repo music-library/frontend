@@ -18,6 +18,7 @@ import Albums from "./routes/Albums";
 import AlbumIndividual from "./routes/AlbumIndividual";
 import Playlists from "./routes/Playlists";
 import Tracks from "./routes/Tracks";
+import Queue from "./routes/Queue";
 
 import "./styles/index.scss";
 
@@ -55,6 +56,7 @@ function App() {
 								path="/albums/:id"
 								element={<AlbumIndividual />}
 							/>
+							<Route path="/queue" element={<Queue />} />
 							<Route path="/playlists" element={<Playlists />} />
 							<Route path="/tracks" element={<Tracks />} />
 						</Routes>
