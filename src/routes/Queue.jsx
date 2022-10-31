@@ -4,7 +4,7 @@ import cx from "classnames";
 
 import { queueNew } from "store/actions";
 
-import { GridDnd } from "components/layout";
+import { Grid, GridDnd } from "components/layout";
 import TrackBig from "components/Tracks/TrackBig";
 
 function Queue() {
@@ -28,7 +28,7 @@ function Queue() {
 				<section>
 					<h2>Queue</h2>
 					<div className={cx("track-container", tracksWrapper)}>
-						{playingIndex !== null && (
+						{playingIndex !== -1 && (
 							<TrackBig index={playingIndex} size="big" />
 						)}
 
@@ -48,6 +48,24 @@ function Queue() {
 							minWidth={"100%"}
 							maxWidth={"1fr"}
 						/>
+
+						<hr className={separator} />
+
+						{(playingIndex !== -1 || !!queue?.length) && (
+							<Grid gutter={5} minWidth={"100%"} maxWidth={"1fr"}>
+								{[...Array(5)].map((e, i) => {
+									const index = queue?.length
+										? queue?.[queue?.length - 1] + i
+										: playingIndex + i;
+									return (
+										<TrackBig
+											index={index + 1}
+											size="big"
+										/>
+									);
+								})}
+							</Grid>
+						)}
 					</div>
 				</section>
 			</div>
@@ -59,8 +77,13 @@ const tracksWrapper = css`
 	margin: 3rem 0;
 `;
 
+const separator = css`
+	margin: 50px;
+	border: 1px solid #252525;
+`;
+
 const gridDndWrapper = css`
-	margin-top: 5px;
+	margin: 5px 0;
 `;
 
 export default Queue;
