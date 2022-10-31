@@ -55,14 +55,14 @@ export const GridDnd = ({
 	mouseSensorOptions = {
 		// Require the mouse to move by 10 pixels before activating
 		activationConstraint: {
-			distance: 10
+			distance: 5
 		}
 	},
 	pointerSensorOptions = {
-		// Press delay of 100ms, with tolerance of 5px of movement
+		// Press delay of 80ms, with tolerance of 4px of movement
 		activationConstraint: {
-			delay: 100,
-			tolerance: 5
+			delay: 80,
+			tolerance: 4
 		}
 	},
 	...gridProps
@@ -84,7 +84,7 @@ export const GridDnd = ({
 			sensors={sensors}
 		>
 			<SortableContext
-				items={data.map(({ id }) => id)}
+				items={data.map(({ id }) => String(id))}
 				strategy={rectSortingStrategy}
 			>
 				<Grid {...gridProps}>

@@ -6,7 +6,7 @@ import cx from "classnames";
 import { queueNew } from "store/actions";
 
 import { GridDnd } from "components/layout";
-import Track from "components/Tracks/Track";
+import TrackBig from "components/Tracks/TrackBig";
 
 function Queue() {
 	const dispatch = useDispatch();
@@ -35,7 +35,7 @@ function Queue() {
 							data={newQueue}
 							setData={setNewQueue}
 							renderWith={(props) => (
-								<Track
+								<TrackBig
 									index={Number(props?.id)}
 									size="big"
 									{...props}
