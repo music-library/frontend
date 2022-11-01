@@ -97,7 +97,7 @@ const initialState = {
 	}
 };
 
-const countReducer = (state = initialState, action) => {
+const mainReducer = (state = initialState, action) => {
 	switch (action.type) {
 		case FETCH_TRACKS_START:
 			return {
@@ -441,4 +441,4 @@ const countReducer = (state = initialState, action) => {
 	}
 };
 
-export default countReducer;
+export default mainReducer;
