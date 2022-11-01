@@ -29,7 +29,11 @@ function Queue() {
 					<h2>Queue</h2>
 					<div className={cx("track-container", tracksWrapper)}>
 						{playingIndex !== -1 && (
-							<TrackBig index={playingIndex} size="big" />
+							<TrackBig
+								size="big"
+								index={playingIndex}
+								className={queueTrack}
+							/>
 						)}
 
 						<GridDnd
@@ -38,6 +42,7 @@ function Queue() {
 							renderWith={(props) => (
 								<TrackBig
 									index={Number(props?.id)}
+									className={queueTrack}
 									size="big"
 									{...props}
 								/>
@@ -59,9 +64,11 @@ function Queue() {
 										: playingIndex + i;
 									return (
 										<TrackBig
-											hideIfNonExistent={true}
-											index={index + 1}
+											key={i}
 											size="big"
+											index={index + 1}
+											className={queueTrack}
+											hideIfNonExistent={true}
 										/>
 									);
 								})}
@@ -85,6 +92,16 @@ const separator = css`
 
 const gridDndWrapper = css`
 	margin: 5px 0;
+`;
+
+const queueTrack = css`
+	padding: 0 6px !important;
+	height: 63px !important;
+
+	.image {
+		margin-left: 2px !important;
+		margin-right: 13px !important;
+	}
 `;
 
 export default Queue;

@@ -59,9 +59,9 @@ export const GridDnd = ({
 		}
 	},
 	pointerSensorOptions = {
-		// Press delay of 80ms, with tolerance of 4px of movement
+		// Press delay of 100ms, with tolerance of 4px of movement
 		activationConstraint: {
-			delay: 80,
+			delay: 100,
 			tolerance: 4
 		}
 	},

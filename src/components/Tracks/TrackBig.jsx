@@ -1,13 +1,20 @@
 import React from "react";
-import Skeleton from "react-loading-skeleton";
+import cx from "classnames";
 import moment from "moment";
+import Skeleton from "react-loading-skeleton";
 import { useSelector, useDispatch } from "react-redux";
 
 import { playTrack, queuePush, queueRemove } from "store/actions";
 
 import Image from "../Image";
 
-function TrackBig({ index, size, hideIfNonExistent = false }) {
+function TrackBig({
+	index,
+	size,
+	hideIfNonExistent = false,
+	className,
+	...props
+}) {
 	const dispatch = useDispatch();
 
 	// Track and session data from store
@@ -65,17 +72,19 @@ function TrackBig({ index, size, hideIfNonExistent = false }) {
 	};
 
 	// Dynamic class list
-	let classList = "";
-	classList += size ? ` ${size}` : "";
-	classList += isTrackPlaying ? " playing" : "";
-	classList += isTrackPaused ? " paused" : "";
-	classList += didError ? " error" : "";
+	const classList = [];
+	if (size) classList.push(size);
+	if (isTrackPlaying) classList.push("playing");
+	if (isTrackPaused) classList.push("paused");
+	if (didError) classList.push("error");
+	if (className) classList.push(className);
 
 	return (
 		<div
-			className={`track${classList}`}
+			className={cx(`track`, ...classList)}
 			onClick={playInSession}
 			onContextMenu={handleTrackQueue}
+			{...props}
 		>
 			<div className="track-col image">
 				<Image
