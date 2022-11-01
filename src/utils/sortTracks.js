@@ -1,6 +1,102 @@
 import Fuse from "fuse.js";
 import sha1 from "crypto-js/sha1";
 
+import store from "store";
+
+/*
+ * Get next track index
+ *
+ * @Note: Does not check queue
+ */
+export const getNextTrack = (trackIndex) => {
+    const state = store.getState();
+    const tracks = state.music.tracks.data;
+    const filter = state.music.tracks.filter;
+
+    let newIndex = 0;
+
+    // Check if filter is applied
+    if (filter.tags.length > 0) {
+        // #1 Re-create filter
+        // #2 Is current track in filter
+        const tracksFiltered = state.music.tracks.filteredData;
+        const [trackExists, trackIndexFiltered] = doesTrackExist(
+            tracksFiltered,
+            tracks[trackIndex]
+        );
+
+        if (trackExists) {
+            newIndex = trackIndexFiltered + 1;
+            if (tracksFiltered.length <= newIndex) newIndex = 0;
+
+            newIndex = tracks.findIndex(
+                (storeTrack) =>
+                    storeTrack.id === tracksFiltered[newIndex].id
+            );
+
+            return newIndex;
+        }
+    }
+
+    // #1 attempt to play next track
+    newIndex = trackIndex + 1;
+
+    // If end of all tracks
+    // loop to first track
+    if (tracks.length <= newIndex) {
+        // #3 loop entire playlist to first track
+        newIndex = 0;
+    }
+
+    return newIndex;
+};
+
+/*
+ * Get previous track index
+ */
+export const getPreviousTrack = (trackIndex) => {
+    const state = store.getState();
+    const tracks = state.music.tracks.data;
+    const filter = state.music.tracks.filter;
+
+    let newIndex = 0;
+
+    // Check if filter is applied
+    if (filter.tags.length > 0) {
+        // #1 Re-create filter
+        // #2 Is current track in filter
+        const tracksFiltered = state.music.tracks.filteredData;
+        const [trackExists, trackIndexFiltered] = doesTrackExist(
+            tracksFiltered,
+            tracks[trackIndex]
+        );
+
+        if (trackExists) {
+            newIndex = trackIndexFiltered - 1;
+            if (newIndex < 0) newIndex = tracksFiltered.length - 1;
+
+            newIndex = tracks.findIndex(
+                (storeTrack) =>
+                    storeTrack.id === tracksFiltered[newIndex].id
+            );
+
+            return newIndex;
+        }
+    }
+
+    // #1 attempt to play previous track
+    newIndex = trackIndex - 1;
+
+    // If end of all tracks
+    // loop to end track
+    if (newIndex < 0) {
+        // #3 loop entire playlist to end track
+        newIndex = tracks.length - 1;
+    }
+
+    return newIndex;
+};
+
 /*
  * Group tracks into albums
  *

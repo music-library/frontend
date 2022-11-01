@@ -1,7 +1,8 @@
 import {
 	api,
+	getNextTrack,
+	getPreviousTrack,
 	filterTracks,
-	doesTrackExist,
 	groupTracksIntoAlbums
 } from "utils";
 import {
@@ -107,113 +108,24 @@ export const playRandomTrack = () => (dispatch, getState) => {
  */
 export const playNextTrack = (trackIndex) => (dispatch, getState) => {
 	const state = getState();
-	let newIndex = 0;
+	const queue = state.music.tracks.queue;
 
 	// Check if there is a queue (serve queue first)
-	if (state.music.tracks.queue.length > 0) {
-		const newQueue = [...state.music.tracks.queue];
-		newIndex = newQueue.shift();
+	if (queue.length > 0) {
+		const newQueue = [...queue];
+		const newIndex = newQueue.shift();
 		dispatch({ type: QUEUE_NEW, payload: newQueue });
 		return dispatch({ type: SESSION_PLAY_TRACK, payload: newIndex });
 	}
 
-	// If a track is currently playing
-	if (typeof newIndex === "number") {
-		const tracks = state.music.tracks.data;
-		const filter = state.music.tracks.filter;
-
-		// Check if filter is applied
-		if (filter.tags.length > 0) {
-			// #1 Re-create filter
-			// #2 Is current track in filter
-			const tracksFiltered = state.music.tracks.filteredData;
-			const [trackExists, trackIndexFiltered] = doesTrackExist(
-				tracksFiltered,
-				tracks[trackIndex]
-			);
-
-			if (trackExists) {
-				newIndex = trackIndexFiltered + 1;
-				if (tracksFiltered.length <= newIndex) newIndex = 0;
-
-				newIndex = tracks.findIndex(
-					(storeTrack) =>
-						storeTrack.id === tracksFiltered[newIndex].id
-				);
-
-				return dispatch({
-					type: SESSION_PLAY_TRACK,
-					payload: newIndex
-				});
-			}
-		}
-
-		// #1 attempt to play next track
-		newIndex = trackIndex + 1;
-
-		// If end of all tracks
-		// loop to first track
-		if (tracks.length <= newIndex) {
-			// #3 loop entire playlist to first track
-			newIndex = 0;
-		}
-	}
-
-	// Select next track
-	dispatch({ type: SESSION_PLAY_TRACK, payload: newIndex });
+	dispatch({ type: SESSION_PLAY_TRACK, payload: getNextTrack(trackIndex) });
 };
 
 /*
  * Play previous track
  */
-export const playPreviousTrack = (trackIndex) => (dispatch, getState) => {
-	const state = getState();
-	let newIndex = 0;
-
-	// If a track is currently playing
-	if (typeof newIndex === "number") {
-		const tracks = state.music.tracks.data;
-		const filter = state.music.tracks.filter;
-
-		// Check if filter is applied
-		if (filter.tags.length > 0) {
-			// #1 Re-create filter
-			// #2 Is current track in filter
-			const tracksFiltered = state.music.tracks.filteredData;
-			const [trackExists, trackIndexFiltered] = doesTrackExist(
-				tracksFiltered,
-				tracks[trackIndex]
-			);
-
-			if (trackExists) {
-				newIndex = trackIndexFiltered - 1;
-				if (newIndex < 0) newIndex = tracksFiltered.length - 1;
-
-				newIndex = tracks.findIndex(
-					(storeTrack) =>
-						storeTrack.id === tracksFiltered[newIndex].id
-				);
-
-				return dispatch({
-					type: SESSION_PLAY_TRACK,
-					payload: newIndex
-				});
-			}
-		}
-
-		// #1 attempt to play previous track
-		newIndex = trackIndex - 1;
-
-		// If end of all tracks
-		// loop to end track
-		if (newIndex < 0) {
-			// #3 loop entire playlist to end track
-			newIndex = tracks.length - 1;
-		}
-	}
-
-	// Select next track
-	dispatch({ type: SESSION_PLAY_TRACK, payload: newIndex });
+export const playPreviousTrack = (trackIndex) => (dispatch) => {
+	dispatch({ type: SESSION_PLAY_TRACK, payload: getPreviousTrack(trackIndex) });
 };
 
 /*
