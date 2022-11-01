@@ -250,7 +250,7 @@ export const doesTrackExist = (data, track) => {
 
     // Loop all tracks
     data.some((trackLoop, index) => {
-        if (track.id === trackLoop.id) {
+        if (track?.id === trackLoop?.id) {
             res[0] = true;
             res[1] = index;
             return true;

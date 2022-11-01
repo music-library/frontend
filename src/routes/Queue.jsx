@@ -1,7 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { css } from "@linaria/core";
+import { useMemo } from "react";
 import cx from "classnames";
 
+import { getNextTrack } from "utils";
 import { queueNew } from "store/actions";
 
 import { Grid, GridDnd } from "components/layout";
@@ -21,6 +23,35 @@ function Queue() {
 			queueNew(newNewQueue(newQueue).map((track) => Number(track.id)))
 		);
 	};
+
+	// Array of the next five track indexes to play after the final queue track
+	const nextQueueItems = (() => {
+		const arr = [];
+
+		for (let i = 0; i < 5; i++) {
+			const index = queue?.length
+				? queue?.[queue?.length - 1] + i
+				: playingIndex + i;
+
+			arr.push(index + 1);
+			// arr.push(getNextTrack(index));
+		}
+
+		// If the next track index is larger than the track list (the last track in the redux tracks array),
+		// then the next track index is 0. `getNextTrack` will always give `0`, even if it's 2+ over the limit.
+		// The following checks and amends the correct track after `0`.
+		if (arr.indexOf(0) !== -1 && arr.indexOf(0) !== arr.length - 1) {
+			let counter = 1;
+			for (let i = arr.indexOf(0) + 1; i < arr.length; i++) {
+				arr[i] = 0 + counter;
+				counter++;
+			}
+		}
+
+		return arr;
+	})();
+
+	debug(nextQueueItems);
 
 	return (
 		<>
@@ -58,15 +89,12 @@ function Queue() {
 
 						{(playingIndex !== -1 || !!queue?.length) && (
 							<Grid gutter={5} minWidth={"100%"} maxWidth={"1fr"}>
-								{[...Array(5)].map((e, i) => {
-									const index = queue?.length
-										? queue?.[queue?.length - 1] + i
-										: playingIndex + i;
+								{nextQueueItems.map((trackIndex) => {
 									return (
 										<TrackBig
-											key={i}
 											size="big"
-											index={index + 1}
+											key={trackIndex}
+											index={trackIndex}
 											className={queueTrack}
 											hideIfNonExistent={true}
 										/>
