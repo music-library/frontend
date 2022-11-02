@@ -25,33 +25,26 @@ function Queue() {
 	};
 
 	// Array of the next five track indexes to play after the final queue track
-	const nextQueueItems = (() => {
+	const nextQueueItems = useMemo(() => {
 		const arr = [];
 
 		for (let i = 0; i < 5; i++) {
 			const index = queue?.length
-				? queue?.[queue?.length - 1] + i
-				: playingIndex + i;
+				? queue?.[queue?.length - 1]
+				: playingIndex;
 
-			arr.push(index + 1);
-			// arr.push(getNextTrack(index));
-		}
-
-		// If the next track index is larger than the track list (the last track in the redux tracks array),
-		// then the next track index is 0. `getNextTrack` will always give `0`, even if it's 2+ over the limit.
-		// The following checks and amends the correct track after `0`.
-		if (arr.indexOf(0) !== -1 && arr.indexOf(0) !== arr.length - 1) {
-			let counter = 1;
-			for (let i = arr.indexOf(0) + 1; i < arr.length; i++) {
-				arr[i] = 0 + counter;
-				counter++;
-			}
+			// If the next track index is larger than the track list (the last track in the redux tracks array),
+			// then the next track index is 0. `getNextTrack` will always give `0`, even if it's 2+ over the limit.
+			// The following checks and amends the correct track after `0`.
+			arr.push(getNextTrack(index));
+			[...Array(i)].map(
+				(_, j) =>
+					(arr[arr?.length - 1] = getNextTrack(arr[arr?.length - 1]))
+			);
 		}
 
 		return arr;
-	})();
-
-	debug(nextQueueItems);
+	}, [queue, playingIndex]);
 
 	return (
 		<>
