@@ -36,11 +36,13 @@ function Queue() {
 			// If the next track index is larger than the track list (the last track in the redux tracks array),
 			// then the next track index is 0. `getNextTrack` will always give `0`, even if it's 2+ over the limit.
 			// The following checks and amends the correct track after `0`.
-			arr.push(getNextTrack(index));
-			[...Array(i)].map(
-				(_, j) =>
-					(arr[arr?.length - 1] = getNextTrack(arr[arr?.length - 1]))
-			);
+			for (let count = 0; count < i + 1; count++) {
+				if (count === 0) {
+					arr.push(getNextTrack(index));
+					continue;
+				}
+				arr[arr?.length - 1] = getNextTrack(arr[arr?.length - 1]);
+			}
 		}
 
 		return arr;
