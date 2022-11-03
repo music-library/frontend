@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTrail, animated } from "react-spring";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { css } from "@linaria/core";
 
 function NavLinks() {
-    const links = [];
-    if (window.innerWidth > 600) {
-        links.push("home", "albums", "tracks", "queue");
-    } else {
-        links.push("home", "albums", "queue");
-    }
+    const location = useLocation();
+    const queue = useSelector((state) => state.music.tracks.queue);
 
     const [activeLink, setActiveLink] = useState("home");
 
-    const location = useLocation();
+    const links = ["home", "albums", "tracks", "queue"];
+
+    if (window.innerWidth < 600) {
+        links.length = 0;
+        links.push("home", "albums", "queue");
+    }
 
     useEffect(() => {
         if (location.pathname === "/") return setActiveLink("home");
@@ -55,6 +58,11 @@ function NavLinks() {
                             <Link to={`/${linkPath}`}>
                                 <span>{link}</span>
                             </Link>
+                            {link === "queue" && !!queue?.length && (
+                                <div className={queueCount}>
+                                    {queue?.length}
+                                </div>
+                            )}
                         </animated.div>
                     );
                 })}
@@ -62,5 +70,19 @@ function NavLinks() {
         </div>
     );
 }
+
+const queueCount = css`
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    content: "";
+    bottom: 15px;
+    width: 17px;
+    height: 17px;
+    right: 0.5rem;
+    background: gray;
+    border-radius: 100%;
+`;
 
 export default NavLinks;

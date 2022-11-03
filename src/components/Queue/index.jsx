@@ -98,7 +98,7 @@ function Queue({ className, ...props }) {
 }
 
 const separator = css`
-	margin: 50px;
+	margin: 8rem;
 	border: 1px solid #252525;
 `;
 
