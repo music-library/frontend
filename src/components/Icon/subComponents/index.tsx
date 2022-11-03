@@ -9,6 +9,8 @@ export * from "./Pause";
 export * from "./Placeholder";
 export * from "./Play";
 export * from "./Plus";
+export * from "./PlusBoxMultiple";
+export * from "./QueueMusic";
 export * from "./Refresh";
 export * from "./Replay";
 export * from "./Shuffle";

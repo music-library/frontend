@@ -13,6 +13,8 @@ const IconMappings = {
 	placeholder: Icons.Placeholder,
 	play: Icons.Play,
 	plus: Icons.Plus,
+	"plus-box-multiple": Icons.PlusBoxMultiple,
+	"queue-music": Icons.QueueMusic,
 	replay: Icons.Replay,
 	shuffle: Icons.Shuffle,
 	"skip-next": Icons.SkipNext,
@@ -28,11 +30,13 @@ const IconMappings = {
 export type IconMappingsType = keyof typeof IconMappings;
 
 type IconProps = SVGProps<SVGSVGElement> & {
+	animate?: string;
 	name: IconMappingsType;
 	ref?: Ref<SVGSVGElement>;
 };
 
-export const Icon = ({ name, ...svgProps }: IconProps) => {
+export const Icon = ({ name, animate, style = {}, ...svgProps }: IconProps) => {
+	const styles = animate ? { animation: animate, ...style } : style;
 	const IconComponent = IconMappings?.[name];
-	return <IconComponent {...svgProps} />;
+	return <IconComponent {...svgProps} style={styles} />;
 };
