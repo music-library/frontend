@@ -1,5 +1,6 @@
 import socketIOClient from "socket.io-client";
 import { isMobile } from "react-device-detect";
+import { parseJSON } from "utils";
 
 export const FETCH_TRACKS_START = "FETCH_TRACKS_START";
 export const FETCH_TRACKS_SUCCESS = "FETCH_TRACKS_SUCCESS";
@@ -53,7 +54,7 @@ const initialState = {
 				tags: [],
 				search: ""
 			},
-			queue: [],
+			queue: parseJSON(localStorage.getItem("queue")) || [], //[45, 49, 71, 94],
 			albumsData: [],
 			filteredData: [],
 			data: []
@@ -75,7 +76,7 @@ const initialState = {
 				isMute: false,
 				volume: isMobile
 					? 100
-					: JSON.parse(localStorage.getItem("volume")) || 50
+					: parseJSON(localStorage.getItem("volume")) || 50
 			},
 			index: -1,
 			track: {
@@ -141,6 +142,13 @@ const mainReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_REMOVE:
+			localStorage.setItem("queue", JSON.stringify([
+				...state.music.tracks.queue.filter(
+					// Remove the track from the queue
+					(track) => track !== action.payload
+				)
+			]));
+
 			return {
 				...state,
 				music: {
@@ -158,6 +166,8 @@ const mainReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_PUSH:
+			localStorage.setItem("queue", JSON.stringify([...state.music.tracks.queue, action.payload]));
+
 			return {
 				...state,
 				music: {
@@ -170,6 +180,8 @@ const mainReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_NEW:
+			localStorage.setItem("queue", JSON.stringify([...action.payload]));
+
 			return {
 				...state,
 				music: {

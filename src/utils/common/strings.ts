@@ -2,14 +2,14 @@
  * Use char(s) to pad an input string/number to a certain length.
  */
 export function padChar(
-	str: string | number,
-	size: number,
-	char: string,
-	append = false
+    str: string | number,
+    size: number,
+    char: string,
+    append = false
 ): string {
-	str = String(str);
-	while (str.length < size) str = append ? str + char : char + str;
-	return str;
+    str = String(str);
+    while (str.length < size) str = append ? str + char : char + str;
+    return str;
 }
 
 /**
@@ -18,5 +18,17 @@ export function padChar(
  * Alias of `padChar`.
  */
 export function padZeros(num: string | number, size: number): string {
-	return padChar(num, size, "0", false);
+    return padChar(num, size, "0", false);
 }
+
+/**
+ * A wrapper for `JSON.parse()` to support `undefined` value
+ */
+export const parseJSON = <T>(value: string | null): T | undefined => {
+    try {
+        return value === "undefined" ? undefined : JSON.parse(value ?? "");
+    } catch {
+        console.warn("[parseJSON]", value);
+        return undefined;
+    }
+};
