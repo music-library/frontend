@@ -1,19 +1,28 @@
+import Chance from 'chance';
+const chance = new Chance();
+
 export const COLOR_NEXT = "COLOR_NEXT";
 export const COLOR_UPDATE_CURRENT = "COLOR_UPDATE_CURRENT";
 
+const colors = [
+	"#d5f1ff",
+	"#cdfff5",
+	"#cdffda",
+	"#fcffcd",
+	"#ffeecd",
+	"#d5e0ff",
+	// New
+	"#97b9ed",
+	"#a3a2ff",
+	"#FFFFFF",
+	"#FFE799",
+	"#F8B47C"
+];
+
 // Initial state of app
 const initialState = {
-	colors: [
-		"#d5f1ff",
-		"#cdfff5",
-		"#cdffda",
-		"#fcffcd",
-		"#ffeecd",
-		"#ffcde8",
-		"#fccdff",
-		"#d5e0ff"
-	],
-	current: Math.floor(Math.random() * 7) // Select a random color to start
+	colors,
+	current: chance.integer({ min: 0, max: colors.length - 1 }) // Select a random color to start
 };
 
 const colorReducer = (state = initialState, action) => {
@@ -25,14 +34,11 @@ const colorReducer = (state = initialState, action) => {
 			};
 
 		case COLOR_NEXT:
-			// Pick a random color
-			// If the random color is the current color, increment color by one,
-			// and loop back to the begining once finished
-			let nextCurrent = Math.floor(Math.random() * 7);
-			if (nextCurrent === state.current) {
-				nextCurrent = state.current + 1;
-				if (nextCurrent > state.colors.length - 1)
-					nextCurrent = 0;
+			// Pick a random color (not the current one)
+			let nextCurrent = state.current;
+			while (nextCurrent === state.current) {
+				nextCurrent = chance.integer({ min: 0, max: colors.length - 1 });
+				if (colors?.length <= 1) break;
 			}
 
 			return {
