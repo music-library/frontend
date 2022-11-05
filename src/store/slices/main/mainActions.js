@@ -75,7 +75,19 @@ export const queueNew = (newQueue) => (dispatch) => {
 /*
  * Play a new track (adds to current session)
  */
-export const playTrack = (trackIndex) => (dispatch) => {
+export const playTrack = (trackIndex) => (dispatch, getState) => {
+	const state = getState();
+	const queue = state.music.tracks.queue;
+	const queueIndexOfTrack = queue?.indexOf(trackIndex);
+
+	// If track is in the queue, remove it
+	if (queue?.length > 0 && queueIndexOfTrack !== -1) {
+		console.log({ queueIndexOfTrack });
+		const newQueue = [...queue];
+		newQueue.splice(queueIndexOfTrack, 1);
+		dispatch({ type: QUEUE_NEW, payload: newQueue });
+	}
+
 	dispatch({ type: SESSION_PLAY_TRACK, payload: trackIndex });
 };
 
