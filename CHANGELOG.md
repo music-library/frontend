@@ -24,7 +24,47 @@ Types of changes:
 -   **Fixed** for any bug fixes.
 -   **Security** in case of vulnerabilities.
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## [2.17.10] - 2022-11-05
+
+### Added
+
+-   Add new colors
+-   Playing a track in the queue removes said track from queue
+
+### Changed
+
+-   Split mono-reducer into slices
+
+### Fixed
+
+-   Fix next up tracks breaking on first load if tracks have not loaded
+
+## [2.17.6] - 2022-11-03
+
+### Added
+
+-   Show queue length badge in navLinks
+-   Store queue in local storage
+-   Queue next-up tracks uses active filters (search, tags, ect...)
+
+### Fixed
+
+-   Queue track overflow bug
+
+## [2.14.4] - 2022-10-31
+
+### Added
+
+-   Queue page with drag-n-drop functionality
+-   Display currently playing track above queue
+-   Render five tracks which are up-next after the last queue track
+
+### Fixed
+
+-   Socket.io not working (Rollback to last known working version)
+-   Hide non-existent Tracks when guessing indexes in the Queue
 
 ## [2.12.0] - 2022-10-11
 
