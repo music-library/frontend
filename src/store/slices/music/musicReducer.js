@@ -4,6 +4,8 @@ export const FETCH_TRACKS_START = "FETCH_TRACKS_START";
 export const FETCH_TRACKS_SUCCESS = "FETCH_TRACKS_SUCCESS";
 export const FETCH_TRACKS_FAILURE = "FETCH_TRACKS_FAILURE";
 
+export const TRACK_STAT_UPDATE = "TRACK_STAT_UPDATE";
+
 export const QUEUE_REMOVE = "QUEUE_REMOVE";
 export const QUEUE_PUSH = "QUEUE_PUSH";
 export const QUEUE_NEW = "QUEUE_NEW";
@@ -25,7 +27,7 @@ const initialState = {
 		albumsData: [],
 		filteredData: [],
 		data: []
-	}
+	},
 };
 
 const musicReducer = (state = initialState, action) => {
@@ -59,6 +61,28 @@ const musicReducer = (state = initialState, action) => {
 					...state.tracks,
 					didError: true,
 					isFetching: false
+				}
+			};
+
+		case TRACK_STAT_UPDATE:
+			// Update track stats
+			// * Last played timestamp
+			// * Times played count
+			const newData = [...state.tracks.data];
+			newData[action.payload] = {
+				...newData[action.payload],
+				stats: {
+					...newData[action.payload].stats,
+					lastPlayed: Date.now(),
+					timesPlayed: newData[action.payload].stats.timesPlayed + 1
+				}
+			};
+
+			return {
+				...state,
+				tracks: {
+					...state.tracks,
+					data: newData
 				}
 			};
 

@@ -1,4 +1,5 @@
 import { getNextTrack, getPreviousTrack } from "utils";
+import { TRACK_STAT_UPDATE, QUEUE_NEW } from "store/slices/music/musicReducer";
 import {
 	SESSION_PLAY_TRACK,
 	SESSION_TRACK_ERROR,
@@ -11,6 +12,12 @@ import {
 	SESSION_REPEAT_TOGGLE,
 	SESSION_PIP_TOGGLE,
 } from "./sessionReducer";
+
+const playTrackHelper = (dispatch, state, trackIndex) => {
+	if (state.music.tracks.isFetching || state.music.tracks.didError) return state;
+	dispatch({ type: TRACK_STAT_UPDATE, payload: trackIndex });
+	dispatch({ type: SESSION_PLAY_TRACK, payload: { trackIndex, track: state?.music?.tracks?.data?.[trackIndex] } });
+}
 
 /*
  * Play a new track (adds to current session)
@@ -28,7 +35,7 @@ export const playTrack = (trackIndex) => (dispatch, getState) => {
 		dispatch({ type: QUEUE_NEW, payload: newQueue });
 	}
 
-	dispatch({ type: SESSION_PLAY_TRACK, payload: trackIndex });
+	playTrackHelper(dispatch, state, trackIndex);
 };
 
 /*
@@ -52,7 +59,7 @@ export const playRandomTrack = () => (dispatch, getState) => {
 		(storeTrack) => storeTrack.id === ranTrack.id
 	);
 
-	dispatch({ type: SESSION_PLAY_TRACK, payload: trackIndex });
+	playTrackHelper(dispatch, state, trackIndex);
 };
 
 /*
@@ -67,35 +74,33 @@ export const playNextTrack = (trackIndex) => (dispatch, getState) => {
 		const newQueue = [...queue];
 		const newIndex = newQueue.shift();
 		dispatch({ type: QUEUE_NEW, payload: newQueue });
-		return dispatch({ type: SESSION_PLAY_TRACK, payload: newIndex });
+		return playTrackHelper(dispatch, state, newIndex);
 	}
 
-	dispatch({ type: SESSION_PLAY_TRACK, payload: getNextTrack(trackIndex) });
+	playTrackHelper(dispatch, state, getNextTrack(trackIndex));
 };
 
 /*
  * Play previous track
  */
-export const playPreviousTrack = (trackIndex) => (dispatch) => {
-	dispatch({ type: SESSION_PLAY_TRACK, payload: getPreviousTrack(trackIndex) });
+export const playPreviousTrack = (trackIndex) => (dispatch, getState) => {
+	playTrackHelper(dispatch, getState(), getPreviousTrack(trackIndex));
 };
 
 /*
  * Decide what to play based on current session
  */
-export const playNextTrackBasedOnSession =
-	(playNext = true) =>
-		(dispatch, getState) => {
-			const state = getState();
+export const playNextTrackBasedOnSession = (playNext = true) => (dispatch, getState) => {
+	const state = getState();
 
-			if (state.session.actions.shuffle) return dispatch(playRandomTrack());
+	if (state.session.actions.shuffle) return dispatch(playRandomTrack());
 
-			if (playNext) {
-				dispatch(playNextTrack(state.session.playing.index));
-			} else {
-				dispatch(playPreviousTrack(state.session.playing.index));
-			}
-		};
+	if (playNext) {
+		dispatch(playNextTrack(state.session.playing.index));
+	} else {
+		dispatch(playPreviousTrack(state.session.playing.index));
+	}
+};
 
 /*
  * Pause currently playing track

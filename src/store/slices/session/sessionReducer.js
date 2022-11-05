@@ -1,6 +1,5 @@
 import { isMobile } from "react-device-detect";
 
-import store from "store";
 import { parseJSON } from "utils";
 
 export const SESSION_PLAY_TRACK = "SESSION_PLAY_TRACK";
@@ -45,28 +44,14 @@ const initialState = {
 const sessionReducer = (state = initialState, action) => {
 	switch (action.type) {
 		case SESSION_PLAY_TRACK:
-			const state = store.getState();
-
-			// Do nothing if still fetching album index
-			if (state.music.tracks.isFetching || state.music.tracks.didError)
-				return state;
-
-			// Update track stats
-			// * Last played timestamp
-			// * Times played count
-			// prettier-ignore
-			state.music.tracks.data[action.payload].stats.lastPlayed = Date.now();
-			// prettier-ignore
-			state.music.tracks.data[action.payload].stats.timesPlayed += 1;
-
 			return {
 				...state,
 				playing: {
 					...state.playing,
 					didError: false,
 					isPaused: false,
-					index: parseInt(action.payload),
-					track: state.music.tracks.data[action.payload]
+					index: parseInt(action.payload.trackIndex),
+					track: action.payload.track
 				}
 			};
 
@@ -84,12 +69,6 @@ const sessionReducer = (state = initialState, action) => {
 			};
 
 		case SESSION_TRACK_ERROR:
-			const state = store.getState();
-
-			// Do nothing if still fetching album index
-			if (state.music.tracks.isFetching || state.music.tracks.didError)
-				return state;
-
 			return {
 				...state,
 				playing: {

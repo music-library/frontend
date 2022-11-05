@@ -188,7 +188,7 @@ export const filterTracks = (
     filter,
     includeSearch = false
 ) => {
-    return tracksToFilter.reduce(function (filtered, track, key) {
+    return tracksToFilter?.reduce(function (filtered, track, key) {
         // RegExp filter tags (case-insensitive)
         const regexTags = new RegExp(filter.tags.join("|"), "i");
 
