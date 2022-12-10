@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTrail, animated } from "react-spring";
+import { useSelector, useColor } from "hooks";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
 import { css } from "@linaria/core";
 
 function NavLinks() {
+    const color = useColor();
     const location = useLocation();
     const queue = useSelector((state) => state.music.tracks.queue);
 
@@ -59,7 +60,10 @@ function NavLinks() {
                                 <span>{link}</span>
                             </Link>
                             {link === "queue" && !!queue?.length && (
-                                <div className={queueCount}>
+                                <div
+                                    className={queueCount}
+                                    style={{ background: color }}
+                                >
                                     {queue?.length}
                                 </div>
                             )}
@@ -81,6 +85,7 @@ const queueCount = css`
     width: 17px;
     height: 17px;
     right: 0.5rem;
+    color: #000000;
     background: gray;
     border-radius: 100%;
 `;
