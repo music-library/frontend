@@ -58,15 +58,15 @@ function NavLinks() {
                         >
                             <Link to={`/${linkPath}`}>
                                 <span>{link}</span>
+                                {link === "queue" && !!queue?.length && (
+                                    <div
+                                        className={queueCount}
+                                        style={{ background: color }}
+                                    >
+                                        {queue?.length}
+                                    </div>
+                                )}
                             </Link>
-                            {link === "queue" && !!queue?.length && (
-                                <div
-                                    className={queueCount}
-                                    style={{ background: color }}
-                                >
-                                    {queue?.length}
-                                </div>
-                            )}
                         </animated.div>
                     );
                 })}
@@ -88,6 +88,7 @@ const queueCount = css`
     color: #000000;
     background: gray;
     border-radius: 100%;
+    transition: all 200ms ease;
 `;
 
 export default NavLinks;
