@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+
+import { useColor } from "hooks";
 
 import AFCBackground from "./AFCBackground";
 
 function AFCBackgroundMulti(props) {
-    const colors = useSelector((state) => state.color.colors);
-    const colorIndex = useSelector((state) => state.color.current);
+    const color = useColor();
 
     // Array of AFCBackground components being rendered
     const [afcbackgrounds, setAfcbackgrounds] = useState([
-        <AFCBackground key={0} color={colors[colorIndex]} />,
+        <AFCBackground key={0} color={color} />
     ]);
 
     // Wait for global color to change before spawning a new background
@@ -19,7 +19,7 @@ function AFCBackgroundMulti(props) {
         const newKey = lastComponent.key + 1;
         setAfcbackgrounds([
             ...afcbackgrounds.slice(-2),
-            <AFCBackground key={newKey} color={colors[colorIndex]} />,
+            <AFCBackground key={newKey} color={color} />
         ]);
     }, [colorIndex]);
 
