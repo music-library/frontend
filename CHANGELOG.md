@@ -26,6 +26,12 @@ Types of changes:
 
 <!-- ## [Unreleased] -->
 
+## [2.18.10] - 2022-12-10
+
+### Fixed
+
+-   Backend: track duration of mp3 files
+
 ## [2.17.10] - 2022-11-05
 
 ### Added
