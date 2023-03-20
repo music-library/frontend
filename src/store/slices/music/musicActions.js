@@ -3,6 +3,7 @@ import {
 	filterTracks
 } from "utils";
 import {
+	LIBRARY_SWITCH,
 	LIBRARY_FETCH_START,
 	LIBRARY_FETCH_SUCCESS,
 	LIBRARY_FETCH_FAILURE,
@@ -25,6 +26,13 @@ export const fetchLibrary = (library) => async (dispatch) => {
 	} catch (error) {
 		dispatch({ type: LIBRARY_FETCH_FAILURE, payload: error });
 	}
+};
+
+/*
+ * Switch to a different music library
+ */
+export const switchLibrary = (library) => async (dispatch) => {
+	dispatch({ type: LIBRARY_SWITCH, payload: library });
 };
 
 /*
