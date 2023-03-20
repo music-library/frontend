@@ -28,7 +28,7 @@ function AudioControlBar(props) {
 
     // Get session state from store
     const playingIndex = useSelector((state) => state.session.playing.index);
-    const track = useSelector((state) => state.music.tracks.data[playingIndex]);
+    const track = useSelector((state) => state.music.tracks[playingIndex]);
     const isPaused = useSelector((state) => state.session.playing.isPaused);
     const doesShuffle = useSelector((state) => state.session.actions.shuffle);
     const doesRepeat = useSelector((state) => state.session.actions.repeat);

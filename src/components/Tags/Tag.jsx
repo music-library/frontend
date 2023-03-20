@@ -3,7 +3,7 @@ import Skeleton from "react-loading-skeleton";
 import { useSelector } from "react-redux";
 
 function Tag({ tag, className, handleOnClick }) {
-    const selectedTags = useSelector((state) => state.music.tracks.filter.tags);
+    const selectedTags = useSelector((state) => state.music.filter.tags);
     let isSelected = false;
     let isActive = false;
 

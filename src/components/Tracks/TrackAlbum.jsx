@@ -2,11 +2,13 @@ import React from "react";
 import Skeleton from "react-loading-skeleton";
 import { useSelector } from "react-redux";
 
+import { getAlbum } from "utils";
+
 import Track from "./Track";
 
-function TrackAlbum({ album }) {
-    // If api call failed
-    const didError = useSelector((state) => state.music.tracks.didError);
+function TrackAlbum({ albumId = false, albumTracks = [] }) {
+    const tracksMap = useSelector((state) => state.music.tracksMap);
+    const didError = useSelector((state) => state.music.didError);
 
     let isLoading;
     let $title;
@@ -14,11 +16,12 @@ function TrackAlbum({ album }) {
 
     // If album exists
     // Render full album
-    if (album) {
+    if (albumId) {
         isLoading = false;
+        const album = getAlbum(albumId);
         $title = `${album.album_artist} - [${album.year}] ${album.album}`;
-        $tracks = album.tracks.map((track, key) => {
-            return <Track index={track} size="compact" key={key} />;
+        $tracks = albumTracks.map((track, key) => {
+            return <Track index={tracksMap[track]} size="compact" key={key} />;
         });
     } else {
         // Album falsy - render skeleton

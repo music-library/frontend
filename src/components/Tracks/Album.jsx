@@ -4,8 +4,8 @@ import Skeleton from "react-loading-skeleton";
 import { isMobile } from "react-device-detect";
 import { useSelector, useDispatch } from "react-redux";
 
-import { api } from "utils";
 import { useColor } from "hooks";
+import { api, getAlbum } from "utils";
 import { playTrack, playingTrackIsPaused } from "store/actions";
 
 import Image from "../Image";
@@ -37,10 +37,10 @@ function Album({ albumId = false, albumTracks = [] }) {
     // Album exists
     if (albumId && albumTracks.length > 0) {
         isLoading = false;
-        const track = tracks?.[tracksMap?.[albumTracks?.[0]]];
-        albumName = track?.metadata?.album;
-        albumArtist = track?.metadata?.album_artist;
-        albumCoverId = track?.id;
+        const album = getAlbum(albumId);
+        albumName = album?.album;
+        albumArtist = album?.album_artist;
+        albumCoverId = album?.idCover;
         if (albumId == playingAlbum) isAlbumPlaying = true;
     }
 
@@ -56,7 +56,7 @@ function Album({ albumId = false, albumTracks = [] }) {
 
         if (!isAlbumPlaying) {
             // Play first track in album
-            dispatch(playTrack(album.tracks[0]));
+            dispatch(playTrack(tracksMap[albumTracks[0]]));
         } else {
             // Pause track
             dispatch(playingTrackIsPaused(!isPaused));

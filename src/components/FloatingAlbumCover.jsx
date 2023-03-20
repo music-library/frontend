@@ -18,7 +18,7 @@ function FloatingAlbumCover() {
 
     // Track and session data from store
     const playingIndex = useSelector((state) => state.session.playing.index);
-    const track = useSelector((state) => state.music.tracks.data[playingIndex]);
+    const track = useSelector((state) => state.music.tracks?.[playingIndex]);
     const isPaused = useSelector((state) => state.session.playing.isPaused);
 
     const color = useColor();

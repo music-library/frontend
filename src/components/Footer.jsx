@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 
 function Footer() {
     const playingIndex = useSelector((state) => state.session.playing.index);
-    const track = useSelector((state) => state.music.tracks.data[playingIndex]);
+    const track = useSelector((state) => state.music.tracks[playingIndex]);
 
     const styles = { marginBottom: 120 };
 
