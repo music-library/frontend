@@ -4,6 +4,39 @@ import sha1 from "crypto-js/sha1";
 import store from "store";
 
 /*
+ * Returns Album from Id
+ */
+export const getAlbum = (albumIdOrTrackId) => {
+	const state = store.getState();
+	const tracks = state.music.tracks;
+	const tracksMap = state.music.tracksMap;
+	const albumsMap = state.music.albumsMap;
+
+	const album = {};
+	let trackFromAlbum = {};
+
+	// Check if albumIdOrTrackId is an album id
+	if (albumsMap?.[albumIdOrTrackId]) {
+		trackFromAlbum = tracks?.[tracksMap?.[albumsMap?.[albumIdOrTrackId]?.[0]]];
+	}
+
+	// Check if albumIdOrTrackId is a track id
+	if (tracksMap?.[albumIdOrTrackId]) {
+		trackFromAlbum = tracks?.[tracksMap?.[albumIdOrTrackId]];
+	}
+
+	album.id = trackFromAlbum.id_album;
+	album.idCover = albumsMap?.[trackFromAlbum.id_album]?.[0];
+	album.album = trackFromAlbum?.metadata?.album;
+	album.album_artist = trackFromAlbum?.metadata?.album_artist;
+	album.genre = trackFromAlbum?.metadata?.genre;
+	album.year = trackFromAlbum?.metadata?.year;
+	album.tracks = albumsMap?.[trackFromAlbum.id_album];
+
+	return album;
+}
+
+/*
  * Get next track index
  *
  * @Note: Does not check queue
