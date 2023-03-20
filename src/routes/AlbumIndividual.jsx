@@ -1,9 +1,10 @@
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
-import React, { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { useColor } from "hooks";
+import { api, getAlbum } from "utils";
 import { playTrack, playingTrackIsPaused } from "store/actions";
 
 import Image from "components/Image";
@@ -21,24 +22,26 @@ function AlbumIndividual() {
     // Album ID in URL
     const { id } = useParams();
 
-    const tracks = useSelector((state) => state.music.tracks.data);
-    const albums = useSelector((state) => state.music.tracks.albumsData);
-    const isFetching = useSelector((state) => state.music.tracks.isFetching);
-    const didError = useSelector((state) => state.music.tracks.didError);
-    const playingIndex = useSelector((state) => state.session.playing.index);
+    const tracksMap = useSelector((state) => state.music.tracksMap);
+    const didError = useSelector((state) => state.music.didError);
+    const isFetching = useSelector((state) => state.music.isFetching);
     const isPaused = useSelector((state) => state.session.playing.isPaused);
+    const playingAlbum = useSelector(
+        (state) => state.session.playing.track.id_album
+    );
 
     // Search for album
-    const album = albums.find((album) => album.id === id);
+    const album = getAlbum(id);
 
     // Is album playing
     let isAlbumPlaying = false;
 
     // Album exists
-    if (album && album.tracks.includes(playingIndex)) isAlbumPlaying = true;
+    if (album?.id && playingAlbum !== null && album?.id === playingAlbum)
+        isAlbumPlaying = true;
 
     //
-    const isLoading = !album || isFetching || didError;
+    const isLoading = !album?.id || isFetching || didError;
 
     // Build external links
     let linkSearch = "";
@@ -50,7 +53,6 @@ function AlbumIndividual() {
         // prettier-ignore
         linkSearch = `${album.album_artist} - ${album.album}`;
         linkSearch = encodeURIComponent(linkSearch).replace(/%20/g, "+");
-        // album.year;
     }
 
     // Action button handler
@@ -59,7 +61,7 @@ function AlbumIndividual() {
         if (album) {
             if (!isAlbumPlaying) {
                 // Play first track in album
-                dispatch(playTrack(album.tracks[0]));
+                dispatch(playTrack(tracksMap[album.tracks[0]]));
             } else {
                 // Pause track
                 dispatch(playingTrackIsPaused(!isPaused));
@@ -128,12 +130,9 @@ function AlbumIndividual() {
                                         src={
                                             isLoading
                                                 ? "example"
-                                                : `${
-                                                      import.meta.env
-                                                          .REACT_APP_API
-                                                  }/tracks/${
-                                                      tracks[album.tracks[0]].id
-                                                  }/cover/600`
+                                                : api().getUri({
+                                                      url: `/tracks/${album?.idCover}/cover/600`
+                                                  })
                                         }
                                         fallback={`fallback--album-cover`}
                                         alt="album-cover"
@@ -240,7 +239,7 @@ function AlbumIndividual() {
                                     album.tracks.map((track, key) => {
                                         return (
                                             <Track
-                                                index={track}
+                                                index={tracksMap[track]}
                                                 trackNumber={key + 1}
                                                 key={key}
                                             />

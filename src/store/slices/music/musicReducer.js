@@ -85,6 +85,8 @@ const musicReducer = (state = initialState, action) => {
 
 			return {
 				...state,
+				didError: false,
+				isFetching: false,
 				library: {
 					...state.library,
 					options: action.payload?.libraries,

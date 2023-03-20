@@ -12,14 +12,14 @@ function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
     const color = useColor();
 
     // Track and session data from store
-    const track = useSelector((state) => state.music.tracks.data[index]);
+    const track = useSelector((state) => state.music.tracks[index]);
     const isPaused = useSelector((state) => state.session.playing.isPaused);
     const playingId = useSelector((state) => state.session.playing.track.id);
     const playingDidError = useSelector(
         (state) => state.session.playing.didError
     );
     const queuePosition = useSelector((state) =>
-        state.music.tracks.queue.indexOf(index)
+        state.music.queue.indexOf(index)
     );
 
     // Hide if track doesn't exist
