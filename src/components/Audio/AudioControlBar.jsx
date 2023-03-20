@@ -12,6 +12,7 @@ import {
     changeVolume,
     muteVolume
 } from "store/actions";
+import { api } from "utils";
 import { useColor } from "hooks";
 
 import Image from "../Image";
@@ -103,9 +104,9 @@ function AudioControlBar(props) {
                     <div className="track col" onClick={handleGoToAlbum}>
                         <div className="track-cover">
                             <Image
-                                src={`${
-                                    import.meta.env.REACT_APP_API
-                                }/tracks/${albumCoverId}/cover/50`}
+                                src={api().getUri({
+                                    url: `/tracks/${albumCoverId}/cover/50`
+                                })}
                                 fallback={`fallback--album-cover`}
                                 alt="album-cover"
                                 draggable="false"

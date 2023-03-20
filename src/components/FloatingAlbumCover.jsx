@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSpring, animated } from "react-spring";
 import { useSelector, useDispatch } from "react-redux";
 
+import { api } from "utils";
 import { useColor } from "hooks";
 import { playingTrackIsPaused } from "store/actions";
 
@@ -58,9 +59,7 @@ function FloatingAlbumCover() {
             onClick={handleGoToAlbum}
         >
             <Image
-                src={`${
-                    import.meta.env.REACT_APP_API
-                }/tracks/${albumCoverId}/cover/400`}
+                src={api().getUri({ url: `/tracks/${albumCoverId}/cover/400` })}
                 fallback={`fallback--album-cover`}
                 alt="album-cover"
                 draggable="false"

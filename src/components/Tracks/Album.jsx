@@ -4,6 +4,7 @@ import Skeleton from "react-loading-skeleton";
 import { isMobile } from "react-device-detect";
 import { useSelector, useDispatch } from "react-redux";
 
+import { api } from "utils";
 import { useColor } from "hooks";
 import { playTrack, playingTrackIsPaused } from "store/actions";
 
@@ -72,9 +73,9 @@ function Album({ album }) {
             <div className={`album${classList}`}>
                 <div className="album-cover">
                     <Image
-                        src={`${
-                            import.meta.env.REACT_APP_API
-                        }/tracks/${albumCoverId}/cover/600`}
+                        src={api().getUri({
+                            url: `/tracks/${albumCoverId}/cover/600`
+                        })}
                         fallback={`fallback--album-cover`}
                         alt="album-cover"
                         draggable="false"
