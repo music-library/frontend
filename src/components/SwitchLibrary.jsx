@@ -14,15 +14,9 @@ function SwitchLibrary() {
                 <div className={cx("libraryOptions", "tags")}>
                     {library.options.map((option) => (
                         <div
-                            className={`tag${
-                                library.selected === option.name
-                                    ? " selected"
-                                    : ""
-                            }${
-                                library.selected === option.name
-                                    ? " active"
-                                    : " active"
-                            }`}
+                            className={cx(`tag`, {
+                                selected: library.selected === option.id
+                            })}
                             onClick={() => dispatch(switchLibrary(option.id))}
                         >
                             {option.name}
