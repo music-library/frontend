@@ -3,9 +3,9 @@ import {
 	filterTracks
 } from "utils";
 import {
-	FETCH_LIBRARY_START,
-	FETCH_LIBRARY_SUCCESS,
-	FETCH_LIBRARY_FAILURE,
+	LIBRARY_FETCH_START,
+	LIBRARY_FETCH_SUCCESS,
+	LIBRARY_FETCH_FAILURE,
 	QUEUE_REMOVE,
 	QUEUE_PUSH,
 	QUEUE_NEW,
@@ -17,13 +17,13 @@ import {
 /*
  * Fetch music-library index from api
  */
-export const fetchLibrary = (library = "main") => async (dispatch) => {
+export const fetchLibrary = (library) => async (dispatch) => {
 	try {
-		dispatch({ type: FETCH_LIBRARY_START, payload: library });
-		const res = await api().get(`/lib/${library}`);
-		dispatch({ type: FETCH_LIBRARY_SUCCESS, payload: res.data });
+		dispatch({ type: LIBRARY_FETCH_START, payload: library });
+		const res = await api(library).get(`/`);
+		dispatch({ type: LIBRARY_FETCH_SUCCESS, payload: res.data });
 	} catch (error) {
-		dispatch({ type: FETCH_LIBRARY_FAILURE, payload: error });
+		dispatch({ type: LIBRARY_FETCH_FAILURE, payload: error });
 	}
 };
 

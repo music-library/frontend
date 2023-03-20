@@ -1,8 +1,9 @@
 import { parseJSON } from "utils";
 
-export const FETCH_LIBRARY_START = "FETCH_LIBRARY_START";
-export const FETCH_LIBRARY_SUCCESS = "FETCH_LIBRARY_SUCCESS";
-export const FETCH_LIBRARY_FAILURE = "FETCH_LIBRARY_FAILURE";
+export const LIBRARY_SWITCH = "LIBRARY_SWITCH";
+export const LIBRARY_FETCH_START = "LIBRARY_FETCH_START";
+export const LIBRARY_FETCH_SUCCESS = "LIBRARY_FETCH_SUCCESS";
+export const LIBRARY_FETCH_FAILURE = "LIBRARY_FETCH_FAILURE";
 
 export const TRACK_STAT_UPDATE = "TRACK_STAT_UPDATE";
 
@@ -19,8 +20,8 @@ const initialState = {
 	didError: false,
 	isFetching: true,
 	library: {
-		selected: parseJSON(localStorage.getItem("library_selected")) || "main",
-		options: parseJSON(localStorage.getItem("library_options")) || [{
+		selected: localStorage.getItem("library/selected") || "main",
+		options: parseJSON(localStorage.getItem("library/selected")) || [{
 			"id": "main",
 			"name": "Main"
 		}],
@@ -40,22 +41,50 @@ const initialState = {
 
 const musicReducer = (state = initialState, action) => {
 	switch (action.type) {
-		case FETCH_LIBRARY_START:
-			if (state.library.selected !== action.payload) {
-				return {
-					...initialState,
-					queue: [],
-				};
-			}
+		case LIBRARY_SWITCH:
+			// Skip if already selected
+			if (state.library.selected === action.payload) return { ...state };
 
-			return {
-				...initialState,
-				queue: state.queue,
-			};
+			localStorage.setItem("library/selected", action.payload);
 
-		case FETCH_LIBRARY_SUCCESS:
 			return {
 				...state,
+				didError: false,
+				isFetching: true,
+				library: {
+					...state.library,
+					selected: action.payload,
+				},
+				// Clear all lib data
+				queue: [],
+				filter: {
+					tags: [],
+					search: ""
+				},
+				filteredData: [],
+				tracks: [],
+				tracksMap: {},
+				albumsMap: {},
+				decades: [],
+				genres: [],
+			};
+
+		case LIBRARY_FETCH_START:
+			return {
+				...state,
+				didError: false,
+				isFetching: true,
+			};
+
+		case LIBRARY_FETCH_SUCCESS:
+			localStorage.setItem("library/selected", JSON.stringify(action.payload?.libraries));
+
+			return {
+				...state,
+				library: {
+					...state.library,
+					options: action.payload?.libraries,
+				},
 				tracks: action.payload?.tracks,
 				tracksMap: action.payload?.tracks_map,
 				albumsMap: action.payload?.albums,
@@ -63,7 +92,7 @@ const musicReducer = (state = initialState, action) => {
 				genres: action.payload?.genres,
 			};
 
-		case FETCH_LIBRARY_FAILURE:
+		case LIBRARY_FETCH_FAILURE:
 			return {
 				...state,
 				didError: true,

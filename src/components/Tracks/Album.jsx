@@ -78,7 +78,7 @@ function Album({ albumId = false, albumTracks = [] }) {
                 <div className="album-cover">
                     <Image
                         src={api().getUri({
-                            url: `/lib/main/tracks/${albumCoverId}/cover/600`
+                            url: `/tracks/${albumCoverId}/cover/600`
                         })}
                         fallback={`fallback--album-cover`}
                         alt="album-cover"
