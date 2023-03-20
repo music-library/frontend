@@ -6,7 +6,7 @@ import TrackBig from "./Tracks/TrackBig";
 
 function RecentlyListenedTracks(props) {
     // Get tracks from store
-    const tracks = useSelector((state) => state.music.tracks.data);
+    const tracks = useSelector((state) => state.music.tracks);
     const [tracksToRender, setTracksToRender] = useState([]);
 
     // Find 5 most recently listened to tracks

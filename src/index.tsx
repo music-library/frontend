@@ -8,7 +8,7 @@ import App from "./App";
 
 import store from "store";
 import "styles/index.scss";
-import { injectGlobalLog, versionLog, appVersion } from "utils";
+import { injectGlobalLog, versionLog, appVersion, api } from "utils";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 
 injectGlobalLog();
@@ -17,23 +17,23 @@ versionLog();
 // Bugcatch init
 // logs all errors
 if (import.meta.env.REACT_APP_BUGCATCH_ENABLE) {
-	bugcatchInit({
-		base_url: `${import.meta.env.REACT_APP_API}/bugcatch`,
-		release: appVersion
-	});
+    bugcatchInit({
+        base_url: api().getUri({ url: `/bugcatch` }),
+        release: appVersion
+    });
 }
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement as HTMLElement);
 
 root.render(
-	<StrictMode>
-		<Provider store={store}>
-			<Router>
-				<App />
-			</Router>
-		</Provider>
-	</StrictMode>
+    <StrictMode>
+        <Provider store={store}>
+            <Router>
+                <App />
+            </Router>
+        </Provider>
+    </StrictMode>
 );
 
 // If you want your app to work offline and load faster, you can change

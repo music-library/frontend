@@ -4,42 +4,44 @@ import { useSelector } from "react-redux";
 import {
     filterTracks,
     groupTracksIntoAlbums,
-    nRowsOfAlbums,
+    nRowsOfAlbums
 } from "utils/sortTracks";
 
 import Album from "../Tracks/Album";
 
 function AlbumList() {
     // Get album list from store
-    const trackStore = useSelector((state) => state.music.tracks);
-    const isLoading = trackStore.isFetching || trackStore.didError;
+    const tracks = useSelector((state) => state.music.tracks);
+    const filter = useSelector((state) => state.music.filter);
+    const filteredData = useSelector((state) => state.music.filteredData);
+    const albumsMap = useSelector((state) => state.music.albumsMap);
+    const isLoading = tracks.isFetching || tracks.didError;
 
     // Use pre-filtered tracks.data if tags applied
-    let tracksData = trackStore.data;
-    if (trackStore.filter.length > 0) tracksData = trackStore.filteredData;
+    let tracksData = tracks;
+    if (filter.tags.length > 0) tracksData = filteredData;
 
     // #1 Filter tracks using tags or search input
-    let tracksFiltered = filterTracks(
-        trackStore.data,
-        tracksData,
-        trackStore.filter,
-        true
-    );
+    const tracksFiltered = filterTracks(tracks, tracksData, filter, true);
 
     // #2 Populate albums from filtered array
     // #3 Create array of Album components to render
-    let albumsBeingRendered = groupTracksIntoAlbums(
-        trackStore.data,
-        tracksFiltered
-    ).map((data, key) => {
-        return <Album album={data} key={key} />;
-    });
+    const albumsBeingRendered = groupTracksIntoAlbums(tracksFiltered).map(
+        (albumId, key) => {
+            return (
+                <Album
+                    albumId={albumId}
+                    albumTracks={albumsMap?.[albumId]}
+                    key={key}
+                />
+            );
+        }
+    );
 
     // # of rendered albums
     const defaultRenderAmmount = nRowsOfAlbums(4);
-    const [renderedAlbumsCount, setRenderedAlbumsCount] = useState(
-        defaultRenderAmmount
-    );
+    const [renderedAlbumsCount, setRenderedAlbumsCount] =
+        useState(defaultRenderAmmount);
 
     useEffect(() => {
         // Adds more albums as user scrolls to bottom of page
@@ -70,7 +72,7 @@ function AlbumList() {
         <div className="track-container grid grid-albums">
             {isLoading &&
                 [...Array(nRowsOfAlbums(4))].map((x, key) => (
-                    <Album album={false} key={key} />
+                    <Album key={key} />
                 ))}
 
             {albumsBeingRendered.slice(0, renderedAlbumsCount)}

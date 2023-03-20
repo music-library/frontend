@@ -4,9 +4,9 @@ import { orderBy } from "lodash";
 
 import TrackBig from "./Tracks/TrackBig";
 
-function PopularTracks(props) {
+function PopularTracks() {
     // Get tracks from store
-    const tracks = useSelector((state) => state.music.tracks.data);
+    const tracks = useSelector((state) => state.music.tracks);
     const [tracksToRender, setTracksToRender] = useState([]);
 
     // Find the top 5 most listened to tracks

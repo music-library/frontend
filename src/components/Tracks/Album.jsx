@@ -5,18 +5,22 @@ import { isMobile } from "react-device-detect";
 import { useSelector, useDispatch } from "react-redux";
 
 import { useColor } from "hooks";
+import { api, getAlbum } from "utils";
 import { playTrack, playingTrackIsPaused } from "store/actions";
 
 import Image from "../Image";
 import { Icon } from "components/Icon";
 
-function Album({ album }) {
+function Album({ albumId = false, albumTracks = [] }) {
     const dispatch = useDispatch();
     const color = useColor();
 
-    const playingIndex = useSelector((state) => state.session.playing.index);
+    const playingAlbum = useSelector(
+        (state) => state.session.playing.track.id_album
+    );
     const isPaused = useSelector((state) => state.session.playing.isPaused);
-    const trackStore = useSelector((state) => state.music.tracks.data);
+    const tracksMap = useSelector((state) => state.music.tracksMap);
+    const tracks = useSelector((state) => state.music.tracks);
 
     // If api call failed
     const didError = useSelector((state) => state.music.tracks.didError);
@@ -31,17 +35,18 @@ function Album({ album }) {
     let albumCoverId = "example";
 
     // Album exists
-    if (album) {
+    if (albumId && albumTracks.length > 0) {
         isLoading = false;
-        albumName = album.album;
-        albumArtist = album.album_artist;
-        albumCoverId = trackStore[album.tracks[0]].id;
-        if (album.tracks.includes(playingIndex)) isAlbumPlaying = true;
+        const album = getAlbum(albumId);
+        albumName = album?.album;
+        albumArtist = album?.album_artist;
+        albumCoverId = album?.idCover;
+        if (albumId == playingAlbum) isAlbumPlaying = true;
     }
 
     // Goto album url
     const handleAlbumClick = (e) => {
-        if (!album) e.preventDefault();
+        if (!albumId) e.preventDefault();
     };
 
     // Action button handler
@@ -51,7 +56,7 @@ function Album({ album }) {
 
         if (!isAlbumPlaying) {
             // Play first track in album
-            dispatch(playTrack(album.tracks[0]));
+            dispatch(playTrack(tracksMap[albumTracks[0]]));
         } else {
             // Pause track
             dispatch(playingTrackIsPaused(!isPaused));
@@ -66,15 +71,15 @@ function Album({ album }) {
 
     return (
         <Link
-            to={album ? `/albums/${album.id}` : `#`}
+            to={albumId ? `/albums/${albumId}` : `#`}
             onClick={handleAlbumClick}
         >
             <div className={`album${classList}`}>
                 <div className="album-cover">
                     <Image
-                        src={`${
-                            import.meta.env.REACT_APP_API
-                        }/tracks/${albumCoverId}/cover/600`}
+                        src={api().getUri({
+                            url: `/tracks/${albumCoverId}/cover/600`
+                        })}
                         fallback={`fallback--album-cover`}
                         alt="album-cover"
                         draggable="false"

@@ -13,11 +13,9 @@ function SearchBar() {
     const color = useColor();
 
     // Search input value in store
-    const tracks = useSelector((state) => state.music.tracks.data);
-    const filter = useSelector((state) => state.music.tracks.filter);
-    const filteredData = useSelector(
-        (state) => state.music.tracks.filteredData
-    );
+    const tracks = useSelector((state) => state.music.tracks);
+    const filter = useSelector((state) => state.music.filter);
+    const filteredData = useSelector((state) => state.music.filteredData);
 
     // Input state
     const [search, setSearch] = useState("");

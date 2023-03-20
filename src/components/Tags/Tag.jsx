@@ -1,9 +1,10 @@
 import React from "react";
-import Skeleton from "react-loading-skeleton";
+import cx from "classnames";
 import { useSelector } from "react-redux";
+import Skeleton from "react-loading-skeleton";
 
 function Tag({ tag, className, handleOnClick }) {
-    const selectedTags = useSelector((state) => state.music.tracks.filter.tags);
+    const selectedTags = useSelector((state) => state.music.filter.tags);
     let isSelected = false;
     let isActive = false;
 
@@ -25,9 +26,16 @@ function Tag({ tag, className, handleOnClick }) {
 
     return (
         <div
-            className={`tag${isSelected ? " selected" : ""}${
-                className ? ` ${className}${isActive ? " active" : ""}` : ""
-            }`}
+            className={cx(
+                `tag`,
+                className,
+                {
+                    selected: isSelected
+                },
+                {
+                    active: isActive
+                }
+            )}
             onClick={() => handleOnClick(tag)}
         >
             {tag}

@@ -7,31 +7,44 @@ import TrackAlbum from "../Tracks/TrackAlbum";
 
 function TrackList() {
     // Get album list from store
-    const trackStore = useSelector((state) => state.music.tracks);
-    const isLoading = trackStore.isFetching || trackStore.didError;
+    const tracks = useSelector((state) => state.music.tracks);
+    const filter = useSelector((state) => state.music.filter);
+    const filteredData = useSelector((state) => state.music.filteredData);
+    const albumsMap = useSelector((state) => state.music.albumsMap);
+    const isLoading = tracks.isFetching || tracks.didError;
 
     // Use pre-filtered tracks.data if tags applied
-    let tracksData = trackStore.data;
-    if (trackStore.filter.length > 0) tracksData = trackStore.filteredData;
+    const tracksData = filter.tags.length > 0 ? filteredData : tracks;
 
     // #1 Filter tracks using tags or search input
-    let tracksFiltered = filterTracks(trackStore.data, tracksData, trackStore.filter, true);
+    let tracksFiltered = filterTracks(tracks.data, tracksData, filter, true);
 
     // #2 Populate albums from filtered array
     // #3 Create array of Album components to render
-    let albumsBeingRendered = groupTracksIntoAlbums(trackStore.data, tracksFiltered).map((data, key) => {
-        return <TrackAlbum album={data} key={key} />;
-    });
+    let albumsBeingRendered = groupTracksIntoAlbums(tracksFiltered).map(
+        (albumId, key) => {
+            return (
+                <TrackAlbum
+                    albumId={albumId}
+                    albumTracks={albumsMap?.[albumId]}
+                    key={key}
+                />
+            );
+        }
+    );
 
     // # of rendered albums
     const defaultRenderAmmount = 12;
-    const [renderedAlbumsCount, setRenderedAlbumsCount] = useState(defaultRenderAmmount);
+    const [renderedAlbumsCount, setRenderedAlbumsCount] =
+        useState(defaultRenderAmmount);
 
     useEffect(() => {
         // Adds more albums as user scrolls to bottom of page
         const handleScroll = () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - (window.innerHeight + 600))
-            {
+            if (
+                window.innerHeight + window.scrollY >=
+                document.body.offsetHeight - (window.innerHeight + 600)
+            ) {
                 if (renderedAlbumsCount < albumsBeingRendered.length) {
                     // Add album to render
                     setRenderedAlbumsCount(renderedAlbumsCount + 4);
@@ -40,21 +53,18 @@ function TrackList() {
                 // Reset render count
                 setRenderedAlbumsCount(defaultRenderAmmount);
             }
-        }
+        };
 
         window.addEventListener("scroll", handleScroll);
         return () => {
             window.removeEventListener("scroll", handleScroll);
-        }
+        };
     });
 
     return (
         <div className="track-container">
             {isLoading &&
-                [...Array(4)].map((x, key) =>
-                    <TrackAlbum album={false} key={key} />
-                )
-            }
+                [...Array(4)].map((x, key) => <TrackAlbum key={key} />)}
 
             {albumsBeingRendered.slice(0, renderedAlbumsCount)}
         </div>

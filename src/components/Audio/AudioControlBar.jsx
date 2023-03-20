@@ -12,6 +12,7 @@ import {
     changeVolume,
     muteVolume
 } from "store/actions";
+import { api } from "utils";
 import { useColor } from "hooks";
 
 import Image from "../Image";
@@ -27,7 +28,7 @@ function AudioControlBar(props) {
 
     // Get session state from store
     const playingIndex = useSelector((state) => state.session.playing.index);
-    const track = useSelector((state) => state.music.tracks.data[playingIndex]);
+    const track = useSelector((state) => state.music.tracks[playingIndex]);
     const isPaused = useSelector((state) => state.session.playing.isPaused);
     const doesShuffle = useSelector((state) => state.session.actions.shuffle);
     const doesRepeat = useSelector((state) => state.session.actions.repeat);
@@ -103,9 +104,9 @@ function AudioControlBar(props) {
                     <div className="track col" onClick={handleGoToAlbum}>
                         <div className="track-cover">
                             <Image
-                                src={`${
-                                    import.meta.env.REACT_APP_API
-                                }/tracks/${albumCoverId}/cover/50`}
+                                src={api().getUri({
+                                    url: `/tracks/${albumCoverId}/cover/50`
+                                })}
                                 fallback={`fallback--album-cover`}
                                 alt="album-cover"
                                 draggable="false"

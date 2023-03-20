@@ -14,9 +14,9 @@ import {
 } from "./sessionReducer";
 
 const playTrackHelper = (dispatch, state, trackIndex) => {
-	if (state.music.tracks.isFetching || state.music.tracks.didError) return state;
+	if (state.music.isFetching || state.music.didError) return state;
 	dispatch({ type: TRACK_STAT_UPDATE, payload: trackIndex });
-	dispatch({ type: SESSION_PLAY_TRACK, payload: { trackIndex, track: state?.music?.tracks?.data?.[trackIndex] } });
+	dispatch({ type: SESSION_PLAY_TRACK, payload: { trackIndex, track: state?.music?.tracks?.[trackIndex] } });
 }
 
 /*
@@ -24,12 +24,11 @@ const playTrackHelper = (dispatch, state, trackIndex) => {
  */
 export const playTrack = (trackIndex) => (dispatch, getState) => {
 	const state = getState();
-	const queue = state.music.tracks.queue;
+	const queue = state.music.queue;
 	const queueIndexOfTrack = queue?.indexOf(trackIndex);
 
 	// If track is in the queue, remove it
 	if (queue?.length > 0 && queueIndexOfTrack !== -1) {
-		console.log({ queueIndexOfTrack });
 		const newQueue = [...queue];
 		newQueue.splice(queueIndexOfTrack, 1);
 		dispatch({ type: QUEUE_NEW, payload: newQueue });
@@ -43,12 +42,12 @@ export const playTrack = (trackIndex) => (dispatch, getState) => {
  */
 export const playRandomTrack = () => (dispatch, getState) => {
 	const state = getState();
-	const tracks = state.music.tracks.data;
-	let trackList = state.music.tracks.data;
-	const tags = state.music.tracks.filter.tags;
+	const tracks = state.music.tracks;
+	let trackList = state.music.tracks;
+	const tags = state.music.filter.tags;
 
 	// If filter applied: use filtered tracks
-	if (tags.length > 0) trackList = state.music.tracks.filteredData;
+	if (tags.length > 0) trackList = state.music.filteredData;
 
 	// Select random track
 	const ranIndex = Math.floor(Math.random() * trackList.length);
@@ -67,7 +66,7 @@ export const playRandomTrack = () => (dispatch, getState) => {
  */
 export const playNextTrack = (trackIndex) => (dispatch, getState) => {
 	const state = getState();
-	const queue = state.music.tracks.queue;
+	const queue = state.music.queue;
 
 	// Check if there is a queue (serve queue first)
 	if (queue.length > 0) {

@@ -11,8 +11,8 @@ import TrackBig from "components/Tracks/TrackBig";
 
 function Queue({ className, ...props }) {
     const dispatch = useDispatch();
-    const queue = useSelector((state) => state.music.tracks.queue);
-    const isFetching = useSelector((state) => state.music.tracks.isFetching);
+    const queue = useSelector((state) => state.music.queue);
+    const isFetching = useSelector((state) => state.music.isFetching);
     const playingIndex = useSelector((state) => state.session.playing.index);
 
     const newQueue = queue.map((trackId) => ({

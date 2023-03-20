@@ -1,12 +1,12 @@
 import {
 	api,
-	filterTracks,
-	groupTracksIntoAlbums
+	filterTracks
 } from "utils";
 import {
-	FETCH_TRACKS_START,
-	FETCH_TRACKS_SUCCESS,
-	FETCH_TRACKS_FAILURE,
+	LIBRARY_SWITCH,
+	LIBRARY_FETCH_START,
+	LIBRARY_FETCH_SUCCESS,
+	LIBRARY_FETCH_FAILURE,
 	QUEUE_REMOVE,
 	QUEUE_PUSH,
 	QUEUE_NEW,
@@ -16,24 +16,23 @@ import {
 } from "./musicReducer";
 
 /*
- * Fetch tracks index from api
+ * Fetch music-library index from api
  */
-export const fetchTracks = () => (dispatch) => {
-	dispatch({ type: FETCH_TRACKS_START, payload: [] });
+export const fetchLibrary = (library) => async (dispatch) => {
+	try {
+		dispatch({ type: LIBRARY_FETCH_START, payload: library });
+		const res = await api(library).get(`/`);
+		dispatch({ type: LIBRARY_FETCH_SUCCESS, payload: res.data });
+	} catch (error) {
+		dispatch({ type: LIBRARY_FETCH_FAILURE, payload: error });
+	}
+};
 
-	api()
-		.get("/tracks")
-		.then((res) => {
-			// console.log("Tracks:", res.data);
-			const albums = groupTracksIntoAlbums(res.data, res.data);
-			dispatch({
-				type: FETCH_TRACKS_SUCCESS,
-				payload: [res.data, albums]
-			});
-		})
-		.catch((error) => {
-			dispatch({ type: FETCH_TRACKS_FAILURE, payload: error });
-		});
+/*
+ * Switch to a different music library
+ */
+export const switchLibrary = (library) => async (dispatch) => {
+	dispatch({ type: LIBRARY_SWITCH, payload: library });
 };
 
 /*
@@ -77,7 +76,8 @@ export const updateUserSearch = (search) => (dispatch) => {
 export const filterToggleTag = (tag) => (dispatch, getState) => {
 	const state = getState();
 	const tracks = state.music.tracks;
-	const filter = tracks.filter;
+	const filter = state.music.filter;
+
 	const tags = [...filter.tags];
 	let tracksFiltered = [];
 
@@ -93,7 +93,7 @@ export const filterToggleTag = (tag) => (dispatch, getState) => {
 
 	// Filter tracks
 	if (tags.length > 0) {
-		tracksFiltered = filterTracks(tracks.data, tracks.data, {
+		tracksFiltered = filterTracks(tracks, tracks, {
 			...filter,
 			tags
 		});

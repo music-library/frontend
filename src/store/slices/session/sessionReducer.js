@@ -35,6 +35,7 @@ const initialState = {
 		index: -1,
 		track: {
 			id: null,
+			id_album: null,
 			metadata: {}
 		}
 	},
