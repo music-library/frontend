@@ -9,92 +9,92 @@ import store from "store";
  * @Note: Does not check queue
  */
 export const getNextTrack = (trackIndex) => {
-    const state = store.getState();
-    const tracks = state.music.tracks.data;
-    const filter = state.music.tracks.filter;
+	const state = store.getState();
+	const tracks = state.music.tracks;
+	const filter = state.music.filter;
 
-    let newIndex = 0;
+	let newIndex = 0;
 
-    // Check if filter is applied
-    if (filter.tags.length > 0) {
-        // #1 Re-create filter
-        // #2 Is current track in filter
-        const tracksFiltered = state.music.tracks.filteredData;
-        const [trackExists, trackIndexFiltered] = doesTrackExist(
-            tracksFiltered,
-            tracks[trackIndex]
-        );
+	// Check if filter is applied
+	if (filter.tags.length > 0) {
+		// #1 Re-create filter
+		// #2 Is current track in filter
+		const tracksFiltered = state.music.filteredData;
+		const [trackExists, trackIndexFiltered] = doesTrackExist(
+			tracksFiltered,
+			tracks[trackIndex]
+		);
 
-        if (trackExists) {
-            newIndex = trackIndexFiltered + 1;
-            if (tracksFiltered.length <= newIndex) newIndex = 0;
+		if (trackExists) {
+			newIndex = trackIndexFiltered + 1;
+			if (tracksFiltered.length <= newIndex) newIndex = 0;
 
-            newIndex = tracks.findIndex(
-                (storeTrack) =>
-                    storeTrack.id === tracksFiltered[newIndex].id
-            );
+			newIndex = tracks.findIndex(
+				(storeTrack) =>
+					storeTrack.id === tracksFiltered[newIndex].id
+			);
 
-            return newIndex;
-        }
-    }
+			return newIndex;
+		}
+	}
 
-    // #1 attempt to play next track
-    newIndex = trackIndex + 1;
+	// #1 attempt to play next track
+	newIndex = trackIndex + 1;
 
-    // If end of all tracks
-    // loop to first track
-    if (tracks.length <= newIndex) {
-        // #3 loop entire playlist to first track
-        newIndex = 0;
-    }
+	// If end of all tracks
+	// loop to first track
+	if (tracks.length <= newIndex) {
+		// #3 loop entire playlist to first track
+		newIndex = 0;
+	}
 
-    return newIndex;
+	return newIndex;
 };
 
 /*
  * Get previous track index
  */
 export const getPreviousTrack = (trackIndex) => {
-    const state = store.getState();
-    const tracks = state.music.tracks.data;
-    const filter = state.music.tracks.filter;
+	const state = store.getState();
+	const tracks = state.music.tracks;
+	const filter = state.music.filter;
 
-    let newIndex = 0;
+	let newIndex = 0;
 
-    // Check if filter is applied
-    if (filter.tags.length > 0) {
-        // #1 Re-create filter
-        // #2 Is current track in filter
-        const tracksFiltered = state.music.tracks.filteredData;
-        const [trackExists, trackIndexFiltered] = doesTrackExist(
-            tracksFiltered,
-            tracks[trackIndex]
-        );
+	// Check if filter is applied
+	if (filter.tags.length > 0) {
+		// #1 Re-create filter
+		// #2 Is current track in filter
+		const tracksFiltered = state.music.filteredData;
+		const [trackExists, trackIndexFiltered] = doesTrackExist(
+			tracksFiltered,
+			tracks[trackIndex]
+		);
 
-        if (trackExists) {
-            newIndex = trackIndexFiltered - 1;
-            if (newIndex < 0) newIndex = tracksFiltered.length - 1;
+		if (trackExists) {
+			newIndex = trackIndexFiltered - 1;
+			if (newIndex < 0) newIndex = tracksFiltered.length - 1;
 
-            newIndex = tracks.findIndex(
-                (storeTrack) =>
-                    storeTrack.id === tracksFiltered[newIndex].id
-            );
+			newIndex = tracks.findIndex(
+				(storeTrack) =>
+					storeTrack.id === tracksFiltered[newIndex].id
+			);
 
-            return newIndex;
-        }
-    }
+			return newIndex;
+		}
+	}
 
-    // #1 attempt to play previous track
-    newIndex = trackIndex - 1;
+	// #1 attempt to play previous track
+	newIndex = trackIndex - 1;
 
-    // If end of all tracks
-    // loop to end track
-    if (newIndex < 0) {
-        // #3 loop entire playlist to end track
-        newIndex = tracks.length - 1;
-    }
+	// If end of all tracks
+	// loop to end track
+	if (newIndex < 0) {
+		// #3 loop entire playlist to end track
+		newIndex = tracks.length - 1;
+	}
 
-    return newIndex;
+	return newIndex;
 };
 
 /*
@@ -105,47 +105,47 @@ export const getPreviousTrack = (trackIndex) => {
  * @return                 array of albums with keys to each track in store
  */
 export const groupTracksIntoAlbums = (tracksStore, tracksToGroup) => {
-    const albums = [];
+	const albums = [];
 
-    // Loop each track
-    // populate albums array
-    tracksToGroup.forEach((track, i) => {
-        let found = false;
+	// Loop each track
+	// populate albums array
+	tracksToGroup.forEach((track, i) => {
+		let found = false;
 
-        // Find proper index of track in tracksStore
-        const storeIndex = tracksStore.findIndex(
-            (storeTrack) => storeTrack.id === track.id
-        );
+		// Find proper index of track in tracksStore
+		const storeIndex = tracksStore.findIndex(
+			(storeTrack) => storeTrack.id === track.id
+		);
 
-        // Loop albums array
-        // Search for matching album data
-        albums.forEach((album, j) => {
-            if (
-                track.metadata.album === album.album &&
-                track.metadata.album_artist === album.album_artist
-            ) {
-                albums[j].tracks.push(storeIndex);
-                found = true;
-            }
-        });
+		// Loop albums array
+		// Search for matching album data
+		albums.forEach((album, j) => {
+			if (
+				track.metadata.album === album.album &&
+				track.metadata.album_artist === album.album_artist
+			) {
+				albums[j].tracks.push(storeIndex);
+				found = true;
+			}
+		});
 
-        // If nothing found
-        // create new album
-        if (!found) {
-            return albums.push({
-                id: sha1(
-                    track.metadata.album + track.metadata.album_artist
-                ).toString(),
-                album: track.metadata.album,
-                album_artist: track.metadata.album_artist,
-                genre: track.metadata.genre,
-                year: track.metadata.year,
-                tracks: [storeIndex],
-            });
-        }
-    });
+		// If nothing found
+		// create new album
+		if (!found) {
+			return albums.push({
+				id: sha1(
+					track.metadata.album + track.metadata.album_artist
+				).toString(),
+				album: track.metadata.album,
+				album_artist: track.metadata.album_artist,
+				genre: track.metadata.genre,
+				year: track.metadata.year,
+				tracks: [storeIndex],
+			});
+		}
+	});
 
-    return albums;
+	return albums;
 };
 
 /*
@@ -156,23 +156,23 @@ export const groupTracksIntoAlbums = (tracksStore, tracksToGroup) => {
  * @return          bool: if match found
  */
 export const fuzzySearchForTrack = (tracks, filter) => {
-    // Run search on all tracks
-    const fuse = new Fuse(tracks, {
-        threshold: 0.2,
-        keys: [
-            "metadata.title",
-            "metadata.album",
-            "metadata.artist",
-            "metadata.album_artist",
-            "metadata.year",
-        ],
-    });
+	// Run search on all tracks
+	const fuse = new Fuse(tracks, {
+		threshold: 0.2,
+		keys: [
+			"metadata.title",
+			"metadata.album",
+			"metadata.artist",
+			"metadata.album_artist",
+			"metadata.year",
+		],
+	});
 
-    // List of matches
-    const found = fuse.search(filter.search);
+	// List of matches
+	const found = fuse.search(filter.search);
 
-    if (found.length > 0) return true;
-    return false;
+	if (found.length > 0) return true;
+	return false;
 };
 
 /*
@@ -183,59 +183,59 @@ export const fuzzySearchForTrack = (tracks, filter) => {
  * @return          array of index keys for state.music.albums.data
  */
 export const filterTracks = (
-    tracksStore,
-    tracksToFilter,
-    filter,
-    includeSearch = false
+	tracksStore,
+	tracksToFilter,
+	filter,
+	includeSearch = false
 ) => {
-    return tracksToFilter?.reduce(function (filtered, track, key) {
-        // RegExp filter tags (case-insensitive)
-        const regexTags = new RegExp(filter.tags.join("|"), "i");
+	return tracksToFilter?.reduce(function (filtered, track, key) {
+		// RegExp filter tags (case-insensitive)
+		const regexTags = new RegExp(filter.tags.join("|"), "i");
 
-        // Run search on each track
-        if (filter.search.length > 0 && includeSearch) {
-            const trackFound = fuzzySearchForTrack([track], filter);
-            if (!trackFound) return filtered;
-        }
+		// Run search on each track
+		if (filter.search.length > 0 && includeSearch) {
+			const trackFound = fuzzySearchForTrack([track], filter);
+			if (!trackFound) return filtered;
+		}
 
-        // If no filter applyed: add all all tracks
-        if (filter.tags.length === 0) {
-            filtered.push(track);
-            return filtered;
-        }
+		// If no filter applyed: add all all tracks
+		if (filter.tags.length === 0) {
+			filtered.push(track);
+			return filtered;
+		}
 
-        const genre = track?.metadata?.genre;
-        const year = track?.metadata?.year;
-        const decade = Math.floor(year / 10) * 10;
+		const genre = track?.metadata?.genre;
+		const year = track?.metadata?.year;
+		const decade = Math.floor(year / 10) * 10;
 
-        // If track tag matches filter in RegExp
-        if (filter.tags.length > 0) {
-            const matchedGenre = regexTags.test(genre);
-            const matchedDecade = regexTags.test(decade);
+		// If track tag matches filter in RegExp
+		if (filter.tags.length > 0) {
+			const matchedGenre = regexTags.test(genre);
+			const matchedDecade = regexTags.test(decade);
 
-            if (matchedGenre || matchedDecade) {
-                const isDecadeInTags = filter.tags
-                    .join("|")
-                    .match(/[12][0-9]{3}/gi);
+			if (matchedGenre || matchedDecade) {
+				const isDecadeInTags = filter.tags
+					.join("|")
+					.match(/[12][0-9]{3}/gi);
 
-                if (isDecadeInTags && isDecadeInTags?.length > 0) {
-                    // Add track if:
-                    // 1. both the genre & decade match (e.g. Latin track in the 1950s)
-                    // 2. only decades are selected, no genre(s)
-                    if (
-                        (matchedGenre && matchedDecade) ||
-                        isDecadeInTags.length === filter.tags.length
-                    )
-                        filtered.push(track);
-                } else {
-                    // If only genre(s) selected, add track
-                    filtered.push(track);
-                }
-            }
-        }
+				if (isDecadeInTags && isDecadeInTags?.length > 0) {
+					// Add track if:
+					// 1. both the genre & decade match (e.g. Latin track in the 1950s)
+					// 2. only decades are selected, no genre(s)
+					if (
+						(matchedGenre && matchedDecade) ||
+						isDecadeInTags.length === filter.tags.length
+					)
+						filtered.push(track);
+				} else {
+					// If only genre(s) selected, add track
+					filtered.push(track);
+				}
+			}
+		}
 
-        return filtered;
-    }, []);
+		return filtered;
+	}, []);
 };
 
 /*
@@ -246,79 +246,79 @@ export const filterTracks = (
  * @return {object}  index of album and track
  */
 export const doesTrackExist = (data, track) => {
-    const res = [false, -1];
+	const res = [false, -1];
 
-    // Loop all tracks
-    data.some((trackLoop, index) => {
-        if (track?.id === trackLoop?.id) {
-            res[0] = true;
-            res[1] = index;
-            return true;
-        }
+	// Loop all tracks
+	data.some((trackLoop, index) => {
+		if (track?.id === trackLoop?.id) {
+			res[0] = true;
+			res[1] = index;
+			return true;
+		}
 
-        if (res[0]) return true;
-        return false;
-    });
+		if (res[0]) return true;
+		return false;
+	});
 
-    return res;
+	return res;
 };
 
 export const numberOfAlbumsOnOneRow = () => {
-    let width = window.innerWidth;
-    let albumsPerRow;
+	let width = window.innerWidth;
+	let albumsPerRow;
 
-    switch (true) {
-        case width < 800:
-            albumsPerRow = 2;
-            break;
+	switch (true) {
+		case width < 800:
+			albumsPerRow = 2;
+			break;
 
-        case width < 1100:
-            albumsPerRow = 3;
-            break;
+		case width < 1100:
+			albumsPerRow = 3;
+			break;
 
-        case width < 1500:
-            albumsPerRow = 4;
-            break;
+		case width < 1500:
+			albumsPerRow = 4;
+			break;
 
-        case width < 1800:
-            albumsPerRow = 5;
-            break;
+		case width < 1800:
+			albumsPerRow = 5;
+			break;
 
-        default:
-            albumsPerRow = 7;
-    }
+		default:
+			albumsPerRow = 7;
+	}
 
-    return albumsPerRow;
+	return albumsPerRow;
 };
 
 export const numberOfTracksOnOneRow = () => {
-    let width = window.innerWidth;
-    let tracksPerRow;
+	let width = window.innerWidth;
+	let tracksPerRow;
 
-    switch (true) {
-        case width < 850:
-            tracksPerRow = 1;
-            break;
+	switch (true) {
+		case width < 850:
+			tracksPerRow = 1;
+			break;
 
-        case width < 1400:
-            tracksPerRow = 2;
-            break;
+		case width < 1400:
+			tracksPerRow = 2;
+			break;
 
-        case width < 1800:
-            tracksPerRow = 3;
-            break;
+		case width < 1800:
+			tracksPerRow = 3;
+			break;
 
-        default:
-            tracksPerRow = 4;
-    }
+		default:
+			tracksPerRow = 4;
+	}
 
-    return tracksPerRow;
+	return tracksPerRow;
 };
 
 export const nRowsOfAlbums = (rows) => {
-    return numberOfAlbumsOnOneRow() * rows;
+	return numberOfAlbumsOnOneRow() * rows;
 };
 
 export const nRowsOfTracks = (rows) => {
-    return numberOfTracksOnOneRow() * rows;
+	return numberOfTracksOnOneRow() * rows;
 };
