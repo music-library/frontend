@@ -9,7 +9,7 @@ export const api = (library = undefined) => {
 	}
 
 	return axios.create({
-		baseURL: `${import.meta.env.REACT_APP_API}/lib`,
+		baseURL: `${import.meta.env.REACT_APP_API}/lib/${library}`,
 		headers: {
 			"X-Library": library
 		}
