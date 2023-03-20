@@ -1,8 +1,8 @@
 import { parseJSON } from "utils";
 
-export const FETCH_TRACKS_START = "FETCH_TRACKS_START";
-export const FETCH_TRACKS_SUCCESS = "FETCH_TRACKS_SUCCESS";
-export const FETCH_TRACKS_FAILURE = "FETCH_TRACKS_FAILURE";
+export const FETCH_LIBRARY_START = "FETCH_LIBRARY_START";
+export const FETCH_LIBRARY_SUCCESS = "FETCH_LIBRARY_SUCCESS";
+export const FETCH_LIBRARY_FAILURE = "FETCH_LIBRARY_FAILURE";
 
 export const TRACK_STAT_UPDATE = "TRACK_STAT_UPDATE";
 
@@ -16,59 +16,65 @@ export const FILTER_RESET_TAGS = "FILTER_RESET_TAGS";
 
 // Initial state of app
 const initialState = {
-	tracks: {
-		didError: false,
-		isFetching: true,
-		filter: {
-			tags: [],
-			search: ""
-		},
-		queue: parseJSON(localStorage.getItem("queue")) || [], //[45, 49, 71, 94],
-		albumsData: [],
-		filteredData: [],
-		data: []
+	didError: false,
+	isFetching: true,
+	library: {
+		selected: parseJSON(localStorage.getItem("library_selected")) || "main",
+		options: parseJSON(localStorage.getItem("library_options")) || [{
+			"id": "main",
+			"name": "Main"
+		}],
 	},
+	queue: parseJSON(localStorage.getItem("queue")) || [], // [45, 49, 71, 94],
+	filter: {
+		tags: [],
+		search: ""
+	},
+	filteredData: [],
+	tracks: [],
+	tracks_map: {},
+	albums: {},
+	decades: [],
+	genres: [],
 };
 
 const musicReducer = (state = initialState, action) => {
 	switch (action.type) {
-		case FETCH_TRACKS_START:
+		case FETCH_LIBRARY_START:
+			if (state.library.selected !== action.payload) {
+				return {
+					...initialState,
+					queue: [],
+				};
+			}
+
 			return {
-				...state,
-				tracks: {
-					...state.tracks,
-					didError: false,
-					isFetching: true,
-					data: []
-				}
+				...initialState,
+				queue: state.queue,
 			};
 
-		case FETCH_TRACKS_SUCCESS:
+		case FETCH_LIBRARY_SUCCESS:
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					isFetching: false,
-					albumsData: action.payload[1],
-					data: action.payload[0]
-				}
+				tracks: action.payload?.tracks,
+				tracks_map: action.payload?.tracks_map,
+				albums: action.payload?.albums,
+				decades: action.payload?.decades,
+				genres: action.payload?.genres,
 			};
 
-		case FETCH_TRACKS_FAILURE:
+		case FETCH_LIBRARY_FAILURE:
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					didError: true,
-					isFetching: false
-				}
+				didError: true,
+				isFetching: false
 			};
 
 		case TRACK_STAT_UPDATE:
 			// Update track stats
 			// * Last played timestamp
 			// * Times played count
-			const newData = [...state.tracks.data];
+			const newData = [...state.tracks];
 			newData[action.payload] = {
 				...newData[action.payload],
 				stats: {
@@ -80,15 +86,12 @@ const musicReducer = (state = initialState, action) => {
 
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					data: newData
-				}
+				tracks: newData
 			};
 
 		case QUEUE_REMOVE:
 			localStorage.setItem("queue", JSON.stringify([
-				...state.tracks.queue.filter(
+				...state.queue.filter(
 					// Remove the track from the queue
 					(track) => track !== action.payload
 				)
@@ -96,26 +99,20 @@ const musicReducer = (state = initialState, action) => {
 
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					queue: [
-						...state.tracks.queue.filter(
-							// Remove the track from the queue
-							(track) => track !== action.payload
-						)
-					]
-				}
+				queue: [
+					...state.queue.filter(
+						// Remove the track from the queue
+						(track) => track !== action.payload
+					)
+				]
 			};
 
 		case QUEUE_PUSH:
-			localStorage.setItem("queue", JSON.stringify([...state.tracks.queue, action.payload]));
+			localStorage.setItem("queue", JSON.stringify([...state.queue, action.payload]));
 
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					queue: [...state.tracks.queue, action.payload]
-				}
+				queue: [...state.queue, action.payload]
 			};
 
 		case QUEUE_NEW:
@@ -123,48 +120,36 @@ const musicReducer = (state = initialState, action) => {
 
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					queue: [...action.payload]
-				}
+				queue: [...action.payload]
 			};
 
 		case UPDATE_USER_SEARCH:
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					filter: {
-						...state.tracks.filter,
-						search: action.payload
-					}
+				filter: {
+					...state.filter,
+					search: action.payload
 				}
 			};
 
 		case FILTER_TOGGLE_TAG:
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					filter: {
-						...state.tracks.filter,
-						tags: action.payload.tags
-					},
-					filteredData: action.payload.filteredData
-				}
+				filter: {
+					...state.filter,
+					tags: action.payload.tags
+				},
+				filteredData: action.payload.filteredData
 			};
 
 		case FILTER_RESET_TAGS:
 			return {
 				...state,
-				tracks: {
-					...state.tracks,
-					filter: {
-						...state.tracks.filter,
-						tags: []
-					},
-					filteredData: []
-				}
+				filter: {
+					...state.filter,
+					tags: []
+				},
+				filteredData: []
 			};
 
 		default:
