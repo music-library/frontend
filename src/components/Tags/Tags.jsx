@@ -1,58 +1,27 @@
-import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-// import { useSpring, animated } from "react-spring";
 
 import { useLocalStorage } from "hooks/useLocalStorage";
 import { filterToggleTag, filterResetTags } from "store/actions";
 
-import Tag from "./Tag.jsx";
-
+import Tag from "./Tag";
 import { Icon } from "components/Icon";
 
 function Tags() {
     const dispatch = useDispatch();
 
-    const tracks = useSelector((state) => state.music.tracks);
-    const isFetching = useSelector((state) => state.music.isFetching);
+    const genres = useSelector((state) => state.music.genres);
+    const decades = useSelector((state) => state.music.decades);
     const didError = useSelector((state) => state.music.didError);
+    const isFetching = useSelector((state) => state.music.isFetching);
     const isLoading = isFetching || didError;
 
     // Tags
-    const [tags, setTags] = useState([]);
+    const tags = [...decades, ...genres];
     const [areTagsHidden, setAreTagsHidden] = useLocalStorage(
         "areTagsHidden",
         true
     );
     const tagsRendered = areTagsHidden ? 6 : tags.length;
-
-    // Populate genre tags
-    useEffect(() => {
-        setTags(
-            tracks
-                .reduce(function (filtered, track, key) {
-                    const genre = track?.metadata?.genre.toLowerCase();
-                    const year = track?.metadata?.year;
-                    const decade = Math.floor(year / 10) * 10;
-
-                    // Only add unique genre tags
-                    if (genre && !filtered.includes(genre)) {
-                        filtered.push(genre);
-                    }
-
-                    // Only add unique decade tags
-                    if (
-                        decade &&
-                        decade.toString().length === 4 &&
-                        !filtered.includes(decade)
-                    ) {
-                        filtered.push(decade);
-                    }
-
-                    return filtered;
-                }, [])
-                .sort()
-        );
-    }, [tracks]);
 
     // Toggle tag in filter array
     const handleToggleTag = (tag) => dispatch(filterToggleTag(tag));
