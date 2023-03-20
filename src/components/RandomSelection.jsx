@@ -6,9 +6,10 @@ import { nRowsOfAlbums } from "utils/sortTracks";
 
 import Album from "./Tracks/Album";
 
-function RandomSelection(props) {
+function RandomSelection() {
     // Get albums list from store
-    const albums = useSelector((state) => state.music.tracks.albumsData);
+    const albumsMap = useSelector((state) => state.music.albumsMap);
+    const albumsMapKeys = Object.keys(albumsMap);
     const [albumsToRender, setAlbumsToRender] = useState([-1, -1, -1, -1]);
 
     // Generate up-to 10 - unique - random numbers (used as album indexes)
@@ -17,28 +18,38 @@ function RandomSelection(props) {
         let albumsAmmount = nRowsOfAlbums(1);
         if (albumsAmmount === 2) albumsAmmount = 4;
         let albumsMaxIndex = albumsAmmount - 1;
-        if (albums.length > 0) albumsMaxIndex = albums.length - 1;
-        if (albums.length > 0 && albums.length < albumsAmmount)
-            albumsAmmount = albums.length;
+        if (albumsMap.length > 0) albumsMaxIndex = albumsMap.length - 1;
+        if (albumsMap.length > 0 && albumsMap.length < albumsAmmount)
+            albumsAmmount = albumsMap.length;
 
         setAlbumsToRender(
             chance.unique(chance.integer, albumsAmmount, {
                 min: 0,
-                max: albumsMaxIndex,
+                max: albumsMaxIndex
             })
         );
-    }, [albums.length]);
+    }, [albumsMap.length]);
 
     return (
         <div className="random-selection">
             <h2>Random Selection</h2>
             <div className="track-container grid grid-albums">
                 {albumsToRender.map((albumIndex, index) => {
-                    if (typeof albums[albumIndex] !== "undefined") {
-                        return <Album album={albums[albumIndex]} key={index} />;
+                    const albumId = albumsMapKeys[albumIndex];
+
+                    if (typeof albumsMap[albumId] !== "undefined") {
+                        return (
+                            <Album
+                                albumId={albumId}
+                                albumTracks={albumsMap[albumId]}
+                                key={index}
+                            />
+                        );
                     }
 
-                    return <Album album={false} key={index} />;
+                    return (
+                        <Album albumId={false} albumTracks={[]} key={index} />
+                    );
                 })}
             </div>
         </div>

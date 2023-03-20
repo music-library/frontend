@@ -32,8 +32,8 @@ const initialState = {
 	},
 	filteredData: [],
 	tracks: [],
-	tracks_map: {},
-	albums: {},
+	tracksMap: {},
+	albumsMap: {},
 	decades: [],
 	genres: [],
 };
@@ -57,8 +57,8 @@ const musicReducer = (state = initialState, action) => {
 			return {
 				...state,
 				tracks: action.payload?.tracks,
-				tracks_map: action.payload?.tracks_map,
-				albums: action.payload?.albums,
+				tracksMap: action.payload?.tracks_map,
+				albumsMap: action.payload?.albums,
 				decades: action.payload?.decades,
 				genres: action.payload?.genres,
 			};
