@@ -16,7 +16,7 @@ import {
 const playTrackHelper = (dispatch, state, trackIndex) => {
 	if (state.music.isFetching || state.music.didError) return state;
 	dispatch({ type: TRACK_STAT_UPDATE, payload: trackIndex });
-	dispatch({ type: SESSION_PLAY_TRACK, payload: { trackIndex, track: state?.music?.data?.[trackIndex] } });
+	dispatch({ type: SESSION_PLAY_TRACK, payload: { trackIndex, track: state?.music?.tracks?.[trackIndex] } });
 }
 
 /*
@@ -29,7 +29,6 @@ export const playTrack = (trackIndex) => (dispatch, getState) => {
 
 	// If track is in the queue, remove it
 	if (queue?.length > 0 && queueIndexOfTrack !== -1) {
-		console.log({ queueIndexOfTrack });
 		const newQueue = [...queue];
 		newQueue.splice(queueIndexOfTrack, 1);
 		dispatch({ type: QUEUE_NEW, payload: newQueue });

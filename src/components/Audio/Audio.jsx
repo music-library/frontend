@@ -164,10 +164,6 @@ function Audio() {
     // MediaMetadata audio API
     useEffect(() => {
         if ("mediaSession" in navigator) {
-            console.log(
-                "api().getUri()",
-                api().getUri({ url: `/tracks/${track.id}/cover/96` })
-            );
             navigator.mediaSession.metadata = new window.MediaMetadata({
                 title: track.metadata.title,
                 artist: track.metadata.artist,
