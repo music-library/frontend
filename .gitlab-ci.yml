@@ -51,7 +51,7 @@ release:
         - apk update && apk add bash && apk add git
         - git clone --recurse-submodules https://gitlab.com/music-library/release.git
         - cd release
-        - git submodule update --remote backend
+        - git submodule update --remote api
         - git submodule update --remote client
     script:
         - docker login -u "$DOCKER_USER" -p "$DOCKER_TOKEN"
