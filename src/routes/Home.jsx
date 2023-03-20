@@ -1,6 +1,5 @@
 import React from "react";
 
-import SwitchLibrary from "components/SwitchLibrary";
 import ActiveUsers from "components/ActiveUsers";
 import PopularTracks from "components/PopularTracks";
 import RandomSelection from "components/RandomSelection";
@@ -10,9 +9,6 @@ function Home() {
     return (
         <>
             <div className="Home container">
-                <section>
-                    <SwitchLibrary />
-                </section>
                 <section>
                     <RandomSelection />
                 </section>

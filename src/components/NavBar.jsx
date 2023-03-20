@@ -6,6 +6,7 @@ import { useColor } from "hooks";
 import NavLinks from "./NavLinks";
 import SearchBar from "./SearchBar";
 import { Icon } from "components/Icon";
+import SwitchLibrary from "components/SwitchLibrary";
 
 function NavBar() {
     const color = useColor();
@@ -49,6 +50,7 @@ function NavBar() {
             <div className="navbar-secondary container">
                 <h1 className="navbar-title">Music Library</h1>
                 <SearchBar />
+                <SwitchLibrary />
             </div>
         </>
     );
