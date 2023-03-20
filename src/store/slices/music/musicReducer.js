@@ -21,7 +21,7 @@ const initialState = {
 	isFetching: true,
 	library: {
 		selected: localStorage.getItem("library/selected") || "main",
-		options: parseJSON(localStorage.getItem("library/selected")) || [{
+		options: parseJSON(localStorage.getItem("library/options")) || [{
 			"id": "main",
 			"name": "Main"
 		}],
@@ -77,7 +77,11 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case LIBRARY_FETCH_SUCCESS:
-			localStorage.setItem("library/selected", JSON.stringify(action.payload?.libraries));
+			localStorage.setItem("library/options", JSON.stringify(action.payload?.libraries));
+
+			if (!localStorage.getItem("library/selected")) {
+				localStorage.setItem("library/selected", action.payload?.libraries?.[0].id || "main");
+			}
 
 			return {
 				...state,
