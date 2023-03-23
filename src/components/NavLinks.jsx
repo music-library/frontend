@@ -7,7 +7,7 @@ import { css } from "@linaria/core";
 function NavLinks() {
     const color = useColor();
     const location = useLocation();
-    const queue = useSelector((state) => state.music.tracks.queue);
+    const queue = useSelector((state) => state.music.queue);
 
     const [activeLink, setActiveLink] = useState("home");
 

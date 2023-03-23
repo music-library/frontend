@@ -23,7 +23,7 @@ function Album({ albumId = false, albumTracks = [] }) {
     const tracks = useSelector((state) => state.music.tracks);
 
     // If api call failed
-    const didError = useSelector((state) => state.music.tracks.didError);
+    const didError = useSelector((state) => state.music.didError);
 
     // Is album playing
     let isAlbumPlaying = false;
