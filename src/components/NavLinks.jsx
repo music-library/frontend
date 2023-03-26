@@ -24,12 +24,11 @@ function NavLinks() {
     }, [location]);
 
     // Animation
-    const config = { mass: 5, tension: 2000, friction: 200 };
     const trail = useTrail(links.length, {
-        config,
-        opacity: 1,
         x: 0,
-        from: { opacity: 0, x: 20 }
+        opacity: 1,
+        from: { opacity: 0, x: 20 },
+        config: { mass: 5, tension: 2000, friction: 200 }
     });
 
     return (
