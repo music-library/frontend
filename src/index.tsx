@@ -8,15 +8,15 @@ import App from "./App";
 
 import store from "store";
 import "styles/index.scss";
-import { injectGlobalLog, versionLog, appVersion, api } from "utils";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+import { injectGlobalLog, versionLog, appVersion, api, feature } from "utils";
 
 injectGlobalLog();
 versionLog();
 
 // Bugcatch init
 // logs all errors
-if (import.meta.env.REACT_APP_BUGCATCH_ENABLE) {
+if (feature("bugcatch")) {
     bugcatchInit({
         base_url: api().getUri({ url: `/bugcatch` }),
         release: appVersion

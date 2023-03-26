@@ -2,52 +2,51 @@
  * Feature flags
  */
 export const featureFlags = {
-	timerIncrement: import.meta.env.REACT_APP_FEATURE_INCREMENT,
-	someOtherFeature: false
+    bugcatch: import.meta.env.REACT_APP_BUGCATCH_ENABLE
 };
 
 type FeatureOptions = {
-	alwaysShowOnDev?: boolean;
+    alwaysShowOnDev?: boolean;
 };
 
 const isFalse = (value: unknown): value is false => {
-	return (
-		!value ||
-		value === "0" ||
-		value === "off" ||
-		value === "null" ||
-		value === "false" ||
-		value === "undefined"
-	);
+    return (
+        !value ||
+        value === "0" ||
+        value === "off" ||
+        value === "null" ||
+        value === "false" ||
+        value === "undefined"
+    );
 };
 
 /**
  * Returns `true` if the feature is enabled in `featureFlags` object.
  */
 export const feature = (
-	mode: string,
-	options: FeatureOptions = {}
+    mode: string,
+    options: FeatureOptions = {}
 ): boolean => {
-	const { alwaysShowOnDev } = {
-		alwaysShowOnDev: true,
-		...options
-	};
+    const { alwaysShowOnDev } = {
+        alwaysShowOnDev: false,
+        ...options
+    };
 
-	// Bypass feature flag in dev mode if `alwaysShowOnDev` is true
-	if (alwaysShowOnDev && import.meta.env.MODE === "development") {
-		return true;
-	}
+    // Bypass feature flag in dev mode if `alwaysShowOnDev` is true
+    if (alwaysShowOnDev && import.meta.env.MODE === "development") {
+        return true;
+    }
 
-	let match = false;
+    let match = false;
 
-	// Feature is truthy in featureFlags{},
-	// OR matches the current development environment (env.MODE)
-	if (
-		(featureFlags[mode] && !isFalse(featureFlags[mode])) ||
-		mode === import.meta.env.MODE
-	) {
-		match = true;
-	}
+    // Feature is truthy in featureFlags{},
+    // OR matches the current development environment (env.MODE)
+    if (
+        (featureFlags[mode] && !isFalse(featureFlags[mode])) ||
+        mode === import.meta.env.MODE
+    ) {
+        match = true;
+    }
 
-	return match;
+    return match;
 };
