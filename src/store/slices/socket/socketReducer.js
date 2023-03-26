@@ -3,10 +3,14 @@ import Sarus from '@anephenix/sarus';
 export const SOCKET_CONNECTED_USERS = "SOCKET_CONNECTED_USERS";
 export const SOCKET_GLOBAL_PLAYING = "SOCKET_GLOBAL_PLAYING";
 
+const socketUrl = import.meta.env.REACT_APP_WS || `${(import.meta.env.REACT_APP_API || "https://not.a.real.domain")
+	.replace("https", "wss")
+	.replace("http", "ws")}/ws`;
+
 // Initial state of app
 const initialState = {
 	connection: new Sarus({
-		url: `${import.meta.env.REACT_APP_WS || import.meta.env.REACT_APP_API || "wss://not.a.real.domain"}`,
+		url: socketUrl,
 	}),
 	global: {
 		connectedUsers: 0,
