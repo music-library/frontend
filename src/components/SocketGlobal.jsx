@@ -6,7 +6,6 @@ import { socketConnectedUserCount, socketGlobalPlaying } from "store/actions";
 function SocketGlobal() {
     const dispatch = useDispatch();
 
-    const library = useSelector((state) => state.music.library);
     const socket = useSelector((state) => state.socket.connection);
     const playingId = useSelector((state) => state.session.playing.track.id);
 
@@ -21,7 +20,7 @@ function SocketGlobal() {
                 case "ws:connectionCount":
                     dispatch(socketConnectedUserCount(event.data));
                     break;
-                case "music:global:tracksPlaying":
+                case "music:playingTracks":
                     dispatch(socketGlobalPlaying(event.data));
                     break;
                 default:
@@ -32,11 +31,7 @@ function SocketGlobal() {
 
     // Send currently playing track
     useEffect(() => {
-        socket.send(
-            socketSendEvent("music:playTrack", {
-                trackId: playingId
-            })
-        );
+        socket.send(socketSendEvent("music:playTrack", playingId));
     }, [socket, playingId]);
 
     return <></>;

@@ -20,7 +20,6 @@ function Album({ albumId = false, albumTracks = [] }) {
     );
     const isPaused = useSelector((state) => state.session.playing.isPaused);
     const tracksMap = useSelector((state) => state.music.tracksMap);
-    const tracks = useSelector((state) => state.music.tracks);
 
     // If api call failed
     const didError = useSelector((state) => state.music.didError);
