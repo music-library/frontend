@@ -6,7 +6,7 @@ export const SOCKET_GLOBAL_PLAYING = "SOCKET_GLOBAL_PLAYING";
 // Initial state of app
 const initialState = {
 	connection: new Sarus({
-		url: `${import.meta.env.REACT_APP_WS}`,
+		url: `${import.meta.env.REACT_APP_WS || import.meta.env.REACT_APP_API || "wss://not.a.real.domain"}`,
 	}),
 	global: {
 		connectedUsers: 0,
