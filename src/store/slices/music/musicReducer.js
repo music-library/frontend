@@ -15,18 +15,21 @@ export const UPDATE_USER_SEARCH = "UPDATE_USER_SEARCH";
 export const FILTER_TOGGLE_TAG = "FILTER_TOGGLE_TAG";
 export const FILTER_RESET_TAGS = "FILTER_RESET_TAGS";
 
+const initialSelectedLibrary = localStorage.getItem("library/selected") || "main";
+const getQueue = (library = initialSelectedLibrary) => parseJSON(localStorage.getItem(`queue/${library}`)) || [];
+
 // Initial state of app
 const initialState = {
 	didError: false,
 	isFetching: true,
 	library: {
-		selected: localStorage.getItem("library/selected") || "main",
+		selected: initialSelectedLibrary,
 		options: parseJSON(localStorage.getItem("library/options")) || [{
 			"id": "main",
 			"name": "Main"
 		}],
 	},
-	queue: parseJSON(localStorage.getItem("queue")) || [], // [45, 49, 71, 94],
+	queue: getQueue(initialSelectedLibrary), // [45, 49, 71, 94],
 	filter: {
 		tags: [],
 		search: ""
@@ -45,6 +48,7 @@ const musicReducer = (state = initialState, action) => {
 			// Skip if already selected
 			if (state.library.selected === action.payload) return { ...state };
 
+			const libraryQueue = getQueue(action.payload);
 			localStorage.setItem("library/selected", action.payload);
 
 			return {
@@ -56,7 +60,7 @@ const musicReducer = (state = initialState, action) => {
 					selected: action.payload,
 				},
 				// Clear all lib data
-				queue: [],
+				queue: libraryQueue,
 				filter: {
 					tags: [],
 					search: ""
@@ -125,7 +129,7 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_REMOVE:
-			localStorage.setItem("queue", JSON.stringify([
+			localStorage.setItem(`queue/${state.library.selected}`, JSON.stringify([
 				...state.queue.filter(
 					// Remove the track from the queue
 					(track) => track !== action.payload
@@ -143,7 +147,7 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_PUSH:
-			localStorage.setItem("queue", JSON.stringify([...state.queue, action.payload]));
+			localStorage.setItem(`queue/${state.library.selected}`, JSON.stringify([...state.queue, action.payload]));
 
 			return {
 				...state,
@@ -151,7 +155,7 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_NEW:
-			localStorage.setItem("queue", JSON.stringify([...action.payload]));
+			localStorage.setItem(`queue/${state.library.selected}`, JSON.stringify([...action.payload]));
 
 			return {
 				...state,
