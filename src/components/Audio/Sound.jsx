@@ -59,6 +59,7 @@ function Sound({
             ref.current.addEventListener("error", onError, false);
 
             return function cleanup() {
+                if (!ref || !ref.current) return;
                 // prettier-ignore
                 ref.current.removeEventListener("ended", onFinishedPlaying, false);
                 ref.current.removeEventListener("error", onError, false);

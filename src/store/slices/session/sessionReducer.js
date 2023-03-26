@@ -12,6 +12,7 @@ export const SESSION_VOLUME_MUTE = "SESSION_VOLUME_MUTE";
 export const SESSION_SHUFFLE_TOGGLE = "SESSION_SHUFFLE_TOGGLE";
 export const SESSION_REPEAT_TOGGLE = "SESSION_REPEAT_TOGGLE";
 export const SESSION_PIP_TOGGLE = "SESSION_PIP_TOGGLE";
+export const SESSION_CLEAR = "SESSION_CLEAR";
 
 // Initial state of app
 const initialState = {
@@ -160,6 +161,23 @@ const sessionReducer = (state = initialState, action) => {
 					...state.actions,
 					showPip: !state.actions.showPip
 
+				}
+			};
+
+		case SESSION_CLEAR:
+			return {
+				...initialState,
+				actions: {
+					...state.actions,
+				},
+				playing: {
+					...initialState.playing,
+					audioRef: state.playing.audioRef,
+					status: {
+						...initialState.playing.status,
+						isMute: state.playing.status.isMute,
+						volume: state.playing.status.volume,
+					}
 				}
 			};
 

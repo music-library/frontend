@@ -14,6 +14,9 @@ import {
 	FILTER_TOGGLE_TAG,
 	FILTER_RESET_TAGS
 } from "./musicReducer";
+import {
+	SESSION_CLEAR
+} from "../session/sessionReducer";
 
 /*
  * Fetch music-library index from api
@@ -32,6 +35,7 @@ export const fetchLibrary = (library) => async (dispatch) => {
  * Switch to a different music library
  */
 export const switchLibrary = (library) => async (dispatch) => {
+	dispatch({ type: SESSION_CLEAR });
 	dispatch({ type: LIBRARY_SWITCH, payload: library });
 };
 
