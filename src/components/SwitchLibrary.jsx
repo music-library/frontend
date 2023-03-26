@@ -10,8 +10,6 @@ function SwitchLibrary() {
     const location = useLocation();
     const library = useSelector((state) => state.music.library);
 
-    debug(location);
-
     return (
         <>
             {library.options?.length > 1 && location.pathname === "/" && (

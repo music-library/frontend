@@ -4,31 +4,53 @@ import { useSelector, useDispatch } from "react-redux";
 import { socketConnectedUserCount, socketGlobalPlaying } from "store/actions";
 
 function SocketGlobal() {
-	const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-	const playingIndex = useSelector((state) => state.session.playing.index);
-	const socket = useSelector((state) => state.socket.connection);
+    const playingIndex = useSelector((state) => state.session.playing.index);
+    const socket = useSelector((state) => state.socket.connection);
 
-	useEffect(() => {
-		// Live connected user count
-		socket.on("connected_count", (payload) => {
-			dispatch(socketConnectedUserCount(payload));
-		});
+    useEffect(() => {
+        socket.on("message", (data) => {
+            const event = socketParseEvent(data);
+            if (!event?.type) return;
 
-		// Live global playing tracks
-		socket.on("global_tracks_playing", (payload) => {
-			dispatch(socketGlobalPlaying(payload));
-		});
-	}, [dispatch, socket]);
+            debug({ event });
 
-	// Send currently playing track
-	useEffect(() => {
-		socket.emit("play_track", {
-			track: playingIndex
-		});
-	}, [socket, playingIndex]);
+            switch (event.type) {
+                case "ws:connectionCount":
+                    dispatch(socketConnectedUserCount(event.data));
+                    break;
+                case "music:global:tracksPlaying":
+                    dispatch(socketGlobalPlaying(event.data));
+                    break;
+                default:
+                    break;
+            }
+        });
+    }, [dispatch, socket]);
 
-	return <></>;
+    // Send currently playing track
+    useEffect(() => {
+        socket.send(
+            socketSendEvent("music:playTrack", {
+                track: playingIndex
+            })
+        );
+    }, [socket, playingIndex]);
+
+    return <></>;
 }
+
+const socketSendEvent = (type, data) => {
+    return JSON.stringify({
+        type,
+        data
+    });
+};
+
+const socketParseEvent = (data) => {
+    if (!data?.data) return {};
+    return JSON.parse(data?.data);
+};
 
 export default SocketGlobal;

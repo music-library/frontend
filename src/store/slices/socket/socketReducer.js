@@ -1,12 +1,12 @@
-import socketIOClient from "socket.io-client";
+import Sarus from '@anephenix/sarus';
 
 export const SOCKET_CONNECTED_USERS = "SOCKET_CONNECTED_USERS";
 export const SOCKET_GLOBAL_PLAYING = "SOCKET_GLOBAL_PLAYING";
 
 // Initial state of app
 const initialState = {
-	connection: socketIOClient(`${import.meta.env.REACT_APP_API}`, {
-		transports: ["websocket"]
+	connection: new Sarus({
+		url: `${import.meta.env.REACT_APP_WS}`,
 	}),
 	global: {
 		connectedUsers: 0,
