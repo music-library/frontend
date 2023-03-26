@@ -6,8 +6,9 @@ import { socketConnectedUserCount, socketGlobalPlaying } from "store/actions";
 function SocketGlobal() {
     const dispatch = useDispatch();
 
-    const playingIndex = useSelector((state) => state.session.playing.index);
+    const library = useSelector((state) => state.music.library);
     const socket = useSelector((state) => state.socket.connection);
+    const playingId = useSelector((state) => state.session.playing.track.id);
 
     useEffect(() => {
         socket.on("message", (data) => {
@@ -33,10 +34,10 @@ function SocketGlobal() {
     useEffect(() => {
         socket.send(
             socketSendEvent("music:playTrack", {
-                track: playingIndex
+                trackId: playingId
             })
         );
-    }, [socket, playingIndex]);
+    }, [socket, playingId]);
 
     return <></>;
 }
