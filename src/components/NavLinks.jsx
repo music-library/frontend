@@ -25,16 +25,15 @@ function NavLinks() {
 
     // Animation
     const trail = useTrail(links.length, {
-        x: 0,
-        opacity: 1,
-        from: { opacity: 0, x: 20 },
+        from: { opacity: 0, y: 20 },
+        to: { opacity: 1, y: 0 },
         config: { mass: 5, tension: 2000, friction: 200 }
     });
 
     return (
         <div className={`navlinks`}>
             <div className="navlinks-content">
-                {trail.map(({ x, ...rest }, index) => {
+                {trail.map((props, index) => {
                     let link = links[index];
                     let isActive = false;
                     let linkPath = link;
@@ -48,12 +47,7 @@ function NavLinks() {
                                 isActive ? " active" : ""
                             }`}
                             key={links[index]}
-                            style={{
-                                ...rest,
-                                transform: x.interpolate(
-                                    (x) => `translate3d(0,${x}px,0)`
-                                )
-                            }}
+                            style={props}
                         >
                             <Link to={`/${linkPath}`}>
                                 <span>{link}</span>

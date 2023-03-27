@@ -13,9 +13,8 @@ function SwitchLibrary() {
     const library = useSelector((state) => state.music.library);
 
     const trail = useTrail(library.options?.length, {
-        x: 0,
-        opacity: 1,
-        from: { opacity: 0, x: 20 },
+        from: { opacity: 0, y: 20 },
+        to: { opacity: 1, y: 0 },
         reverse: !visible,
         config: { mass: 5, tension: 2000, friction: 200 }
     });
@@ -24,7 +23,7 @@ function SwitchLibrary() {
         <>
             {library.options?.length > 1 && (
                 <div className={cx(libraryOptions, "tags")}>
-                    {trail.map(({ x, ...rest }, index) => {
+                    {trail.map((props, index) => {
                         const option = library.options?.[index];
                         if (!option?.id) return null;
 
@@ -39,10 +38,7 @@ function SwitchLibrary() {
                                     dispatch(switchLibrary(option.id));
                                 }}
                                 style={{
-                                    ...rest,
-                                    transform: x.interpolate(
-                                        (x) => `translate3d(0,${x}px,0)`
-                                    ),
+                                    ...props,
                                     cursor: visible ? "pointer" : "default"
                                 }}
                             >

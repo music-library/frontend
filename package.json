@@ -1,6 +1,6 @@
 {
     "name": "music-library",
-    "version": "2.21.9",
+    "version": "2.21.10",
     "license": "UNLICENSED",
     "type": "module",
     "private": true,
@@ -39,7 +39,7 @@
         "react-redux": "^8.0.4",
         "react-router-dom": "^6.4.1",
         "react-sound": "^1.2.0",
-        "react-spring": "8.0.27",
+        "react-spring": "^9.7.1",
         "redux-logger": "^3.0.6",
         "sass": "^1.55.0"
     },
