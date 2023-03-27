@@ -92,7 +92,8 @@ export const playPreviousTrack = (trackIndex) => (dispatch, getState) => {
 export const playNextTrackBasedOnSession = (playNext = true) => (dispatch, getState) => {
 	const state = getState();
 
-	if (state.session.actions.shuffle) return dispatch(playRandomTrack());
+	// If shuffle is on (and the queue is empty), play random track.
+	if (state.session.actions.shuffle && !state.music.queue.length) return dispatch(playRandomTrack());
 
 	if (playNext) {
 		dispatch(playNextTrack(state.session.playing.index));
