@@ -8,6 +8,7 @@ export * from "./Minus";
 export * from "./Pause";
 export * from "./Placeholder";
 export * from "./Play";
+export * from "./Playlist";
 export * from "./Plus";
 export * from "./PlusBoxMultiple";
 export * from "./QueueMusic";

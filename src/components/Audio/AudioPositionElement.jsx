@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { isMobile } from "react-device-detect";
+import { isMobileOnly as isMobile } from "react-device-detect";
 
 import Slider from "components/Slider";
 
