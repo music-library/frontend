@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
+import { useTrail, animated } from "react-spring";
 import { css } from "@linaria/core";
 import { useMemo } from "react";
 import cx from "classnames";
@@ -49,6 +50,13 @@ function Queue({ className, ...props }) {
         return arr;
     }, [queue, playingIndex, isFetching]);
 
+    const trail = useTrail(queue?.length + nextQueueItems?.length, {
+        from: { opacity: 0, y: 20 },
+        to: { opacity: 1, y: 0 },
+        reverse: !(playingIndex !== -1 || !!queue?.length || !isFetching),
+        config: { mass: 2, tension: 4000, friction: 200 }
+    });
+
     return (
         <div className={cx("track-container", className)} {...props}>
             {playingIndex !== -1 && (
@@ -81,15 +89,22 @@ function Queue({ className, ...props }) {
 
             {(playingIndex !== -1 || !!queue?.length) && (
                 <Grid gutter={5} minWidth={"100%"} maxWidth={"1fr"}>
-                    {nextQueueItems.map((trackIndex, index) => {
+                    {trail.slice(queue?.length).map((props, index) => {
+                        const trackIndex = nextQueueItems?.[index];
+                        if (!trackIndex) return null;
+
                         return (
-                            <TrackBig
-                                size="big"
+                            <animated.div
                                 key={trackIndex + index}
-                                index={trackIndex}
-                                className={queueTrack}
-                                hideIfNonExistent={true}
-                            />
+                                style={props}
+                            >
+                                <TrackBig
+                                    size="big"
+                                    index={trackIndex}
+                                    className={queueTrack}
+                                    hideIfNonExistent={true}
+                                />
+                            </animated.div>
                         );
                     })}
                 </Grid>
