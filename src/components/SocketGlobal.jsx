@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { socketParseEvent } from "utils";
+import { socketEventParse } from "utils";
 import { useDispatch, useSelector } from "hooks";
 import { socketConnectedUserCount, socketGlobalPlaying } from "store/actions";
 
@@ -10,7 +10,7 @@ function SocketGlobal() {
 
     useEffect(() => {
         const onMessage = (data) => {
-            const event = socketParseEvent(data);
+            const event = socketEventParse(data);
             if (!event?.type) return;
 
             debug(event);

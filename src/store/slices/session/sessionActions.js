@@ -1,4 +1,4 @@
-import { getNextTrack, getPreviousTrack, socketSendEvent } from "utils";
+import { getNextTrack, getPreviousTrack, socketSend } from "utils";
 import { TRACK_STAT_UPDATE, QUEUE_NEW } from "store/slices/music/musicReducer";
 import {
 	SESSION_PLAY_TRACK,
@@ -18,7 +18,7 @@ const playTrackHelper = (dispatch, state, trackIndex) => {
 	const track = state?.music?.tracks?.[trackIndex];
 	dispatch({ type: TRACK_STAT_UPDATE, payload: trackIndex });
 	dispatch({ type: SESSION_PLAY_TRACK, payload: { trackIndex, track: track } });
-	state.socket.connection?.send(socketSendEvent("music:playTrack", track?.id));
+	socketSend("music:playTrack", track?.id);
 }
 
 /*
