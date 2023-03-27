@@ -3,6 +3,8 @@ import Sarus from '@anephenix/sarus';
 export const SOCKET_CONNECTED_USERS = "SOCKET_CONNECTED_USERS";
 export const SOCKET_GLOBAL_PLAYING = "SOCKET_GLOBAL_PLAYING";
 
+export const SOCKET_MIMIC_USER = "SOCKET_MIMIC_USER";
+
 const socketUrl = import.meta.env.REACT_APP_WS || `${(import.meta.env.REACT_APP_API || "https://not.a.real.domain")
 	.replace("https", "wss")
 	.replace("http", "ws")}/ws`;
@@ -14,9 +16,11 @@ const initialState = {
 	}),
 	global: {
 		connectedUsers: 0,
+		sessions: {}, // { [userId]: { ...userSession } }
 		playing: [],
 		messages: []
-	}
+	},
+	mimicUserSession: null,
 };
 
 const socketReducer = (state = initialState, action) => {
@@ -37,6 +41,12 @@ const socketReducer = (state = initialState, action) => {
 					...state.global,
 					playing: action.payload
 				}
+			};
+
+		case SOCKET_MIMIC_USER:
+			return {
+				...state,
+				mimicUserSession: action.payload
 			};
 
 		default:
