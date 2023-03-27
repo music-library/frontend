@@ -21,7 +21,7 @@ function ActiveUsers() {
         () => ({
             reset: users !== usersPrevious,
             from: { y: 10, opacity: 1 },
-            to: { y: -12, opacity: 0 }
+            to: { y: hasIncreased ? -12 : 36, opacity: 0 }
         }),
         [users, usersPrevious]
     );
@@ -29,13 +29,11 @@ function ActiveUsers() {
     const [styleNew] = useSpring(
         () => ({
             reset: users !== usersPrevious,
-            from: { y: 12, opacity: 0 },
+            from: { y: hasIncreased ? 12 : -34, opacity: 0 },
             to: { y: -12, opacity: 1 }
         }),
         [users, usersPrevious]
     );
-
-    debug(users, usersPrevious);
 
     return (
         <div className={cx("active-users", { hide: users <= 1 })}>
