@@ -1,20 +1,19 @@
 import React, { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 
+import { socketParseEvent } from "utils";
+import { useDispatch, useSelector } from "hooks";
 import { socketConnectedUserCount, socketGlobalPlaying } from "store/actions";
 
 function SocketGlobal() {
     const dispatch = useDispatch();
-
     const socket = useSelector((state) => state.socket.connection);
-    const playingId = useSelector((state) => state.session.playing.track.id);
 
     useEffect(() => {
-        socket.on("message", (data) => {
+        const onMessage = (data) => {
             const event = socketParseEvent(data);
             if (!event?.type) return;
 
-            debug({ event });
+            debug(event);
 
             switch (event.type) {
                 case "ws:connectionCount":
@@ -26,27 +25,16 @@ function SocketGlobal() {
                 default:
                     break;
             }
-        });
-    }, [dispatch, socket]);
+        };
 
-    // Send currently playing track
-    useEffect(() => {
-        socket.send(socketSendEvent("music:playTrack", playingId));
-    }, [socket, playingId]);
+        socket.on("message", onMessage);
+
+        return () => {
+            socket.off("message", onMessage);
+        };
+    }, [dispatch, socket]);
 
     return <></>;
 }
-
-const socketSendEvent = (type, data) => {
-    return JSON.stringify({
-        type,
-        data
-    });
-};
-
-const socketParseEvent = (data) => {
-    if (!data?.data) return {};
-    return JSON.parse(data?.data);
-};
 
 export default SocketGlobal;
