@@ -5,3 +5,4 @@ export * from "./useDebounce";
 export * from "./useInterval";
 export * from "./useLazyBackgroundImage";
 export * from "./useLocalStorage";
+export * from "./usePrevious";
