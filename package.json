@@ -1,6 +1,6 @@
 {
     "name": "music-library",
-    "version": "2.21.11",
+    "version": "2.21.12",
     "license": "UNLICENSED",
     "type": "module",
     "private": true,

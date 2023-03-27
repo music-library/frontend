@@ -9,7 +9,7 @@ function PopularTracks() {
     const tracks = useSelector((state) => state.music.tracks);
     const [tracksToRender, setTracksToRender] = useState([]);
 
-    // Find the top 5 most listened to tracks
+    // Find the top most listened to tracks
     useEffect(() => {
         let stats = [];
         let numberOfTracks = 15;

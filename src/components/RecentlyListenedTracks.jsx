@@ -4,20 +4,26 @@ import { orderBy } from "lodash";
 
 import TrackBig from "./Tracks/TrackBig";
 
-function RecentlyListenedTracks(props) {
+function RecentlyListenedTracks() {
     // Get tracks from store
     const tracks = useSelector((state) => state.music.tracks);
     const [tracksToRender, setTracksToRender] = useState([]);
 
-    // Find 5 most recently listened to tracks
+    // Find most recently listened to tracks
+    // TODO: Make this more efficient (maybe get from API?)
     useEffect(() => {
         let stats = [];
         let numberOfTracks = 15;
 
         for (const i in tracks) {
-            const lastPlayed = tracks[i].stats.lastPlayed;
+            let lastPlayed = tracks?.[i]?.stats?.lastPlayed;
+
+            // Convert unix milliseconds to seconds
+            // prettier-ignore
+            if (`${lastPlayed}`.length === 13) lastPlayed = Math.floor(lastPlayed / 1000);
+
             if (lastPlayed !== -1) {
-                stats.push([i, tracks[i].stats.lastPlayed]);
+                stats.push([i, lastPlayed]);
             }
         }
 
