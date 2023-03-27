@@ -1,6 +1,6 @@
 import React from "react";
 
-import ActiveUsers from "components/ActiveUsers";
+import ActiveUsers from "components/ActiveUsers/ActiveUsers";
 import PopularTracks from "components/PopularTracks";
 import RandomSelection from "components/RandomSelection";
 import RecentlyListenedTracks from "components/RecentlyListenedTracks";
