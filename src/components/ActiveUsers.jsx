@@ -1,18 +1,17 @@
 import React from "react";
+import cx from "classnames";
 import { useSelector } from "react-redux";
 
 import TrackBig from "./Tracks/TrackBig";
 
-function ActiveUsers(props) {
+function ActiveUsers() {
     const tracksMap = useSelector((state) => state.music.tracksMap);
 
     const users = useSelector((state) => state.socket.global.connectedUsers);
     const globalPlaying = useSelector((state) => state.socket.global.playing);
 
-    if (users <= 1) return null; // Hide if only one user is connected
-
     return (
-        <div className="active-users">
+        <div className={cx("active-users", { hide: users <= 1 })}>
             <h2>Active Users</h2>
             <p>
                 There are currently <strong>{users}</strong> active users

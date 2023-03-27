@@ -1,4 +1,6 @@
 .active-users {
+    opacity: 1;
+    @include transition(all, 280ms, ease);
 
     & > h2 {
         margin-bottom: 15px;

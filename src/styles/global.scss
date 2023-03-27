@@ -48,6 +48,10 @@ section {
     margin-bottom: 70px;
 }
 
+.hide {
+    opacity: 0 !important;
+}
+
 .app-wrapper {
     min-height: 100vh;
     @include container(1920px);
