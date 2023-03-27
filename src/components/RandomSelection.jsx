@@ -18,9 +18,9 @@ function RandomSelection() {
         let albumsAmmount = nRowsOfAlbums(1);
         if (albumsAmmount === 2) albumsAmmount = 4;
         let albumsMaxIndex = albumsAmmount - 1;
-        if (albumsMap.length > 0) albumsMaxIndex = albumsMap.length - 1;
-        if (albumsMap.length > 0 && albumsMap.length < albumsAmmount)
-            albumsAmmount = albumsMap.length;
+        if (albumsMapKeys.length > 0) albumsMaxIndex = albumsMapKeys.length - 1;
+        if (albumsMapKeys.length > 0 && albumsMapKeys.length < albumsAmmount)
+            albumsAmmount = albumsMapKeys.length;
 
         setAlbumsToRender(
             chance.unique(chance.integer, albumsAmmount, {
@@ -28,7 +28,7 @@ function RandomSelection() {
                 max: albumsMaxIndex
             })
         );
-    }, [albumsMap.length]);
+    }, [albumsMapKeys.length]);
 
     return (
         <div className="random-selection">
@@ -36,19 +36,23 @@ function RandomSelection() {
             <div className="track-container grid grid-albums">
                 {albumsToRender.map((albumIndex, index) => {
                     const albumId = albumsMapKeys[albumIndex];
+                    const trackIndexes = albumsMap[albumId];
 
-                    if (typeof albumsMap[albumId] !== "undefined") {
+                    if (!trackIndexes || typeof trackIndexes == "undefined")
                         return (
                             <Album
-                                albumId={albumId}
-                                albumTracks={albumsMap[albumId]}
                                 key={index}
+                                albumId={false}
+                                albumTracks={[]}
                             />
                         );
-                    }
 
                     return (
-                        <Album albumId={false} albumTracks={[]} key={index} />
+                        <Album
+                            key={index}
+                            albumId={albumId}
+                            albumTracks={trackIndexes}
+                        />
                     );
                 })}
             </div>
