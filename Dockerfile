@@ -3,6 +3,7 @@ FROM node:18-alpine as build
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY / /app
+RUN apk update && apk add git
 RUN yarn install
 RUN yarn build
 
