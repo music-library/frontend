@@ -12,6 +12,15 @@ cover.jpg
 /.pnp
 .pnp.js
 
+# yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 # testing
 /coverage
 
