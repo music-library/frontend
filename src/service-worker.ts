@@ -66,12 +66,26 @@ registerRoute(
     ({ url }) =>
         url.origin === self.location.origin &&
         url.pathname.match(fileExtentionsToCacheRegex), // Customize this strategy as needed, e.g., by changing to CacheFirst.
-    new StaleWhileRevalidate({
+    new CacheFirst({
         cacheName: "images",
         plugins: [
             // Ensure that once this runtime cache reaches a maximum size the
             // least-recently used images are removed.
             new ExpirationPlugin({ maxEntries: 50 })
+        ]
+    })
+);
+
+// Cache the last n tracks' cover images
+const trackCoversToCacheRegex = new RegExp(`.*\/cover/600$`);
+registerRoute(
+    ({ url }) => url.pathname.match(trackCoversToCacheRegex),
+    new CacheFirst({
+        cacheName: "tracks-covers",
+        plugins: [
+            // Ensure that once this runtime cache reaches a maximum size the
+            // least-recently used images are removed.
+            new ExpirationPlugin({ maxEntries: 250 })
         ]
     })
 );
@@ -86,22 +100,6 @@ registerRoute(
             // Ensure that once this runtime cache reaches a maximum size the
             // least-recently used images are removed.
             new ExpirationPlugin({ maxEntries: 10 })
-        ]
-    })
-);
-
-// Cache the last n tracks' cover images
-// (only those the user specifically clicked on - into /albums/:albumId)
-const trackCoversToCacheRegex = new RegExp(`.*\/cover/600$`);
-registerRoute(
-    ({ url }) =>
-        url.pathname.includes("/albums/") && url.pathname.match(trackCoversToCacheRegex),
-    new CacheFirst({
-        cacheName: "tracks-covers",
-        plugins: [
-            // Ensure that once this runtime cache reaches a maximum size the
-            // least-recently used images are removed.
-            new ExpirationPlugin({ maxEntries: 28 })
         ]
     })
 );

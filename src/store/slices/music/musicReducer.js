@@ -81,10 +81,14 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case LIBRARY_FETCH_SUCCESS:
-			localStorage.setItem("library/options", JSON.stringify(action.payload?.libraries));
+			try {
+				localStorage.setItem("library/options", JSON.stringify(action.payload?.libraries));
 
-			if (!localStorage.getItem("library/selected")) {
-				localStorage.setItem("library/selected", action.payload?.libraries?.[0].id || "main");
+				if (!localStorage.getItem("library/selected")) {
+					localStorage.setItem("library/selected", action.payload?.libraries?.[0].id || "main");
+				}
+			} catch (e) {
+				console.error('[LIBRARY_FETCH_SUCCESS] storage error', e);
 			}
 
 			return {
