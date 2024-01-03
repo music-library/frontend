@@ -1,167 +1,210 @@
 /**
- * This file contains a Rollup loader for Linaria.
+ * This file contains a Vite loader for wyw-in-js.
  * It uses the transform.ts function to generate class names from source code,
- * returns transformed code without template literals and attaches generated source maps.
- *
- * @SOURCE: https://github.com/callstack/linaria/blob/master/packages/vite/src/index.ts
+ * returns transformed code without template literals and attaches generated source maps
  */
-import { TransformCacheCollection, slugify, transform } from "@linaria/babel-preset";
-import type { PluginOptions, Preprocessor, Result } from "@linaria/babel-preset";
-import { createCustomDebug } from "@linaria/logger";
-import { getFileIdx, syncResolve } from "@linaria/utils";
-import type { Plugin as VitePlugin } from "@linaria/vite";
-import vitePlugin from "@linaria/vite";
+import type { FilterPattern } from "@rollup/pluginutils";
 import { createFilter } from "@rollup/pluginutils";
+import { logger, syncResolve } from "@wyw-in-js/shared";
+import type {
+	IFileReporterOptions,
+	PluginOptions,
+	Preprocessor
+} from "@wyw-in-js/transform";
+import {
+	TransformCacheCollection,
+	createFileReporter,
+	getFileIdx,
+	slugify,
+	transform
+} from "@wyw-in-js/transform";
+import { existsSync } from "fs";
 import path from "path";
-import type { Plugin } from "rollup";
+import { optimizeDeps } from "vite";
+import type { ModuleNode, Plugin, ResolvedConfig, ViteDevServer } from "vite";
 
-type RollupPluginOptions = {
-    exclude?: string | string[];
-    include?: string | string[];
-    preprocessor?: Preprocessor;
-    sourceMap?: boolean;
+type VitePluginOptions = {
+	debug?: IFileReporterOptions | false | null | undefined;
+	exclude?: FilterPattern;
+	include?: FilterPattern;
+	preprocessor?: Preprocessor;
+	sourceMap?: boolean;
 } & Partial<PluginOptions>;
 
-export default function linaria({
-    exclude,
-    include,
-    preprocessor,
-    sourceMap,
-    ...rest
-}: RollupPluginOptions = {}): Plugin {
-    const filter = createFilter(include, exclude);
-    const cssLookup: { [key: string]: string } = {};
-    const cache = new TransformCacheCollection();
-    const emptyConfig = {};
+export { Plugin };
 
-    const plugin: Plugin = {
-        name: "linaria",
-        load(id: string) {
-            return cssLookup[id];
-        },
-        /* eslint-disable-next-line consistent-return */
-        resolveId(importee: string) {
-            if (importee in cssLookup) return importee;
-        },
-        async transform(
-            code: string,
-            id: string
-        ): Promise<{ code: string; map: Result["sourceMap"] } | undefined> {
-            // Do not transform ignored and generated files
-            if (!filter(id) || id in cssLookup) return;
+export default function wywInJS({
+	debug,
+	include,
+	exclude,
+	sourceMap,
+	preprocessor,
+	...rest
+}: VitePluginOptions = {}): Plugin {
+	const filter = createFilter(include, exclude);
+	const cssLookup: { [key: string]: string } = {};
+	const cssFileLookup: { [key: string]: string } = {};
+	let config: ResolvedConfig;
+	let devServer: ViteDevServer;
 
-            const log = createCustomDebug("rollup", getFileIdx(id));
+	const { emitter, onDone } = createFileReporter(debug ?? false);
 
-            log("rollup-init", id);
+	// <dependency id, targets>
+	const targets: { dependencies: string[]; id: string }[] = [];
+	const cache = new TransformCacheCollection();
+	return {
+		name: "wyw-in-js",
+		enforce: "post",
+		buildEnd() {
+			onDone(process.cwd());
+		},
+		configResolved(resolvedConfig: ResolvedConfig) {
+			config = resolvedConfig;
+		},
+		configureServer(_server) {
+			devServer = _server;
+		},
+		load(url: string) {
+			const [id] = url.split("?", 1);
+			return cssLookup[id];
+		},
+		/* eslint-disable-next-line consistent-return */
+		resolveId(importeeUrl: string) {
+			const [id] = importeeUrl.split("?", 1);
+			if (cssLookup[id]) return id;
+			return cssFileLookup[id];
+		},
+		handleHotUpdate(ctx) {
+			// it's module, so just transform it
+			if (ctx.modules.length) return ctx.modules;
 
-            const asyncResolve = async (
-                what: string,
-                importer: string,
-                stack: string[]
-            ) => {
-                const resolved = await this.resolve(what, importer);
-                if (resolved) {
-                    if (resolved.external) {
-                        // If module is marked as external, Rollup will not resolve it,
-                        // so we need to resolve it ourselves with default resolver
-                        const resolvedId = syncResolve(what, importer, stack);
-                        log("resolve", "✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
-                        return resolvedId;
-                    }
+			// Select affected modules of changed dependency
+			const affected = targets.filter(
+				(x) =>
+					// file is dependency of any target
+					x.dependencies.some((dep) => dep === ctx.file) ||
+					// or changed module is a dependency of any target
+					x.dependencies.some((dep) => ctx.modules.some((m) => m.file === dep))
+			);
+			const deps = affected.flatMap((target) => target.dependencies);
 
-                    log("resolve", "✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
+			// eslint-disable-next-line no-restricted-syntax
+			for (const depId of deps) {
+				cache.invalidateForFile(depId);
+			}
 
-                    // Vite adds param like `?v=667939b3` to cached modules
-                    const resolvedId = resolved.id.split("?")[0];
+			return affected
+				.map((target) => devServer.moduleGraph.getModuleById(target.id))
+				.concat(ctx.modules)
+				.filter((m): m is ModuleNode => !!m);
+		},
+		async transform(code: string, url: string) {
+			const [id] = url.split("?", 1);
 
-                    if (resolvedId.startsWith("\0")) {
-                        // \0 is a special character in Rollup that tells Rollup to not include this in the bundle
-                        // https://rollupjs.org/guide/en/#outputexports
-                        return null;
-                    }
+			// Do not transform ignored and generated files
+			if (url.includes("node_modules") || !filter(url) || id in cssLookup) return;
 
-                    return resolvedId;
-                }
+			const log = logger.extend("vite").extend(getFileIdx(id));
 
-                log("resolve", "❌ '%s'@'%s", what, importer);
-                throw new Error(`Could not resolve ${what}`);
-            };
+			log("transform %s", id);
 
-            const transformServices = {
-                options: {
-                    filename: id,
-                    root: process.cwd(),
-                    preprocessor,
-                    pluginOptions: rest
-                },
-                cache
-            };
+			const asyncResolve = async (
+				what: string,
+				importer: string,
+				stack: string[]
+			) => {
+				const resolved = await this.resolve(what, importer);
+				if (resolved) {
+					if (resolved.external) {
+						// If module is marked as external, Rollup will not resolve it,
+						// so we need to resolve it ourselves with default resolver
+						const resolvedId = syncResolve(what, importer, stack);
+						log("resolve ✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
+						return resolvedId;
+					}
 
-            const result = await transform(
-                transformServices,
-                code,
-                asyncResolve,
-                emptyConfig
-            );
+					log("resolve ✅ '%s'@'%s -> %O\n%s", what, importer, resolved);
+					// Vite adds param like `?v=667939b3` to cached modules
+					const resolvedId = resolved.id.split("?", 1)[0];
 
-            if (!result.cssText) return;
+					if (resolvedId.startsWith("\0")) {
+						// \0 is a special character in Rollup that tells Rollup to not include this in the bundle
+						// https://rollupjs.org/guide/en/#outputexports
+						return null;
+					}
 
-            let { cssText } = result;
+					if (!existsSync(resolvedId)) {
+						await optimizeDeps(config);
+					}
 
-            const slug = slugify(cssText);
+					return resolvedId;
+				}
 
-            // @IMPORTANT: We *need* to use `.scss` extension here.
-            // This tiny change is the only difference between this file and using `@linaria/vite`.
-            const filename = path
-                .normalize(`${id.replace(/\.[jt]sx?$/, "")}_${slug}.scss`)
-                .replace(/\\/g, path.posix.sep);
+				log("resolve ❌ '%s'@'%s", what, importer);
+				throw new Error(`Could not resolve ${what}`);
+			};
 
-            if (sourceMap && result.cssSourceMapText) {
-                const map = Buffer.from(result.cssSourceMapText).toString("base64");
-                cssText += `/*# sourceMappingURL=data:application/json;base64,${map}*/`;
-            }
+			const transformServices = {
+				options: {
+					filename: id,
+					root: process.cwd(),
+					preprocessor,
+					pluginOptions: rest
+				},
+				cache,
+				eventEmitter: emitter
+			};
 
-            cssLookup[filename] = cssText;
+			const result = await transform(transformServices, code, asyncResolve);
 
-            result.code += `\nimport ${JSON.stringify(filename)};\n`;
+			let { cssText, dependencies } = result;
 
-            /* eslint-disable-next-line consistent-return */
-            return { code: result.code, map: result.sourceMap };
-        }
-    };
+			if (!cssText) return;
+			dependencies ??= [];
 
-    let vite: VitePlugin | undefined;
+			const slug = slugify(cssText);
 
-    return new Proxy<Plugin>(plugin, {
-        get(target, prop) {
-            return ((vite as Plugin) || target)[prop as keyof Plugin];
-        },
+			const cssFilename = path
+				.normalize(`${id.replace(/\.[jt]sx?$/, "")}_${slug}.scss`)
+				.replace(/\\/g, path.posix.sep);
 
-        getOwnPropertyDescriptor(target, prop) {
-            return Object.getOwnPropertyDescriptor(vite || target, prop as keyof Plugin);
-        },
+			const cssRelativePath = path
+				.relative(config.root, cssFilename)
+				.replace(/\\/g, path.posix.sep);
 
-        ownKeys() {
-            // Rollup doesn't ask config about its own keys, so it is Vite.
-            vite = vitePlugin({
-                exclude,
-                include,
-                preprocessor,
-                sourceMap,
-                ...rest
-            });
+			const cssId = `/${cssRelativePath}`;
 
-            vite = {
-                ...vite,
-                buildStart() {
-                    // eslint-disable-next-line no-console
-                    console.warn(
-                        "You are trying to use @linaria/rollup with Vite. The support for Vite in @linaria/rollup is deprecated and will be removed in the next major release. Please use @linaria/vite instead."
-                    );
-                }
-            };
+			if (sourceMap && result.cssSourceMapText) {
+				const map = Buffer.from(result.cssSourceMapText).toString("base64");
+				cssText += `/*# sourceMappingURL=data:application/json;base64,${map}*/`;
+			}
 
-            return Reflect.ownKeys(vite);
-        }
-    });
+			cssLookup[cssFilename] = cssText;
+			cssFileLookup[cssId] = cssFilename;
+
+			result.code += `\nimport ${JSON.stringify(cssFilename)};\n`;
+			if (devServer?.moduleGraph) {
+				const module = devServer.moduleGraph.getModuleById(cssId);
+
+				if (module) {
+					devServer.moduleGraph.invalidateModule(module);
+					module.lastHMRTimestamp =
+						module.lastInvalidationTimestamp || Date.now();
+				}
+			}
+
+			for (let i = 0, end = dependencies.length; i < end; i++) {
+				// eslint-disable-next-line no-await-in-loop
+				const depModule = await this.resolve(dependencies[i], url, {
+					isEntry: false
+				});
+				if (depModule) dependencies[i] = depModule.id;
+			}
+			const target = targets.find((t) => t.id === id);
+			if (!target) targets.push({ id, dependencies });
+			else target.dependencies = dependencies;
+			/* eslint-disable-next-line consistent-return */
+			return { code: result.code, map: result.sourceMap };
+		}
+	};
 }

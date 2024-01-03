@@ -5,12 +5,11 @@
 // code you'd like.
 // You can also remove this file if you'd prefer not to use a
 // service worker, and the Workbox build step will be skipped.
-
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
-import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
+import { createHandlerBoundToURL, precacheAndRoute } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { CacheFirst, StaleWhileRevalidate } from "workbox-strategies";
+import { StaleWhileRevalidate } from "workbox-strategies";
 
 clientsClaim();
 
@@ -25,32 +24,32 @@ precacheAndRoute(self.__WB_MANIFEST);
 // https://developers.google.com/web/fundamentals/architecture/app-shell
 const fileExtensionRegexp = new RegExp("/[^/?]+\\.[^/]+$");
 registerRoute(
-    // Return false to exempt requests from being fulfilled by index.html.
-    ({ request, url }) => {
-        // If this isn't a navigation, skip.
-        if (request.mode !== "navigate") {
-            return false;
-        } // If this is a URL that starts with /_, skip.
+	// Return false to exempt requests from being fulfilled by index.html.
+	({ request, url }) => {
+		// If this isn't a navigation, skip.
+		if (request.mode !== "navigate") {
+			return false;
+		} // If this is a URL that starts with /_, skip.
 
-        if (url.pathname.startsWith("/_")) {
-            return false;
-        } // If this looks like a URL for a resource, because it contains // a file extension, skip.
+		if (url.pathname.startsWith("/_")) {
+			return false;
+		} // If this looks like a URL for a resource, because it contains // a file extension, skip.
 
-        if (url.pathname.match(fileExtensionRegexp)) {
-            return false;
-        } // Return true to signal that we want to use the handler.
+		if (url.pathname.match(fileExtensionRegexp)) {
+			return false;
+		} // Return true to signal that we want to use the handler.
 
-        return true;
-    },
-    createHandlerBoundToURL("/index.html")
+		return true;
+	},
+	createHandlerBoundToURL("/index.html")
 );
 
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
 self.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "SKIP_WAITING") {
-        self.skipWaiting();
-    }
+	if (event.data && event.data.type === "SKIP_WAITING") {
+		self.skipWaiting();
+	}
 });
 
 //
@@ -62,44 +61,44 @@ self.addEventListener("message", (event) => {
 const fileExtentionsToCache = [".png", ".jpg", ".jpeg", ".svg"];
 const fileExtentionsToCacheRegex = new RegExp(`.*(${fileExtentionsToCache.join("|")})`);
 registerRoute(
-    // Add in any other file extensions or routing criteria as needed.
-    ({ url }) =>
-        url.origin === self.location.origin &&
-        url.pathname.match(fileExtentionsToCacheRegex), // Customize this strategy as needed, e.g., by changing to CacheFirst.
-    new CacheFirst({
-        cacheName: "images",
-        plugins: [
-            // Ensure that once this runtime cache reaches a maximum size the
-            // least-recently used images are removed.
-            new ExpirationPlugin({ maxEntries: 50 })
-        ]
-    })
+	// Add in any other file extensions or routing criteria as needed.
+	({ url }) =>
+		url.origin === self.location.origin &&
+		url.pathname.match(fileExtentionsToCacheRegex), // Customize this strategy as needed, e.g., by changing to CacheFirst.
+	new CacheFirst({
+		cacheName: "images",
+		plugins: [
+			// Ensure that once this runtime cache reaches a maximum size the
+			// least-recently used images are removed.
+			new ExpirationPlugin({ maxEntries: 50 })
+		]
+	})
 );
 
 // Cache the last n tracks' cover images
 const trackCoversToCacheRegex = new RegExp(`.*\/cover/600$`);
 registerRoute(
-    ({ url }) => url.pathname.match(trackCoversToCacheRegex),
-    new CacheFirst({
-        cacheName: "tracks-covers",
-        plugins: [
-            // Ensure that once this runtime cache reaches a maximum size the
-            // least-recently used images are removed.
-            new ExpirationPlugin({ maxEntries: 250 })
-        ]
-    })
+	({ url }) => url.pathname.match(trackCoversToCacheRegex),
+	new CacheFirst({
+		cacheName: "tracks-covers",
+		plugins: [
+			// Ensure that once this runtime cache reaches a maximum size the
+			// least-recently used images are removed.
+			new ExpirationPlugin({ maxEntries: 250 })
+		]
+	})
 );
 
 // Cache the last n tracks
 const tracksToCacheRegex = new RegExp(`.*\/audio$`);
 registerRoute(
-    ({ url }) => url.pathname.match(tracksToCacheRegex),
-    new CacheFirst({
-        cacheName: "tracks",
-        plugins: [
-            // Ensure that once this runtime cache reaches a maximum size the
-            // least-recently used images are removed.
-            new ExpirationPlugin({ maxEntries: 10 })
-        ]
-    })
+	({ url }) => url.pathname.match(tracksToCacheRegex),
+	new CacheFirst({
+		cacheName: "tracks",
+		plugins: [
+			// Ensure that once this runtime cache reaches a maximum size the
+			// least-recently used images are removed.
+			new ExpirationPlugin({ maxEntries: 10 })
+		]
+	})
 );

@@ -17,7 +17,7 @@
 		"sourceMap": true,
 		"strict": false,
 		"target": "ESNext",
-		"typeRoots": ["./node_modules/@types", "./src/types"],
+		"typeRoots": ["./node_modules/@types", "src/lib/global", "./src/types"],
 		"useDefineForClassFields": true
 	},
 	"include": ["src/**/*"]
