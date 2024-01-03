@@ -1,6 +1,6 @@
 import { $global } from "./utils";
 
-export const appName = "App"; // Optionally use `import.meta.env.VITE_NAME`
+export const appName = "Music Library"; // Optionally use `import.meta.env.VITE_NAME`
 export const appVersion = import.meta.env.REACT_APP_VERSION;
 export const gitBranch = import.meta.env.REACT_APP_GIT_BRANCH;
 export const gitCommitHash = import.meta.env.REACT_APP_GIT_COMMIT;
