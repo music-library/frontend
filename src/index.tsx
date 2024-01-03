@@ -1,39 +1,40 @@
-import { StrictMode } from "react";
-import { Provider } from "react-redux";
-import { createRoot } from "react-dom/client";
 import { init as bugcatchInit } from "@bug-catch/browser";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { Provider as Redux } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
 
-import App from "./App";
+import { api } from "lib/index";
+import "lib/styles/index.scss";
+import store from "state/index";
 
-import store from "store";
-import "styles/index.scss";
+import { HaloProvider } from "view/components";
+
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-import { injectGlobalLog, versionLog, appVersion, api, feature } from "utils";
-
-injectGlobalLog();
-versionLog();
+import App from "./App";
 
 // Bugcatch init
 // logs all errors
 if (feature("bugcatch")) {
-    bugcatchInit({
-        base_url: api().getUri({ url: `/bugcatch` }),
-        release: appVersion
-    });
+	bugcatchInit({
+		base_url: api().getUri({ url: `/bugcatch` }),
+		release: appVersion
+	});
 }
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement as HTMLElement);
 
 root.render(
-    <StrictMode>
-        <Provider store={store}>
-            <Router>
-                <App />
-            </Router>
-        </Provider>
-    </StrictMode>
+	<StrictMode>
+		<Redux store={store}>
+			<Router>
+				<HaloProvider>
+					<App />
+				</HaloProvider>
+			</Router>
+		</Redux>
+	</StrictMode>
 );
 
 // If you want your app to work offline and load faster, you can change

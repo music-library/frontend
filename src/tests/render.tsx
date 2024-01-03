@@ -3,7 +3,7 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { render as reactRender } from "@testing-library/react";
 
-import store from "store";
+import store from "state";
 
 type element = ReactElement<any, string | JSXElementConstructor<any>>;
 

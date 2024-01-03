@@ -29,7 +29,8 @@ test:
         policy: pull-push
     before_script:
         - apk update && apk add git bash
-        - yarn install --cache-folder .npm --prefer-offline
+        - yarn add --cached
+        - yarn install
     script:
         - yarn test:coverage
         - unset CI

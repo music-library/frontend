@@ -12,8 +12,8 @@ bootstrap();
 // Run anything you like, here we get the app version from the package.json + the current commit hash.
 // prettier-ignore
 async function bootstrap() {
-	const gitCommitHash = await core.run(`git rev-parse HEAD`, path, null);
-	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : null;
+	const gitCommitHash = await core.run(`git rev-parse HEAD`, path, '');
+	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : '';
 	const gitBranch = await core.getGitBranch(path);
 	const appVersion = packageJSON?.version;
 	const appName = packageJSON?.name;

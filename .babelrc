@@ -4,5 +4,5 @@
 			"compact": false
 		}
 	},
-	"presets": ["react-app", "@linaria"]
+	"presets": ["react-app", "@wyw-in-js"]
 }
