@@ -41,12 +41,12 @@ test:
 # Release
 #
 release:
-    image: docker:19.03.1
+    image: docker:23.0.6
     stage: build
     only:
         - tags
     services:
-        - name: docker:19.03.1-dind
+        - name: docker:23.0.6-dind
           command: ["--experimental"]
     before_script:
         - apk update && apk add bash && apk add git
