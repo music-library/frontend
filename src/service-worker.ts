@@ -88,17 +88,3 @@ registerRoute(
 		]
 	})
 );
-
-// Cache the last n tracks
-const tracksToCacheRegex = new RegExp(`.*\/audio$`);
-registerRoute(
-	({ url }) => url.pathname.match(tracksToCacheRegex),
-	new CacheFirst({
-		cacheName: "tracks",
-		plugins: [
-			// Ensure that once this runtime cache reaches a maximum size the
-			// least-recently used images are removed.
-			new ExpirationPlugin({ maxEntries: 10 })
-		]
-	})
-);
