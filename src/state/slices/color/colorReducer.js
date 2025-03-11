@@ -16,7 +16,8 @@ const colors = [
 	"#a3a2ff",
 	"#FFFFFF",
 	"#FFE799",
-	"#F8B47C"
+	"#F8B47C",
+	"#3FCE65"
 ];
 
 // Initial state of app
