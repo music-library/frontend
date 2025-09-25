@@ -23,9 +23,9 @@ export function AlbumList() {
 	// #2 Populate albums from filtered array
 	// #3 Create array of Album components to render
 	const albumsBeingRendered = groupTracksIntoAlbums(tracksFiltered).map(
-		(albumId, key) => {
+		(albumId) => {
 			return (
-				<Album albumId={albumId} albumTracks={albumsMap?.[albumId]} key={key} />
+				<Album key={albumId || key} albumId={albumId} albumTracks={albumsMap?.[albumId]}  />
 			);
 		}
 	);

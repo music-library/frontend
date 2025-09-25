@@ -25,9 +25,9 @@ export function TrackList() {
 		(albumId, key) => {
 			return (
 				<TrackAlbum
+					key={albumId || key}
 					albumId={albumId}
 					albumTracks={albumsMap?.[albumId]}
-					key={key}
 				/>
 			);
 		}
