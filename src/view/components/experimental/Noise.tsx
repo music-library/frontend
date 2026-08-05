@@ -37,7 +37,7 @@ export type NoiseProps = {
 };
 
 export type NoiseImgProps = NoiseProps &
-	JSX.IntrinsicElements["div"] & {
+	React.JSX.IntrinsicElements["div"] & {
 		src?: string;
 		imgProps?: ImageProps;
 	};
@@ -62,17 +62,19 @@ export const Noise = ({
 
 		canvasResize(canvas, size);
 
+		const handleResize = () => canvasResize(canvas, size);
 		if (reactToWindowResize) {
-			window.addEventListener("resize", () => canvasResize(canvas, size));
+			window.addEventListener("resize", handleResize);
 		}
 
 		const loopRunning = { current: true }; // Escape loop when unmount
 		const fpsInterval = 1000 / framerate;
 		let then = Date.now();
+		let animationFrame: number;
 
 		(function loop() {
 			if (!canvas || !ctx || !loopRunning.current) return;
-			requestAnimationFrame(loop);
+			animationFrame = requestAnimationFrame(loop);
 
 			const now = Date.now();
 			const elapsed = now - then;
@@ -84,9 +86,12 @@ export const Noise = ({
 
 		return () => {
 			loopRunning.current = false;
-			window.removeEventListener("resize", () => canvasResize(canvas, size));
+			cancelAnimationFrame(animationFrame);
+			if (reactToWindowResize) {
+				window.removeEventListener("resize", handleResize);
+			}
 		};
-	}, [framerate, reactToWindowResize]);
+	}, [alpha, framerate, reactToWindowResize, size]);
 
 	return <canvas ref={$canvas} className={canvas} />;
 };

@@ -7,7 +7,7 @@ export type GridDndItemProps = {
 	id: string;
 	dataItem: any;
 	renderIndex: number;
-	renderWith: (props: any) => JSX.Element;
+	renderWith: (props: any) => React.JSX.Element;
 };
 
 export default function GridDndItem({

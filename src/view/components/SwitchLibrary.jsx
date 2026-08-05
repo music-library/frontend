@@ -1,7 +1,7 @@
 import { css } from "@linaria/core";
 import cx from "classnames";
 import { useLocation } from "react-router-dom";
-import { animated, useTrail } from "react-spring";
+import { animated, useTrail } from "@react-spring/web";
 
 import { useDispatch, useSelector } from "lib/hooks";
 import { switchLibrary } from "state/actions";

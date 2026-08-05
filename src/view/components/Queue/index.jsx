@@ -2,7 +2,7 @@ import { css } from "@linaria/core";
 import cx from "classnames";
 import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { animated, useTrail } from "react-spring";
+import { animated, useTrail } from "@react-spring/web";
 
 import { getNextTrack } from "lib/index";
 import { queueNew } from "state/actions";

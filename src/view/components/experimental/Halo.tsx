@@ -4,7 +4,7 @@ import { isMobile } from "react-device-detect";
 
 import { useEventListener } from "lib/hooks";
 
-export type HaloProps = JSX.IntrinsicElements["div"];
+export type HaloProps = React.JSX.IntrinsicElements["div"];
 export type HaloProvider = {
 	children: React.ReactNode;
 	staticForMobile?: boolean;

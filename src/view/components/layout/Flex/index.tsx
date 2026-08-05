@@ -1,6 +1,6 @@
 import { cx } from "@linaria/core";
 
-export type FlexProps = JSX.IntrinsicElements["div"] & {
+export type FlexProps = React.JSX.IntrinsicElements["div"] & {
 	center?: boolean;
 	grow?: boolean;
 	row?: boolean;

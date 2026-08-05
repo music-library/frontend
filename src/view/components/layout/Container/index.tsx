@@ -1,6 +1,6 @@
 import { css, cx } from "@linaria/core";
 
-export type ContainerProps = JSX.IntrinsicElements["div"] & {
+export type ContainerProps = React.JSX.IntrinsicElements["div"] & {
 	width?: string;
 	padding?: string;
 };

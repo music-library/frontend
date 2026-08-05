@@ -2,7 +2,7 @@ import sha1 from "crypto-js/sha1";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { animated, useSpring } from "react-spring";
+import { animated, useSpring } from "@react-spring/web";
 
 import { useColor } from "lib/hooks";
 import { api } from "lib/index";

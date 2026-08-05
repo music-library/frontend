@@ -2,7 +2,7 @@ import { css } from "@linaria/core";
 
 export type GridDndDragBoxProps = {
 	dataItem: any;
-	renderWith: (props: any) => JSX.Element;
+	renderWith: (props: any) => React.JSX.Element;
 };
 
 /**

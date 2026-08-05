@@ -1,7 +1,7 @@
 import { css } from "@linaria/core";
 import cx from "classnames";
 
-export type GridProps = JSX.IntrinsicElements["div"] & {
+export type GridProps = React.JSX.IntrinsicElements["div"] & {
 	maxWidth?: string | number;
 	minWidth?: string | number;
 	center?: boolean;

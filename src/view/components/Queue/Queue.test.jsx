@@ -30,7 +30,7 @@ vi.mock("state/actions", () => ({
 	queueNew: mocks.queueNew
 }));
 
-vi.mock("react-spring", () => ({
+vi.mock("@react-spring/web", () => ({
 	animated: {
 		div: ({ children }) => <div>{children}</div>
 	},

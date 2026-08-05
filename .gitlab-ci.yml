@@ -15,7 +15,7 @@ variables:
             files:
                 - yarn.lock
         paths:
-            - .npm
+            - .yarn/cache
         policy: pull
 
 #
@@ -23,14 +23,14 @@ variables:
 #
 test:
     stage: test
-    image: node:18-alpine
+    image: node:24-alpine
     extends: .dependencies_cache
     cache:
         policy: pull-push
     before_script:
         - apk update && apk add git bash
-        - yarn add --cached
-        - yarn install
+        - corepack enable
+        - yarn install --immutable
     script:
         - yarn test:coverage
         - unset CI

@@ -1,7 +1,7 @@
 import { css } from "@linaria/core";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { animated, useTrail } from "react-spring";
+import { animated, useTrail } from "@react-spring/web";
 
 import { useColor, useSelector } from "lib/hooks";
 

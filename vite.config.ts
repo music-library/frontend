@@ -1,10 +1,9 @@
 // @ts-nocheck
-import react from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import wyw from "@wyw-in-js/vite";
 import { injectManifest } from "rollup-plugin-workbox";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-
-import linaria from "./config/linaria-rollup";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -18,16 +17,15 @@ export default defineConfig({
 	define: {
 		"process.env": {}
 	},
+	resolve: {
+		tsconfigPaths: true
+	},
 	plugins: [
-		react({
-			// jsxRuntime: "classic",
-			babelrc: true
-		}),
-		tsconfigPaths(),
-		linaria({
+		react(),
+		babel({ presets: [reactCompilerPreset({ compilationMode: "infer" })] }),
+		wyw({
 			sourceMap: isDev,
-			extension: ".scss",
-			preprocessor: "none",
+			preprocessor: "stylis",
 			exclude: ["src/global/**", "**/*.test.{js,jsx,ts,tsx}"],
 			include: ["**/*.{js,jsx,ts,tsx}"]
 		}),

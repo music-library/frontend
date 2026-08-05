@@ -2,7 +2,7 @@ import { css, cx } from "@linaria/core";
 import { MouseEvent, TouchEvent, useCallback, useRef } from "react";
 import { isMobile } from "react-device-detect";
 
-export type RippleProps = JSX.IntrinsicElements["div"] & {
+export type RippleProps = React.JSX.IntrinsicElements["div"] & {
 	hoverBg?: boolean;
 	centered?: boolean;
 	disabled?: boolean;

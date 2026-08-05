@@ -3,14 +3,16 @@
 		"allowJs": true,
 		"checkJs": false,
 		"allowSyntheticDefaultImports": true,
-		"baseUrl": "src",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"jsx": "react-jsx",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
 		"module": "ESNext",
-		"moduleResolution": "Node",
+		"moduleResolution": "Bundler",
+		"paths": {
+			"*": ["./src/*"]
+		},
 		"noEmit": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,

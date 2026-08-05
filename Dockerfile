@@ -1,10 +1,11 @@
 # build environment
-FROM node:18-alpine as build
+FROM node:24-alpine AS build
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 COPY / /app
 RUN apk update && apk add git
-RUN yarn install
+RUN corepack enable
+RUN yarn install --immutable
 RUN yarn build
 
 # production environment

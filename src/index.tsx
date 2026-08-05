@@ -6,6 +6,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 
 import { api } from "lib/index";
 import "lib/styles/index.scss";
+import "react-loading-skeleton/dist/skeleton.css";
 import store from "state/index";
 
 import { HaloProvider } from "view/components";
@@ -17,7 +18,7 @@ import App from "./App";
 // logs all errors
 if (feature("bugcatch")) {
 	bugcatchInit({
-		base_url: api().getUri({ url: `/bugcatch` }),
+		baseUrl: api().getUri({ url: `/bugcatch` }),
 		release: appVersion
 	});
 }

@@ -1,7 +1,7 @@
 import { css, cx } from "@linaria/core";
 import { useState } from "react";
 
-export type ImageProps = JSX.IntrinsicElements["img"] & {
+export type ImageProps = React.JSX.IntrinsicElements["img"] & {
 	/** Maintains image aspect ratio - even when render width/height are fluid */
 	aspectRatioMaintain?: boolean;
 	/** Hides image while loading */

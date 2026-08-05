@@ -1,17 +1,13 @@
 // @ts-nocheck
-import matchers from "@testing-library/jest-dom/matchers";
-import { expect, vi } from "vitest";
+import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
 
 import globalInit from "lib/global/index";
 
 globalInit();
-expect.extend(matchers);
-
 vi.mock("@anephenix/sarus", () => ({
-	default: vi.fn(() => {
-		return {
-			on: vi.fn(),
-			off: vi.fn()
-		};
+	default: vi.fn(function SarusMock() {
+		this.on = vi.fn();
+		this.off = vi.fn();
 	})
 }));
