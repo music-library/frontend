@@ -31,7 +31,7 @@ const initialState = {
 			isMute: false,
 			volume: isMobile
 				? 100
-				: parseJSON(localStorage.getItem("volume")) || 50
+				: parseJSON(localStorage.getItem("volume")) ?? 50
 		},
 		index: -1,
 		track: {
