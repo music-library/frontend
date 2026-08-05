@@ -11,7 +11,9 @@ export function TrackList() {
 	const filter = useSelector((state) => state.music.filter);
 	const filteredData = useSelector((state) => state.music.filteredData);
 	const albumsMap = useSelector((state) => state.music.albumsMap);
-	const isLoading = tracks.isFetching || tracks.didError;
+	const isFetching = useSelector((state) => state.music.isFetching);
+	const didError = useSelector((state) => state.music.didError);
+	const isLoading = isFetching || didError;
 
 	// Use pre-filtered tracks.data if tags applied
 	const tracksData = filter.tags.length > 0 ? filteredData : tracks;
