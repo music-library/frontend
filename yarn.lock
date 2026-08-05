@@ -3199,6 +3199,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/react-virtual@npm:^3.14.8":
+  version: 3.14.9
+  resolution: "@tanstack/react-virtual@npm:3.14.9"
+  dependencies:
+    "@tanstack/virtual-core": 3.17.7
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 9ccaf3fb058be3c175c980be8097d166db305d6b995ee8fa2b93a3e26ebd8ecb38be7af865d518d7b38797d22647301628df0062eb282566157381360221b5cd
+  languageName: node
+  linkType: hard
+
+"@tanstack/virtual-core@npm:3.17.7":
+  version: 3.17.7
+  resolution: "@tanstack/virtual-core@npm:3.17.7"
+  checksum: 1f364505c96295bf32a7d96e3149e431bc240764741e2e7b4e2600700eb13e39395b8deb1ed8a62ab32298e62d088187c28df57d138dd749f642c0a0cade281c
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^8.5.0":
   version: 8.20.1
   resolution: "@testing-library/dom@npm:8.20.1"
@@ -4308,9 +4327,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001503, caniuse-lite@npm:^1.0.30001541, caniuse-lite@npm:^1.0.30001565":
-  version: 1.0.30001745
-  resolution: "caniuse-lite@npm:1.0.30001745"
-  checksum: a018bfbf6eda6e2728184cd39f3d0438cea04011893664fc7de19568d8e6f26cbc09e59460137bb2f4e792d1cdb7f1a48ad35f31a1c1388c1d7f74b3c889d35b
+  version: 1.0.30001806
+  resolution: "caniuse-lite@npm:1.0.30001806"
+  checksum: 4b4a970fbd7cb7b8ee6b5068336f7afa7d9cc65ff444080630ab363dcb44205994f68897c7685dc3de4f04dd1f65ec395e50790a594d0470db4894bedf5cb379
   languageName: node
   linkType: hard
 
@@ -6934,6 +6953,7 @@ __metadata:
     "@linaria/react": 6.0.0
     "@reduxjs/toolkit": ^1.9.7
     "@rollup/pluginutils": ^5.0.5
+    "@tanstack/react-virtual": ^3.14.8
     "@testing-library/jest-dom": ^5.16.5
     "@testing-library/react": ^13.4.0
     "@testing-library/react-hooks": ^8.0.1
