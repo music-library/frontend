@@ -108,6 +108,9 @@ function LoadingAlbumGrid() {
 }
 
 function VirtualAlbumGrid({ albumIds, albumsMap }) {
+	"use no memo";
+	// TanStack Virtual mutates a stable virtualizer instance as the visible range changes.
+	// React Compiler must not cache render-time reads from that instance.
 	const gridRef = useRef(null);
 	const location = useLocation();
 	const navigationType = useNavigationType();

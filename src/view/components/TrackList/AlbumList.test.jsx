@@ -1,7 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import React, { useEffect } from "react";
+import {
+	act,
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor
+} from "@testing-library/react";
+import React, { useEffect, useReducer } from "react";
 import { Provider } from "react-redux";
 import { Link, MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -161,6 +168,56 @@ describe("responsive album rows", () => {
 			"album-4",
 			"album-5"
 		]);
+	});
+
+	test("updates albums when a stable virtualizer changes its visible rows", async () => {
+		let virtualItems = [
+			{
+				end: 300,
+				index: 0,
+				key: "row-0",
+				size: 300,
+				start: 0
+			}
+		];
+		const virtualizer = createVirtualizer();
+		virtualizer.getVirtualItems.mockImplementation(() => virtualItems);
+		let updateVirtualItems;
+
+		useWindowVirtualizer.mockImplementation(() => {
+			const [, rerender] = useReducer((count) => count + 1, 0);
+			updateVirtualItems = (nextVirtualItems) => {
+				virtualItems = nextVirtualItems;
+				rerender();
+			};
+			return virtualizer;
+		});
+
+		renderAlbumList();
+
+		expect(screen.getAllByTestId("album").map((album) => album.textContent)).toEqual([
+			"album-0",
+			"album-1",
+			"album-2"
+		]);
+
+		act(() => {
+			updateVirtualItems([
+				{
+					end: 900,
+					index: 2,
+					key: "row-2",
+					size: 300,
+					start: 600
+				}
+			]);
+		});
+
+		await waitFor(() => {
+			expect(
+				screen.getAllByTestId("album").map((album) => album.textContent)
+			).toEqual(["album-6", "album-7", "album-8"]);
+		});
 	});
 
 	test("scopes block layout to the virtualized Albums grid", () => {
