@@ -49,15 +49,15 @@ export const trackStatUpdate = (trackIndex) => (dispatch) => {
 /*
  * Remove a track from the Queue
  */
-export const queueRemove = (trackIndex) => (dispatch) => {
-	dispatch({ type: QUEUE_REMOVE, payload: trackIndex });
+export const queueRemove = (trackId) => (dispatch) => {
+	dispatch({ type: QUEUE_REMOVE, payload: trackId });
 };
 
 /*
  * Queue a track for future playback
  */
-export const queuePush = (trackIndex) => (dispatch) => {
-	dispatch({ type: QUEUE_PUSH, payload: trackIndex });
+export const queuePush = (trackId) => (dispatch) => {
+	dispatch({ type: QUEUE_PUSH, payload: trackId });
 };
 
 /*

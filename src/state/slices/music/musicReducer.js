@@ -16,7 +16,15 @@ export const FILTER_TOGGLE_TAG = "FILTER_TOGGLE_TAG";
 export const FILTER_RESET_TAGS = "FILTER_RESET_TAGS";
 
 const initialSelectedLibrary = localStorage.getItem("library/selected") || "main";
-const getQueue = (library = initialSelectedLibrary) => parseJSON(localStorage.getItem(`queue/${library}`)) || [];
+const getQueueStorageKey = (library) => `queue/v2/${library}`;
+const isTrackId = (trackId) => typeof trackId === "string" && trackId.length > 0;
+const getQueue = (library = initialSelectedLibrary) => {
+	const queue = parseJSON(localStorage.getItem(getQueueStorageKey(library)));
+	return Array.isArray(queue) ? queue.filter(isTrackId) : [];
+};
+const persistQueue = (library, queue) => {
+	localStorage.setItem(getQueueStorageKey(library), JSON.stringify(queue));
+};
 
 // Initial state of app
 const initialState = {
@@ -29,7 +37,7 @@ const initialState = {
 			"name": "Main"
 		}],
 	},
-	queue: getQueue(initialSelectedLibrary), // [45, 49, 71, 94],
+	queue: getQueue(initialSelectedLibrary),
 	filter: {
 		tags: [],
 		search: ""
@@ -81,8 +89,14 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case LIBRARY_FETCH_SUCCESS:
+			const tracksMap = action.payload?.tracks_map || {};
+			const validQueue = state.queue.filter((trackId) => (
+				Object.prototype.hasOwnProperty.call(tracksMap, trackId)
+			));
+
 			try {
 				localStorage.setItem("library/options", JSON.stringify(action.payload?.libraries));
+				persistQueue(state.library.selected, validQueue);
 
 				if (!localStorage.getItem("library/selected")) {
 					localStorage.setItem("library/selected", action.payload?.libraries?.[0].id || "main");
@@ -100,7 +114,8 @@ const musicReducer = (state = initialState, action) => {
 					options: action.payload?.libraries,
 				},
 				tracks: action.payload?.tracks,
-				tracksMap: action.payload?.tracks_map,
+				queue: validQueue,
+				tracksMap,
 				albumsMap: action.payload?.albums,
 				decades: action.payload?.decades,
 				genres: action.payload?.genres,
@@ -133,37 +148,32 @@ const musicReducer = (state = initialState, action) => {
 			};
 
 		case QUEUE_REMOVE:
-			localStorage.setItem(`queue/${state.library.selected}`, JSON.stringify([
-				...state.queue.filter(
-					// Remove the track from the queue
-					(track) => track !== action.payload
-				)
-			]));
+			const queueWithoutTrack = state.queue.filter(
+				(trackId) => trackId !== action.payload
+			);
+			persistQueue(state.library.selected, queueWithoutTrack);
 
 			return {
 				...state,
-				queue: [
-					...state.queue.filter(
-						// Remove the track from the queue
-						(track) => track !== action.payload
-					)
-				]
+				queue: queueWithoutTrack
 			};
 
 		case QUEUE_PUSH:
-			localStorage.setItem(`queue/${state.library.selected}`, JSON.stringify([...state.queue, action.payload]));
+			const queueWithTrack = [...state.queue, action.payload];
+			persistQueue(state.library.selected, queueWithTrack);
 
 			return {
 				...state,
-				queue: [...state.queue, action.payload]
+				queue: queueWithTrack
 			};
 
 		case QUEUE_NEW:
-			localStorage.setItem(`queue/${state.library.selected}`, JSON.stringify([...action.payload]));
+			const newQueue = action.payload.filter(isTrackId);
+			persistQueue(state.library.selected, newQueue);
 
 			return {
 				...state,
-				queue: [...action.payload]
+				queue: newQueue
 			};
 
 		case UPDATE_USER_SEARCH:

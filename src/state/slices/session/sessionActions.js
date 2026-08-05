@@ -27,7 +27,8 @@ const playTrackHelper = (dispatch, state, trackIndex) => {
 export const playTrack = (trackIndex) => (dispatch, getState) => {
 	const state = getState();
 	const queue = state.music.queue;
-	const queueIndexOfTrack = queue?.indexOf(trackIndex);
+	const trackId = state.music.tracks?.[trackIndex]?.id;
+	const queueIndexOfTrack = queue?.indexOf(trackId);
 
 	// If track is in the queue, remove it
 	if (queue?.length > 0 && queueIndexOfTrack !== -1) {
@@ -73,9 +74,18 @@ export const playNextTrack = (trackIndex) => (dispatch, getState) => {
 	// Check if there is a queue (serve queue first)
 	if (queue.length > 0) {
 		const newQueue = [...queue];
-		const newIndex = newQueue.shift();
+		let queuedTrackIndex;
+
+		while (newQueue.length > 0 && queuedTrackIndex == null) {
+			const trackId = newQueue.shift();
+			queuedTrackIndex = state.music.tracksMap?.[trackId];
+		}
+
 		dispatch({ type: QUEUE_NEW, payload: newQueue });
-		return playTrackHelper(dispatch, state, newIndex);
+
+		if (queuedTrackIndex != null) {
+			return playTrackHelper(dispatch, state, queuedTrackIndex);
+		}
 	}
 
 	playTrackHelper(dispatch, state, getNextTrack(trackIndex));

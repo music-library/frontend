@@ -16,7 +16,7 @@ export function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
 	const playingId = useSelector((state) => state.session.playing.track.id);
 	const playingDidError = useSelector((state) => state.session.playing.didError);
-	const queuePosition = useSelector((state) => state.music.queue.indexOf(index));
+	const queuePosition = useSelector((state) => state.music.queue.indexOf(track?.id));
 
 	// Hide if track doesn't exist
 	if (!track && hideIfNonExistent) return null;
@@ -38,9 +38,9 @@ export function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
 		e.preventDefault();
 		e.stopPropagation();
 		if (queuePosition === -1) {
-			dispatch(queuePush(index));
+			dispatch(queuePush(track.id));
 		} else {
-			dispatch(queueRemove(index));
+			dispatch(queueRemove(track.id));
 		}
 	};
 

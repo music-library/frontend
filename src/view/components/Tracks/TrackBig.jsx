@@ -23,7 +23,7 @@ export function TrackBig({
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
 	const playingIndex = useSelector((state) => state.session.playing.index);
 	const playingDidError = useSelector((state) => state.session.playing.didError);
-	const queuePosition = useSelector((state) => state.music.queue.indexOf(index));
+	const queuePosition = useSelector((state) => state.music.queue.indexOf(track?.id));
 
 	// Hide if track doesn't exist
 	if (!track && hideIfNonExistent) return null;
@@ -60,9 +60,9 @@ export function TrackBig({
 		e.preventDefault();
 		e.stopPropagation();
 		if (queuePosition === -1) {
-			dispatch(queuePush(index));
+			dispatch(queuePush(track.id));
 		} else {
-			dispatch(queueRemove(index));
+			dispatch(queueRemove(track.id));
 		}
 	};
 

@@ -12,38 +12,37 @@ import { Grid, GridDnd, TrackBig } from "view/components";
 export function Queue({ className, ...props }) {
 	const dispatch = useDispatch();
 	const queue = useSelector((state) => state.music.queue);
+	const tracksMap = useSelector((state) => state.music.tracksMap);
 	const isFetching = useSelector((state) => state.music.isFetching);
 	const playingIndex = useSelector((state) => state.session.playing.index);
 
-	const newQueue = queue.map((trackId) => ({
-		id: String(trackId)
-	}));
+	const newQueue = queue.map((trackId) => ({ id: trackId }));
 
 	const setNewQueue = (newNewQueue) => {
-		dispatch(queueNew(newNewQueue(newQueue).map((track) => Number(track.id))));
+		dispatch(queueNew(newNewQueue(newQueue).map((track) => track.id)));
 	};
 
 	// Array of the next five track indexes to play after the final queue track
 	const nextQueueItems = useMemo(() => {
 		const arr = [];
+		if (isFetching) return arr;
+
+		const lastQueuedTrackId = [...queue].reverse().find((trackId) => (
+			Object.prototype.hasOwnProperty.call(tracksMap, trackId)
+		));
+		let index = lastQueuedTrackId == null
+			? playingIndex
+			: tracksMap[lastQueuedTrackId];
+
+		if (index == null || index < 0) return arr;
 
 		for (let i = 0; i < 5; i++) {
-			const index = queue?.length ? queue?.[queue?.length - 1] : playingIndex;
-
-			// If the next track index is larger than the track list (the last track in the redux tracks array),
-			// then the next track index is 0. `getNextTrack` will always give `0`, even if it's 2+ over the limit.
-			// The following checks and amends the correct track after `0`.
-			for (let count = 0; count < i + 1; count++) {
-				if (count === 0) {
-					arr.push(getNextTrack(index));
-					continue;
-				}
-				arr[arr?.length - 1] = getNextTrack(arr[arr?.length - 1]);
-			}
+			index = getNextTrack(index);
+			arr.push(index);
 		}
 
 		return arr;
-	}, [queue, playingIndex, isFetching]);
+	}, [queue, tracksMap, playingIndex, isFetching]);
 
 	const trail = useTrail(queue?.length + nextQueueItems?.length, {
 		from: { opacity: 0, y: 20 },
@@ -63,9 +62,10 @@ export function Queue({ className, ...props }) {
 				setData={setNewQueue}
 				renderWith={(props) => (
 					<TrackBig
-						index={Number(props?.id)}
+						index={tracksMap?.[props?.id]}
 						className={queueTrack}
 						size="big"
+						hideIfNonExistent={true}
 						{...props}
 					/>
 				)}
@@ -82,7 +82,7 @@ export function Queue({ className, ...props }) {
 				<Grid gutter={5} minWidth={"100%"} maxWidth={"1fr"}>
 					{trail.slice(queue?.length).map((props, index) => {
 						const trackIndex = nextQueueItems?.[index];
-						if (!trackIndex) return null;
+						if (trackIndex == null) return null;
 
 						return (
 							<animated.div key={trackIndex + index} style={props}>
