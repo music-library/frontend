@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import { cleanup, render, screen } from "@testing-library/react";
-import React from "react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import React, { useEffect } from "react";
 import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router-dom";
+import { Link, MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import RandomSelection from "../RandomSelection";
@@ -11,7 +11,8 @@ import AlbumList from "./AlbumList";
 import {
 	albumScrollRestorations,
 	getAlbumScrollRestoration,
-	groupAlbumIdsIntoRows
+	groupAlbumIdsIntoRows,
+	rememberAlbumScroll
 } from "./AlbumList.utils";
 
 vi.mock("@tanstack/react-virtual", () => ({
@@ -19,10 +20,21 @@ vi.mock("@tanstack/react-virtual", () => ({
 }));
 
 vi.mock("../Tracks/Album", () => ({
-	default: ({ albumId }) => <div data-testid="album">{albumId}</div>
+	default: ({ albumId, onNavigate }) => (
+		<Link
+			data-testid="album"
+			onClick={() => {
+				if (albumId) onNavigate?.();
+			}}
+			to={albumId ? `/albums/${albumId}` : "#"}
+		>
+			{albumId}
+		</Link>
+	)
 }));
 
 const albumIds = [...Array(12)].map((x, index) => `album-${index}`);
+const originalScrollY = Object.getOwnPropertyDescriptor(window, "scrollY");
 
 const createState = () => ({
 	music: {
@@ -55,6 +67,17 @@ const createState = () => ({
 	}
 });
 
+const measuredRows = [
+	{
+		end: 600,
+		index: 1,
+		key: "row-1",
+		lane: 0,
+		size: 300,
+		start: 300
+	}
+];
+
 const createVirtualizer = () => ({
 	getTotalSize: vi.fn(() => 1200),
 	getVirtualItems: vi.fn(() => [
@@ -69,24 +92,34 @@ const createVirtualizer = () => ({
 	measure: vi.fn(),
 	measureElement: vi.fn(),
 	scrollOffset: 350,
-	scrollToIndex: vi.fn(),
-	scrollToOffset: vi.fn(),
-	takeSnapshot: vi.fn(() => [])
+	scrollToIndex: vi.fn((index) => window.scrollTo(0, index * 300)),
+	scrollToOffset: vi.fn((offset) => window.scrollTo(0, offset)),
+	takeSnapshot: vi.fn(() => measuredRows)
 });
 
-const renderWithState = (ui) => {
+const renderWithState = (ui, routerProps = {}) => {
 	const store = configureStore({
 		reducer: () => createState()
 	});
 
 	return render(
 		<Provider store={store}>
-			<MemoryRouter>{ui}</MemoryRouter>
+			<MemoryRouter {...routerProps}>{ui}</MemoryRouter>
 		</Provider>
 	);
 };
 
 const renderAlbumList = () => renderWithState(<AlbumList />);
+
+function AlbumDetailRoute() {
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, []);
+
+	return <button onClick={() => navigate(-1)}>Back</button>;
+}
 
 beforeEach(() => {
 	albumScrollRestorations.clear();
@@ -95,7 +128,9 @@ beforeEach(() => {
 
 afterEach(() => {
 	cleanup();
+	vi.restoreAllMocks();
 	vi.clearAllMocks();
+	Object.defineProperty(window, "scrollY", originalScrollY);
 });
 
 describe("responsive album rows", () => {
@@ -168,6 +203,125 @@ describe("album scroll restoration", () => {
 				viewportWidth: 1024
 			})
 		).toEqual({ mode: "offset", offset: 1800 });
+	});
+
+	test("captures before album navigation and restores through Strict Mode cleanup", async () => {
+		let scrollY = 0;
+		const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation((x, y) => {
+			scrollY = typeof x === "object" ? x.top : y;
+		});
+		vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+			callback();
+			return 1;
+		});
+		vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+		vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+			() => ({
+				bottom: 1440 - scrollY,
+				height: 1200,
+				left: 0,
+				right: 900,
+				top: 240 - scrollY,
+				width: 900,
+				x: 0,
+				y: 240 - scrollY,
+				toJSON: () => ({})
+			})
+		);
+		Object.defineProperty(window, "scrollY", {
+			configurable: true,
+			get: () => scrollY
+		});
+
+		renderWithState(
+			<React.StrictMode>
+				<Routes>
+					<Route path="/albums" element={<AlbumList />} />
+					<Route path="/albums/:id" element={<AlbumDetailRoute />} />
+				</Routes>
+			</React.StrictMode>,
+			{
+				initialEntries: [{ key: "albums-entry", pathname: "/albums" }]
+			}
+		);
+
+		scrollY = 350;
+		fireEvent.click(screen.getByText("album-3"), { button: 0 });
+
+		expect(scrollY).toBe(0);
+		expect(albumScrollRestorations.get("albums-entry")).toEqual(
+			expect.objectContaining({
+				measurements: measuredRows,
+				scrollOffset: 350
+			})
+		);
+
+		fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+		await waitFor(() => {
+			expect(useWindowVirtualizer).toHaveBeenLastCalledWith(
+				expect.objectContaining({
+					initialMeasurementsCache: measuredRows,
+					initialOffset: 350
+				})
+			);
+			expect(scrollY).toBe(350);
+		});
+
+		expect(scrollTo).toHaveBeenCalledWith(0, 0);
+	});
+
+	test("applies an anchor's intra-row offset before animation-frame reconciliation", async () => {
+		let scrollY = 0;
+		vi.spyOn(window, "scrollTo").mockImplementation((x, y) => {
+			scrollY = typeof x === "object" ? x.top : y;
+		});
+		vi.spyOn(window, "scrollBy").mockImplementation((x, y) => {
+			scrollY += typeof x === "object" ? x.top : y;
+		});
+		vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 1);
+		vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {});
+		vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+			() => ({
+				bottom: 1440 - scrollY,
+				height: 1200,
+				left: 0,
+				right: 900,
+				top: 240 - scrollY,
+				width: 900,
+				x: 0,
+				y: 240 - scrollY,
+				toJSON: () => ({})
+			})
+		);
+		Object.defineProperty(window, "scrollY", {
+			configurable: true,
+			get: () => scrollY
+		});
+		rememberAlbumScroll("albums-entry", {
+			albumIds,
+			anchorAlbumId: "album-3",
+			anchorAlbumIndex: 3,
+			columns: 3,
+			measurements: measuredRows,
+			offsetTop: 240,
+			offsetWithinRow: 50,
+			scrollOffset: 350,
+			viewportWidth: window.innerWidth,
+			width: 800
+		});
+
+		renderWithState(<AlbumList />, {
+			initialEntries: [{ key: "albums-entry", pathname: "/albums" }]
+		});
+
+		await waitFor(() => expect(scrollY).toBe(350));
+		expect(
+			useWindowVirtualizer.mock.results.at(-1).value.scrollToIndex
+		).toHaveBeenCalledWith(1, {
+			align: "start",
+			behavior: "auto"
+		});
 	});
 
 	test("starts at the top for a fresh navigation", () => {

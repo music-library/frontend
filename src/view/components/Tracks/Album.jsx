@@ -10,7 +10,7 @@ import { playTrack, playingTrackIsPaused } from "state/actions";
 
 import { Icon, Image } from "view/components";
 
-export function Album({ albumId = false, albumTracks = [] }) {
+export function Album({ albumId = false, albumTracks = [], onNavigate }) {
 	const dispatch = useDispatch();
 	const color = useColor();
 
@@ -42,7 +42,21 @@ export function Album({ albumId = false, albumTracks = [] }) {
 
 	// Goto album url
 	const handleAlbumClick = (e) => {
-		if (!albumId) e.preventDefault();
+		if (!albumId) {
+			e.preventDefault();
+			return;
+		}
+
+		const target = e.currentTarget.getAttribute("target");
+		const isSameTabNavigation =
+			e.button === 0 &&
+			(!target || target === "_self") &&
+			!e.metaKey &&
+			!e.altKey &&
+			!e.ctrlKey &&
+			!e.shiftKey;
+
+		if (isSameTabNavigation) onNavigate?.();
 	};
 
 	// Action button handler

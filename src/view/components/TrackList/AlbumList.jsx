@@ -148,6 +148,7 @@ function VirtualAlbumGrid({ albumIds, albumsMap }) {
 	});
 
 	const latestState = useRef(null);
+	const capturedBeforeNavigation = useRef(false);
 	useLayoutEffect(() => {
 		latestState.current = {
 			albumIds,
@@ -191,13 +192,16 @@ function VirtualAlbumGrid({ albumIds, albumsMap }) {
 				rowVirtualizer.scrollToOffset(restoration.offset, { behavior: "auto" });
 			});
 		} else if (restoration.mode === "anchor") {
-			rowVirtualizer.scrollToIndex(restoration.rowIndex, {
-				align: "start",
-				behavior: "auto"
-			});
-			animationFrame = window.requestAnimationFrame(() => {
+			const restoreAnchor = () => {
+				rowVirtualizer.scrollToIndex(restoration.rowIndex, {
+					align: "start",
+					behavior: "auto"
+				});
 				window.scrollBy(0, restoration.offsetWithinRow);
-			});
+			};
+
+			restoreAnchor();
+			animationFrame = window.requestAnimationFrame(restoreAnchor);
 		} else {
 			window.scrollTo(0, 0);
 		}
@@ -224,36 +228,46 @@ function VirtualAlbumGrid({ albumIds, albumsMap }) {
 		rowVirtualizer.scrollToOffset(0, { behavior: "auto" });
 	}, [albumIds, location.key, rowVirtualizer]);
 
+	const captureScrollRestoration = useCallback(() => {
+		const current = latestState.current;
+		if (!current || current.albumIds.length === 0) return false;
+
+		const scrollOffset = window.scrollY;
+		const virtualRows = current.rowVirtualizer.getVirtualItems();
+		const anchorRow =
+			virtualRows.find((row) => row.end > scrollOffset) ||
+			virtualRows[virtualRows.length - 1];
+		const anchorRowIndex = anchorRow?.index || 0;
+		const anchorAlbumIndex = Math.min(
+			anchorRowIndex * current.columns,
+			current.albumIds.length - 1
+		);
+
+		rememberAlbumScroll(location.key, {
+			albumIds: [...current.albumIds],
+			anchorAlbumId: current.albumIds[anchorAlbumIndex],
+			anchorAlbumIndex,
+			columns: current.columns,
+			measurements: current.rowVirtualizer.takeSnapshot(),
+			offsetTop: current.offsetTop,
+			offsetWithinRow: anchorRow ? scrollOffset - anchorRow.start : 0,
+			scrollOffset,
+			viewportWidth: window.innerWidth,
+			width: current.width
+		});
+
+		return true;
+	}, [location.key]);
+
+	const captureBeforeAlbumNavigation = useCallback(() => {
+		capturedBeforeNavigation.current = captureScrollRestoration();
+	}, [captureScrollRestoration]);
+
 	useEffect(() => {
 		return () => {
-			const current = latestState.current;
-			if (!current || current.albumIds.length === 0) return;
-
-			const scrollOffset = window.scrollY;
-			const virtualRows = current.rowVirtualizer.getVirtualItems();
-			const anchorRow =
-				virtualRows.find((row) => row.end > scrollOffset) ||
-				virtualRows[virtualRows.length - 1];
-			const anchorRowIndex = anchorRow?.index || 0;
-			const anchorAlbumIndex = Math.min(
-				anchorRowIndex * current.columns,
-				current.albumIds.length - 1
-			);
-
-			rememberAlbumScroll(location.key, {
-				albumIds: [...current.albumIds],
-				anchorAlbumId: current.albumIds[anchorAlbumIndex],
-				anchorAlbumIndex,
-				columns: current.columns,
-				measurements: current.rowVirtualizer.takeSnapshot(),
-				offsetTop: current.offsetTop,
-				offsetWithinRow: anchorRow ? scrollOffset - anchorRow.start : 0,
-				scrollOffset,
-				viewportWidth: window.innerWidth,
-				width: current.width
-			});
+			if (!capturedBeforeNavigation.current) captureScrollRestoration();
 		};
-	}, [location.key]);
+	}, [captureScrollRestoration]);
 
 	return (
 		<div
@@ -279,6 +293,7 @@ function VirtualAlbumGrid({ albumIds, albumsMap }) {
 								albumId={albumId}
 								albumTracks={albumsMap?.[albumId]}
 								key={albumId}
+								onNavigate={captureBeforeAlbumNavigation}
 							/>
 						))}
 					</div>
