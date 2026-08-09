@@ -1,13 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { useWindowVirtualizer } from "@tanstack/react-virtual";
-import {
-	act,
-	cleanup,
-	fireEvent,
-	render,
-	screen,
-	waitFor
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React, { useEffect, useReducer } from "react";
 import { Provider } from "react-redux";
 import { Link, MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
@@ -48,7 +41,9 @@ const createState = () => ({
 		tracks: albumIds.map((albumId, index) => ({
 			id: `track-${index}`,
 			id_album: albumId,
-			metadata: {}
+			metadata: {
+				title: `Track ${index}`
+			}
 		})),
 		filter: {
 			tags: [],
@@ -104,17 +99,34 @@ const createVirtualizer = () => ({
 	takeSnapshot: vi.fn(() => measuredRows)
 });
 
-const renderWithState = (ui, routerProps = {}) => {
+const renderWithState = (ui, routerProps = {}, reducer = () => createState()) => {
 	const store = configureStore({
-		reducer: () => createState()
+		reducer
 	});
 
-	return render(
-		<Provider store={store}>
-			<MemoryRouter {...routerProps}>{ui}</MemoryRouter>
-		</Provider>
-	);
+	return {
+		store,
+		...render(
+			<Provider store={store}>
+				<MemoryRouter {...routerProps}>{ui}</MemoryRouter>
+			</Provider>
+		)
+	};
 };
+
+const createUpdatableStateReducer =
+	() =>
+	(state = createState(), action) => {
+		if (action.type !== "test/update-music") return state;
+
+		return {
+			...state,
+			music: {
+				...state.music,
+				...action.payload
+			}
+		};
+	};
 
 const renderAlbumList = () => renderWithState(<AlbumList />);
 
@@ -443,5 +455,116 @@ describe("album scroll restoration", () => {
 				viewportWidth: 700
 			})
 		).toEqual({ mode: "top" });
+	});
+});
+
+describe("album filter scrolling", () => {
+	const setWindowScrollPosition = (initialScrollY) => {
+		let scrollY = initialScrollY;
+		const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation((x, y) => {
+			scrollY = typeof x === "object" ? x.top : y;
+		});
+		Object.defineProperty(window, "scrollY", {
+			configurable: true,
+			get: () => scrollY
+		});
+
+		return {
+			getScrollY: () => scrollY,
+			scrollTo
+		};
+	};
+
+	test("preserves the window offset when tags are selected and reset", async () => {
+		const virtualizer = createVirtualizer();
+		useWindowVirtualizer.mockReturnValue(virtualizer);
+		const { getScrollY, scrollTo } = setWindowScrollPosition(0);
+		const { store } = renderWithState(
+			<AlbumList />,
+			{},
+			createUpdatableStateReducer()
+		);
+		const rockTracks = createState()
+			.music.tracks.slice(0, 6)
+			.map((track) => ({
+				...track,
+				metadata: {
+					...track.metadata,
+					genre: "Rock"
+				}
+			}));
+
+		window.scrollTo(0, 350);
+		scrollTo.mockClear();
+		virtualizer.scrollToOffset.mockClear();
+
+		act(() => {
+			store.dispatch({
+				type: "test/update-music",
+				payload: {
+					filter: { search: "", tags: ["Rock"] },
+					filteredData: rockTracks
+				}
+			});
+		});
+
+		await waitFor(() => expect(virtualizer.measure).toHaveBeenCalledTimes(1));
+		expect(virtualizer.scrollToOffset).not.toHaveBeenCalled();
+		expect(scrollTo).not.toHaveBeenCalled();
+		expect(getScrollY()).toBe(350);
+
+		act(() => {
+			store.dispatch({
+				type: "test/update-music",
+				payload: {
+					filter: { search: "", tags: [] },
+					filteredData: []
+				}
+			});
+		});
+
+		await waitFor(() => expect(virtualizer.measure).toHaveBeenCalledTimes(2));
+		expect(virtualizer.scrollToOffset).not.toHaveBeenCalled();
+		expect(scrollTo).not.toHaveBeenCalled();
+		expect(getScrollY()).toBe(350);
+	});
+
+	test("resets the window offset when search changes the albums", async () => {
+		const virtualizer = createVirtualizer();
+		virtualizer.getVirtualItems.mockReturnValue([
+			{
+				end: 300,
+				index: 0,
+				key: "row-0",
+				size: 300,
+				start: 0
+			}
+		]);
+		useWindowVirtualizer.mockReturnValue(virtualizer);
+		const { getScrollY } = setWindowScrollPosition(0);
+		const { store } = renderWithState(
+			<AlbumList />,
+			{},
+			createUpdatableStateReducer()
+		);
+
+		window.scrollTo(0, 350);
+		virtualizer.scrollToOffset.mockClear();
+
+		act(() => {
+			store.dispatch({
+				type: "test/update-music",
+				payload: {
+					filter: { search: "0", tags: [] }
+				}
+			});
+		});
+
+		await waitFor(() => {
+			expect(virtualizer.scrollToOffset).toHaveBeenCalledWith(0, {
+				behavior: "auto"
+			});
+		});
+		expect(getScrollY()).toBe(0);
 	});
 });

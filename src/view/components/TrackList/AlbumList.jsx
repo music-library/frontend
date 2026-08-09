@@ -25,6 +25,9 @@ const ALBUM_GRID_COLUMNS_PROPERTY = "--album-grid-columns";
 const ALBUM_ROW_GAP = 10;
 const ALBUM_METADATA_HEIGHT_ESTIMATE = 74;
 
+const tagsAreEqual = (left = [], right = []) =>
+	left.length === right.length && left.every((tag, index) => tag === right[index]);
+
 const estimateAlbumRowHeight = (gridWidth, columns) => {
 	if (gridWidth <= 0) return 320;
 
@@ -107,7 +110,7 @@ function LoadingAlbumGrid() {
 	);
 }
 
-function VirtualAlbumGrid({ albumIds, albumsMap }) {
+function VirtualAlbumGrid({ albumIds, albumsMap, selectedTags }) {
 	"use no memo";
 	// TanStack Virtual mutates a stable virtualizer instance as the visible range changes.
 	// React Compiler must not cache render-time reads from that instance.
@@ -221,15 +224,21 @@ function VirtualAlbumGrid({ albumIds, albumsMap }) {
 		width
 	]);
 
-	const previousAlbumIds = useRef(albumIds);
+	const previousListState = useRef({ albumIds, selectedTags });
 	useEffect(() => {
-		if (albumIdsAreEqual(previousAlbumIds.current, albumIds)) return;
+		const previous = previousListState.current;
+		const albumIdsChanged = !albumIdsAreEqual(previous.albumIds, albumIds);
+		const selectedTagsChanged = !tagsAreEqual(previous.selectedTags, selectedTags);
 
-		previousAlbumIds.current = albumIds;
+		previousListState.current = { albumIds, selectedTags };
+		if (!albumIdsChanged) return;
+
 		albumScrollRestorations.delete(location.key);
 		rowVirtualizer.measure();
-		rowVirtualizer.scrollToOffset(0, { behavior: "auto" });
-	}, [albumIds, location.key, rowVirtualizer]);
+		if (!selectedTagsChanged) {
+			rowVirtualizer.scrollToOffset(0, { behavior: "auto" });
+		}
+	}, [albumIds, location.key, rowVirtualizer, selectedTags]);
 
 	const captureScrollRestoration = useCallback(() => {
 		const current = latestState.current;
@@ -323,7 +332,13 @@ export function AlbumList() {
 
 	if (isLoading) return <LoadingAlbumGrid />;
 
-	return <VirtualAlbumGrid albumIds={albumIds} albumsMap={albumsMap} />;
+	return (
+		<VirtualAlbumGrid
+			albumIds={albumIds}
+			albumsMap={albumsMap}
+			selectedTags={filter.tags}
+		/>
+	);
 }
 
 export default AlbumList;
