@@ -5,6 +5,7 @@ import { parseJSON } from "lib/strings";
 export const SESSION_PLAY_TRACK = "SESSION_PLAY_TRACK";
 export const SESSION_PLAYING_TOGGLE = "SESSION_PLAYING_TOGGLE";
 export const SESSION_TRACK_ERROR = "SESSION_TRACK_ERROR";
+export const SESSION_PLAYBACK_FAILURE = "SESSION_PLAYBACK_FAILURE";
 export const SESSION_PLAYING_UPDATE_STATUS = "SESSION_PLAYING_UPDATE_STATUS";
 export const SESSION_PLAYING_AUDIO_REF = "SESSION_PLAYING_AUDIO_REF";
 export const SESSION_VOLUME = "SESSION_VOLUME";
@@ -24,6 +25,7 @@ const initialState = {
 	playing: {
 		audioRef: {},
 		didError: false,
+		playbackFailure: null,
 		isPaused: true,
 		status: {
 			duration: null,
@@ -51,6 +53,7 @@ const sessionReducer = (state = initialState, action) => {
 				playing: {
 					...state.playing,
 					didError: false,
+					playbackFailure: null,
 					isPaused: false,
 					index: parseInt(action.payload.trackIndex),
 					track: action.payload.track
@@ -76,9 +79,18 @@ const sessionReducer = (state = initialState, action) => {
 				playing: {
 					...state.playing,
 					didError: true,
-					isPaused: true
+					isPaused: true,
+					playbackFailure: action.payload ?? state.playing.playbackFailure
 				}
+			};
 
+		case SESSION_PLAYBACK_FAILURE:
+			return {
+				...state,
+				playing: {
+					...state.playing,
+					playbackFailure: action.payload
+				}
 			};
 
 		case SESSION_PLAYING_UPDATE_STATUS:

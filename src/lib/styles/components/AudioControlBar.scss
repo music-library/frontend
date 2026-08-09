@@ -176,3 +176,27 @@
         }
     }
 }
+
+.audio-resume-prompt {
+    position: fixed;
+    right: 16px;
+    bottom: 86px;
+    z-index: 120;
+    padding: 12px 18px;
+    border: 1px solid $background-shade-40;
+    border-radius: 6px;
+    color: $forground-color;
+    background: $background-shade-10;
+    cursor: pointer;
+    @include disable-touch-highlight();
+
+    &:focus-visible {
+        outline: 2px solid $background-shade-80;
+        outline-offset: 2px;
+    }
+
+    @media (max-width: 750px) {
+        right: 12px;
+        bottom: 150px;
+    }
+}

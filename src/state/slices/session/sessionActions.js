@@ -3,6 +3,7 @@ import { TRACK_STAT_UPDATE, QUEUE_NEW } from "state/slices/music/musicReducer";
 import {
 	SESSION_PLAY_TRACK,
 	SESSION_TRACK_ERROR,
+	SESSION_PLAYBACK_FAILURE,
 	SESSION_PLAYING_TOGGLE,
 	SESSION_PLAYING_UPDATE_STATUS,
 	SESSION_PLAYING_AUDIO_REF,
@@ -124,8 +125,15 @@ export const playingTrackIsPaused = (isPaused) => (dispatch) => {
 /*
  * Track unable to play; error
  */
-export const playingTrackDidError = () => (dispatch) => {
-	dispatch({ type: SESSION_TRACK_ERROR, payload: true });
+export const playingTrackDidError = (playbackFailure = null) => (dispatch) => {
+	dispatch({ type: SESSION_TRACK_ERROR, payload: playbackFailure });
+};
+
+/*
+ * Record or clear a non-terminal playback failure.
+ */
+export const sessionUpdatePlaybackFailure = (playbackFailure) => (dispatch) => {
+	dispatch({ type: SESSION_PLAYBACK_FAILURE, payload: playbackFailure });
 };
 
 /*

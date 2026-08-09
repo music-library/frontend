@@ -1,14 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { isFirefox } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 
 import { api } from "lib/index";
 import {
-	changeVolume,
 	muteVolume,
 	pipToggle,
 	playNextTrackBasedOnSession,
-	playingTrackDidError,
 	playingTrackIsPaused,
 	sessionUpdatePlayingStatus
 } from "state/actions";
@@ -26,49 +24,47 @@ export function Audio() {
 	// Get session state from store
 	const track = useSelector((state) => state.session.playing.track);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
-	const playingIndex = useSelector((state) => state.session.playing.index);
 	const doesRepeat = useSelector((state) => state.session.actions.repeat);
 	const volume = useSelector((state) => state.session.playing.status.volume);
 	const isMute = useSelector((state) => state.session.playing.status.isMute);
 	const showPip = useSelector((state) => state.session.actions.showPip);
 
-	const handlePlayNextTrack = () => {
+	const handlePlayNextTrack = useCallback(() => {
 		dispatch(playNextTrackBasedOnSession(true));
-	};
+	}, [dispatch]);
 
-	const handlePlayPreviousTrack = () => {
+	const handlePlayPreviousTrack = useCallback(() => {
 		dispatch(playNextTrackBasedOnSession(false));
-	};
+	}, [dispatch]);
 
-	const handlePlaying = (audio) => {
-		dispatch(
-			sessionUpdatePlayingStatus({
-				duration: audio.duration,
-				position: audio.time
-			})
-		);
-	};
+	const handlePlaying = useCallback(
+		(audio) => {
+			dispatch(
+				sessionUpdatePlayingStatus({
+					duration: audio.duration,
+					position: audio.time
+				})
+			);
+		},
+		[dispatch]
+	);
 
-	const handleTrackPause = () => {
+	const handleTrackPause = useCallback(() => {
 		dispatch(playingTrackIsPaused(true));
-	};
-	const handleTrackPlay = () => {
+	}, [dispatch]);
+	const handleTrackPlay = useCallback(() => {
 		dispatch(playingTrackIsPaused(false));
-	};
+	}, [dispatch]);
 
-	const handleVolumeMuteToggle = () => {
+	const handleVolumeMuteToggle = useCallback(() => {
 		if (isMute) {
 			dispatch(muteVolume(false));
 		} else {
 			dispatch(muteVolume(true));
 		}
-	};
+	}, [dispatch, isMute]);
 
-	const handleDidError = (error) => {
-		dispatch(playingTrackDidError());
-	};
-
-	const handlePictureInPicture = async () => {
+	const handlePictureInPicture = useCallback(async () => {
 		try {
 			if (
 				document.pictureInPictureEnabled &&
@@ -92,62 +88,73 @@ export function Audio() {
 		} catch (err) {
 			console.error(err);
 		}
-	};
+	}, [track.id]);
 
-	const handleKeyupToPause = (e) => {
-		// Skip if user is typing in the search-bar
-		if (e.target.tagName !== "INPUT") {
-			// Space = play/pause
-			if (e.code === "Space") {
-				e.preventDefault();
-				if (isPaused) {
-					handleTrackPlay();
-				} else {
-					handleTrackPause();
+	const handleKeyupToPause = useCallback(
+		(e) => {
+			// Skip if user is typing in the search-bar
+			if (e.target.tagName !== "INPUT") {
+				// Space = play/pause
+				if (e.code === "Space") {
+					e.preventDefault();
+					if (isPaused) {
+						handleTrackPlay();
+					} else {
+						handleTrackPause();
+					}
 				}
+
+				// ">" = next track
+				if (e.code === "Period") {
+					e.preventDefault();
+					handlePlayNextTrack();
+				}
+
+				// "<" = previous track
+				if (e.code === "Comma") {
+					e.preventDefault();
+					handlePlayPreviousTrack();
+				}
+
+				// "m" = mute/unmute track
+				if (e.code === "KeyM") {
+					e.preventDefault();
+					handleVolumeMuteToggle();
+				}
+
+				// "p" = PIP, picture-in-picture
+				if (e.code === "KeyP") {
+					e.preventDefault();
+					dispatch(pipToggle());
+				}
+
+				// // "-" = decrease volume
+				// if (e.code === "Minus") {
+				//     e.preventDefault();
+				//     let newVolume = volume - 10;
+				//     if (newVolume < 0) newVolume = 0;
+				//     dispatch(changeVolume(newVolume));
+				// }
+
+				// // "+" = increase volume
+				// if (e.code === "Equal") {
+				//     e.preventDefault();
+				//     let newVolume = volume + 10;
+				//     if (newVolume > 100) newVolume = 100;
+				//     dispatch(changeVolume(newVolume));
+				// }
 			}
-
-			// ">" = next track
-			if (e.code === "Period") {
-				e.preventDefault();
-				handlePlayNextTrack();
-			}
-
-			// "<" = previous track
-			if (e.code === "Comma") {
-				e.preventDefault();
-				handlePlayPreviousTrack();
-			}
-
-			// "m" = mute/unmute track
-			if (e.code === "KeyM") {
-				e.preventDefault();
-				handleVolumeMuteToggle();
-			}
-
-			// "p" = PIP, picture-in-picture
-			if (e.code === "KeyP") {
-				e.preventDefault();
-				dispatch(pipToggle());
-			}
-
-			// // "-" = decrease volume
-			// if (e.code === "Minus") {
-			//     e.preventDefault();
-			//     let newVolume = volume - 10;
-			//     if (newVolume < 0) newVolume = 0;
-			//     dispatch(changeVolume(newVolume));
-			// }
-
-			// // "+" = increase volume
-			// if (e.code === "Equal") {
-			//     e.preventDefault();
-			//     let newVolume = volume + 10;
-			//     if (newVolume > 100) newVolume = 100;
-			//     dispatch(changeVolume(newVolume));
-			// }
-		}
-	};
+		},
+		[
+			dispatch,
+			handlePlayNextTrack,
+			handlePlayPreviousTrack,
+			handleTrackPause,
+			handleTrackPlay,
+			handleVolumeMuteToggle,
+			isPaused
+		]
+	);
 
 	// Keyup listener to play/pause track
 	useEffect(() => {
@@ -160,7 +167,9 @@ export function Audio() {
 
 	// MediaMetadata audio API
 	useEffect(() => {
-		if ("mediaSession" in navigator) {
+		if (!("mediaSession" in navigator)) return undefined;
+
+		if (typeof track.id === "string") {
 			navigator.mediaSession.metadata = new window.MediaMetadata({
 				title: track.metadata.title,
 				artist: track.metadata.artist,
@@ -204,23 +213,38 @@ export function Audio() {
 				]
 			});
 
-			navigator.mediaSession.setActionHandler("nexttrack", handlePlayNextTrack);
-			navigator.mediaSession.setActionHandler(
-				"previoustrack",
-				handlePlayPreviousTrack
-			);
-
-			navigator.mediaSession.setActionHandler("pause", handleTrackPause);
-			navigator.mediaSession.setActionHandler("play", handleTrackPlay);
+			try {
+				navigator.mediaSession.setActionHandler("nexttrack", handlePlayNextTrack);
+				navigator.mediaSession.setActionHandler(
+					"previoustrack",
+					handlePlayPreviousTrack
+				);
+			} catch (error) {
+				console.warn("Unable to register Media Session track handlers", error);
+			}
+		} else {
+			navigator.mediaSession.metadata = null;
+			navigator.mediaSession.playbackState = "none";
 		}
 
+		return () => {
+			try {
+				navigator.mediaSession.setActionHandler("nexttrack", null);
+				navigator.mediaSession.setActionHandler("previoustrack", null);
+			} catch (error) {
+				console.warn("Unable to clear Media Session track handlers", error);
+			}
+		};
+	}, [handlePlayNextTrack, handlePlayPreviousTrack, track]);
+
+	useEffect(() => {
 		// PIP, picture-in-picture
 		if (showPip) {
-			handlePictureInPicture();
+			void handlePictureInPicture();
 		} else {
-			if (document.pictureInPictureElement) document.exitPictureInPicture();
+			if (document.pictureInPictureElement) void document.exitPictureInPicture();
 		}
-	}, [dispatch, playingIndex, track, showPip]);
+	}, [handlePictureInPicture, showPip]);
 
 	return (
 		<>
@@ -230,7 +254,6 @@ export function Audio() {
 					isPaused={isPaused}
 					loop={doesRepeat}
 					volume={isMute ? 0 : volume}
-					onError={handleDidError}
 					onPlaying={handlePlaying}
 					onFinishedPlaying={handlePlayNextTrack}
 				/>
