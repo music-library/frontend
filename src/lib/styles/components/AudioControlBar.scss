@@ -1,3 +1,7 @@
+@use "sass:color";
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .audio-control-bar {
     position: fixed;
     bottom: 0;
@@ -137,7 +141,7 @@
                 &.is-faded {
                     opacity: 0.7;
                     svg path {
-                        fill: darken($background-shade-80, 30%);
+                        fill: color.adjust($background-shade-80, $lightness: -30%);
                     }
                 }
 

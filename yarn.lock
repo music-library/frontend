@@ -3334,9 +3334,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "@testing-library/jest-dom@npm:7.0.0"
+"@testing-library/jest-dom@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "@testing-library/jest-dom@npm:7.0.1"
   dependencies:
     "@adobe/css-tools": "npm:^4.4.0"
     aria-query: "npm:^5.0.0"
@@ -3346,7 +3346,11 @@ __metadata:
     redent: "npm:^3.0.0"
   peerDependencies:
     "@testing-library/dom": ">=10 <11"
-  checksum: 10/ec6d50550d7ec87f60a19f1719d87e2d73a050fed4938f13d846d30639f85bd903e5aff2eaecbb1a9e67f3c71c98148b46edd4f77b15ca17c91f655f9c54f92b
+    vitest: ">= 0.32"
+  peerDependenciesMeta:
+    vitest:
+      optional: true
+  checksum: 10/0770454b47da9370e59cda691f797c0442e53caefcd412c504b33c7a9bee099c8a9e7d1f07f7eae8d380ea52c34a5d70139e875480a57f729588068edc78f57b
   languageName: node
   linkType: hard
 
@@ -3876,12 +3880,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wyw-in-js/processor-utils@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@wyw-in-js/processor-utils@npm:2.3.0"
+"@wyw-in-js/processor-utils@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@wyw-in-js/processor-utils@npm:2.4.0"
   dependencies:
-    "@wyw-in-js/shared": "npm:2.3.0"
-  checksum: 10/11f1bfa49a4f2c4b9139b6443df60a87aa9dc2879d073260403f857689fe5a1759d28ef222a44b1d6a4d462557ddd195e5527ae1e9e195514ef149edbec8394a
+    "@wyw-in-js/shared": "npm:2.4.0"
+  checksum: 10/24c253c6264cf4b78b724c1bae5b7235af2465a8962e79411d011d1ba0fd3d974a78d9f86e2b41877ea38c005ed3bee091679ad52e08d0271e8ce20b71a58aa3
   languageName: node
   linkType: hard
 
@@ -3896,24 +3900,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wyw-in-js/shared@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@wyw-in-js/shared@npm:2.3.0"
+"@wyw-in-js/shared@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@wyw-in-js/shared@npm:2.4.0"
   dependencies:
     debug: "npm:^4.3.4"
     find-up: "npm:^5.0.0"
     minimatch: "npm:^9.0.3"
-  checksum: 10/70675f6d637e7947e0882c77d3a42d06112b7a8f232712e9c3c92fcd2690f6535b93893d80127b45d2a79fb64aac53d2de7f767fd648f29958960ff9d95efbe0
+  checksum: 10/0eeaaf6bd5f90032fc5e008271cf290f3e04b55b3b06fcb48912ecff8771df266524d3376bc772204b979da83dcf6040f5670b49536e79dabdc7ef3d9fe08a82
   languageName: node
   linkType: hard
 
-"@wyw-in-js/transform@npm:2.3.1":
-  version: 2.3.1
-  resolution: "@wyw-in-js/transform@npm:2.3.1"
+"@wyw-in-js/transform@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@wyw-in-js/transform@npm:2.4.0"
   dependencies:
     "@jridgewell/remapping": "npm:^2.3.5"
-    "@wyw-in-js/processor-utils": "npm:2.3.0"
-    "@wyw-in-js/shared": "npm:2.3.0"
+    "@wyw-in-js/processor-utils": "npm:2.4.0"
+    "@wyw-in-js/shared": "npm:2.4.0"
     cosmiconfig: "npm:^8.0.0"
     happy-dom: "npm:^20.1.0"
     minimatch: "npm:^9.0.5"
@@ -3923,19 +3927,19 @@ __metadata:
     source-map: "npm:^0.7.4"
     stylis: "npm:^4.3.0"
     ts-invariant: "npm:^0.10.3"
-  checksum: 10/42d7459a4fb37bdd40bbb3b4ec41c5b40b5134879c40632da03ad57be75f18b2c913ac34d9693250ca5574a0924cfe031bfe86be6a974c3555f90f98ec381f1f
+  checksum: 10/3a1d68bf9ac159460364f6c14efe0c6a79463ea6fc3b18fe326013e6c309bb549682d6a1375b27c1e4f83618e4816a8d2816fe750100eb5791c77f00b2b5e54e
   languageName: node
   linkType: hard
 
-"@wyw-in-js/vite@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "@wyw-in-js/vite@npm:2.3.1"
+"@wyw-in-js/vite@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "@wyw-in-js/vite@npm:2.4.0"
   dependencies:
-    "@wyw-in-js/shared": "npm:2.3.0"
-    "@wyw-in-js/transform": "npm:2.3.1"
+    "@wyw-in-js/shared": "npm:2.4.0"
+    "@wyw-in-js/transform": "npm:2.4.0"
   peerDependencies:
     vite: ">=3.2.7"
-  checksum: 10/0bb9eeef10488a79a4ced4da2c6cace041aec6d3b74dd741f23618f76cef9cc8db36c4ea6bf22a5456e86357849e241e8957efdae0a67bfafed79b7d4bc2ccd6
+  checksum: 10/7ae6aeca7fa5f72fea8de670e5ea9355006dd1e62a2520eca1e5c77f6db4a2624944c71221bbdc4e47e9c795b1a99c11fe3eda49ae486af6a85c0f7c7b002765
   languageName: node
   linkType: hard
 
@@ -5745,7 +5749,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"happy-dom@npm:20.11.1, happy-dom@npm:^20.1.0":
+"happy-dom@npm:20.11.2":
+  version: 20.11.2
+  resolution: "happy-dom@npm:20.11.2"
+  dependencies:
+    "@types/node": "npm:>=20.0.0"
+    "@types/whatwg-mimetype": "npm:^3.0.2"
+    "@types/ws": "npm:^8.18.1"
+    buffer-image-size: "npm:^0.6.4"
+    entities: "npm:^7.0.1"
+    whatwg-mimetype: "npm:^3.0.0"
+    ws: "npm:^8.21.0"
+  checksum: 10/f482ff0d6848556a9700c171263c5cb8fead9ab14580e322c28ad0b8284b0e7bb5d3cde4493e6d87b1e6c859073bbb23f97678a51ee986333b4949b4dcae3292
+  languageName: node
+  linkType: hard
+
+"happy-dom@npm:^20.1.0":
   version: 20.11.1
   resolution: "happy-dom@npm:20.11.1"
   dependencies:
@@ -7177,7 +7196,7 @@ __metadata:
     "@rolldown/plugin-babel": "npm:^0.2.3"
     "@tanstack/react-virtual": "npm:^3.14.9"
     "@testing-library/dom": "npm:^10.4.1"
-    "@testing-library/jest-dom": "npm:^7.0.0"
+    "@testing-library/jest-dom": "npm:^7.0.1"
     "@testing-library/react": "npm:^16.3.2"
     "@trivago/prettier-plugin-sort-imports": "npm:^6.0.2"
     "@types/node": "npm:^24.13.3"
@@ -7187,7 +7206,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.0.5"
     "@vitest/coverage-v8": "npm:^4.1.10"
     "@vitest/ui": "npm:^4.1.10"
-    "@wyw-in-js/vite": "npm:^2.3.1"
+    "@wyw-in-js/vite": "npm:^2.4.0"
     axios: "npm:^1.19.0"
     babel-plugin-react-compiler: "npm:1.0.0"
     chance: "npm:^1.1.13"
@@ -7196,7 +7215,7 @@ __metadata:
     crypto-js: "npm:^4.2.0"
     dayjs: "npm:^1.11.21"
     fuse.js: "npm:^7.5.0"
-    happy-dom: "npm:20.11.1"
+    happy-dom: "npm:20.11.2"
     lodash: "npm:^4.18.1"
     moment: "npm:^2.30.1"
     prettier: "npm:3.9.6"
@@ -7211,7 +7230,7 @@ __metadata:
     rollup-plugin-workbox: "npm:^9.0.0"
     sass: "npm:^1.102.0"
     typescript: "npm:^7.0.2"
-    vite: "npm:^8.2.0"
+    vite: "npm:^8.2.1"
     vitest: "npm:^4.1.10"
     workbox-build: "npm:^7.4.1"
     workbox-core: "npm:^7.4.1"
@@ -7228,6 +7247,15 @@ __metadata:
   bin:
     nanoid: bin/nanoid.cjs
   checksum: 10/54c3238ba6ea31c173ccf70922481814892075dbf1b4636abec249d0b34d5594fc9a8892c04872068674010a11fa3d18316dc06e59e700def131ff9d8e740426
+  languageName: node
+  linkType: hard
+
+"nanoid@npm:^3.3.17":
+  version: 3.3.18
+  resolution: "nanoid@npm:3.3.18"
+  bin:
+    nanoid: bin/nanoid.cjs
+  checksum: 10/1b3b4fdac831b92b56d1dbe8b1e63a372432faf86ea383134e3b53141ef8108a60b7f84343b5cefecac9550bb74edf8164da93ea07d1c4f757039bc75d8a5d9e
   languageName: node
   linkType: hard
 
@@ -7780,6 +7808,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postcss@npm:^8.5.25":
+  version: 8.5.26
+  resolution: "postcss@npm:8.5.26"
+  dependencies:
+    nanoid: "npm:^3.3.17"
+    picocolors: "npm:^1.1.1"
+    source-map-js: "npm:^1.2.1"
+  checksum: 10/842a624f822f77cb37264cc24f0cf97c0a69dd8d6f7b4a6d76b5a8dc95355899dd044f33a2d4e890da858293de570fce18dff453f3b629ff14cac67a3591895a
+  languageName: node
+  linkType: hard
+
 "prettier@npm:3.9.6":
   version: 3.9.6
   resolution: "prettier@npm:3.9.6"
@@ -8177,7 +8216,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rolldown@npm:^1.2.3, rolldown@npm:~1.2.0":
+"rolldown@npm:^1.2.3, rolldown@npm:~1.2.0, rolldown@npm:~1.2.1":
   version: 1.2.3
   resolution: "rolldown@npm:1.2.3"
   dependencies:
@@ -9530,7 +9569,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^6.0.0 || ^7.0.0 || ^8.0.0, vite@npm:^8.2.0":
+"vite@npm:^6.0.0 || ^7.0.0 || ^8.0.0":
   version: 8.2.0
   resolution: "vite@npm:8.2.0"
   dependencies:
@@ -9584,6 +9623,63 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: 10/c019ae45923186aeced9c7ccd661250473e43eb5a136e8031a7ee2b02b69d9dfe5bd6a267130e2888a1dc69a3e5481779e467f5c2e0f15671e9360b40a8056ff
+  languageName: node
+  linkType: hard
+
+"vite@npm:^8.2.1":
+  version: 8.2.1
+  resolution: "vite@npm:8.2.1"
+  dependencies:
+    fsevents: "npm:~2.3.3"
+    lightningcss: "npm:^1.33.0"
+    picomatch: "npm:^4.0.5"
+    postcss: "npm:^8.5.25"
+    rolldown: "npm:~1.2.1"
+    tinyglobby: "npm:^0.2.17"
+  peerDependencies:
+    "@types/node": ^20.19.0 || >=22.12.0
+    "@vitejs/devtools": ^0.4.0
+    esbuild: ^0.27.0 || ^0.28.0
+    jiti: ">=1.21.0"
+    less: ^4.0.0
+    sass: ^1.70.0
+    sass-embedded: ^1.70.0
+    stylus: ">=0.54.8"
+    sugarss: ^5.0.0
+    terser: ^5.16.0
+    tsx: ^4.8.1
+    yaml: ^2.4.2
+  dependenciesMeta:
+    fsevents:
+      optional: true
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+    "@vitejs/devtools":
+      optional: true
+    esbuild:
+      optional: true
+    jiti:
+      optional: true
+    less:
+      optional: true
+    sass:
+      optional: true
+    sass-embedded:
+      optional: true
+    stylus:
+      optional: true
+    sugarss:
+      optional: true
+    terser:
+      optional: true
+    tsx:
+      optional: true
+    yaml:
+      optional: true
+  bin:
+    vite: bin/vite.js
+  checksum: 10/af65bf23dc346f968b8b2f577da4c5d18a5a21eea2ce699eb0018918151238ed185067de1749408d26ba93c743635c5870602bd77b4b6f2f678d8d685a9635d8
   languageName: node
   linkType: hard
 

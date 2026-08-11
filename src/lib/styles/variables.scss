@@ -1,16 +1,18 @@
+@use "sass:color";
+
 // Dark theme
 $background-color: #181818;
 $forground-color: #ffffff;
 $text-color: #ffffff;
 
-$background-shade-2: lighten($background-color, 2%);
-$background-shade-5: lighten($background-color, 5%);
-$background-shade-10: lighten($background-color, 10%);
-$background-shade-20: lighten($background-color, 20%);
-$background-shade-40: lighten($background-color, 40%);
-$background-shade-60: lighten($background-color, 60%);
-$background-shade-80: lighten($background-color, 80%);
-$background-shade-100: lighten($background-color, 100%);
+$background-shade-2: color.adjust($background-color, $lightness: 2%);
+$background-shade-5: color.adjust($background-color, $lightness: 5%);
+$background-shade-10: color.adjust($background-color, $lightness: 10%);
+$background-shade-20: color.adjust($background-color, $lightness: 20%);
+$background-shade-40: color.adjust($background-color, $lightness: 40%);
+$background-shade-60: color.adjust($background-color, $lightness: 60%);
+$background-shade-80: color.adjust($background-color, $lightness: 80%);
+$background-shade-100: color.adjust($background-color, $lightness: 100%);
 
 $scrollbar-track: $background-color;
 $scrollbar-thumb: $background-shade-40;

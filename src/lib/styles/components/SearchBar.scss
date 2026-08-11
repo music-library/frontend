@@ -1,3 +1,6 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .search-bar {
     position: relative;
     @include flex();

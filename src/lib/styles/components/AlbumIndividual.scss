@@ -1,3 +1,6 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .AlbumIndividual {
 	.album {
 		// Desktop specific styles

@@ -1,3 +1,6 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .footer {
     @include container(880px);
     @include user-select(none);

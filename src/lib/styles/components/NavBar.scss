@@ -1,3 +1,6 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .navbar {
     position: fixed;
     top: 0;

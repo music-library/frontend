@@ -1,3 +1,6 @@
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .tags {
     @include flex();
     flex-wrap: wrap;

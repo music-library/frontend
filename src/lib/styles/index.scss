@@ -1,20 +1,20 @@
-@import "fonts";
-@import "variables";
-@import "mixins";
+@use "fonts";
+@use "variables";
+@use "mixins";
 
-@import "reset";
-@import "global";
+@use "reset";
+@use "global";
 
-@import "components/ActiveUsers";
-@import "components/AFCBackground";
-@import "components/AlbumIndividual";
-@import "components/AudioControlBar";
-@import "components/FloatingAlbumCover";
-@import "components/Footer";
-@import "components/NavBar";
-@import "components/NavLinks";
-@import "components/SearchBar";
-@import "components/Slider";
-@import "components/Tags";
+@use "components/ActiveUsers";
+@use "components/AFCBackground";
+@use "components/AlbumIndividual";
+@use "components/AudioControlBar";
+@use "components/FloatingAlbumCover";
+@use "components/Footer";
+@use "components/NavBar";
+@use "components/NavLinks";
+@use "components/SearchBar";
+@use "components/Slider";
+@use "components/Tags";
 
-@import "components/tracks";
+@use "components/tracks";

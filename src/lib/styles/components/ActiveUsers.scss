@@ -1,3 +1,5 @@
+@use "../mixins" as *;
+
 .active-users {
     opacity: 1;
     @include transition(all, 280ms, ease);

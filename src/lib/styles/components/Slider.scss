@@ -1,3 +1,7 @@
+@use "sass:color";
+@use "../mixins" as *;
+@use "../variables" as *;
+
 .slider {
     width: 150px;
     padding: 20px 0;
@@ -49,10 +53,10 @@
 
     &.is-faded {
         .slider-button {
-            background-color: darken($background-shade-60, 40%);
+            background-color: color.adjust($background-shade-60, $lightness: -40%);
         }
         .slider-active {
-            background-color: darken($background-shade-80, 40%);
+            background-color: color.adjust($background-shade-80, $lightness: -40%);
         }
     }
 
