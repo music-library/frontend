@@ -3,9 +3,8 @@ import Skeleton from "react-loading-skeleton";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
-import { useAlbum, useAlbumTracks, useCatalogRefreshState, useTrack } from "catalog";
 import { useColor } from "lib/hooks";
-import { api } from "lib/index";
+import { api, getAlbum } from "lib/index";
 import { playTrack, playingTrackIsPaused } from "state/actions";
 
 import { Halo, Icon, Image, Ripple, Track } from "view/components";
@@ -20,23 +19,24 @@ export function AlbumIndividual() {
 	// Album ID in URL
 	const { id } = useParams();
 
-	const libraryId = useSelector((state) => state.music.library.selected);
-	const { data: album } = useAlbum(libraryId, id);
-	const { data: albumTracks = [], isLoading: tracksLoading } = useAlbumTracks(libraryId, id);
-	const refresh = useCatalogRefreshState(libraryId);
+	const tracksMap = useSelector((state) => state.music.tracksMap);
+	const didError = useSelector((state) => state.music.didError);
+	const isFetching = useSelector((state) => state.music.isFetching);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
-	const playingTrackId = useSelector((state) => state.session.playing.trackId);
-	const { data: playingTrack } = useTrack(libraryId, playingTrackId);
+	const playingAlbum = useSelector((state) => state.session.playing.track.id_album);
+
+	// Search for album
+	const album = getAlbum(id);
 
 	// Is album playing
 	let isAlbumPlaying = false;
 
 	// Album exists
-	if (album?.id && playingTrack?.albumId && album.id === playingTrack.albumId)
+	if (album?.id && playingAlbum !== null && album?.id === playingAlbum)
 		isAlbumPlaying = true;
 
 	//
-	const isLoading = !album?.id || tracksLoading || (refresh.isRefreshing && albumTracks.length === 0);
+	const isLoading = !album?.id || isFetching || didError;
 
 	// Build external links
 	let linkSearch = "";
@@ -46,7 +46,7 @@ export function AlbumIndividual() {
 
 	if (!isLoading) {
 		// prettier-ignore
-		linkSearch = `${album.artist} - ${album.title}`;
+		linkSearch = `${album.album_artist} - ${album.album}`;
 		linkSearch = encodeURIComponent(linkSearch).replace(/%20/g, "+");
 	}
 
@@ -56,7 +56,7 @@ export function AlbumIndividual() {
 		if (album) {
 			if (!isAlbumPlaying) {
 				// Play first track in album
-				dispatch(playTrack(album.coverTrackId));
+				dispatch(playTrack(tracksMap[album.tracks[0]]));
 			} else {
 				// Pause track
 				dispatch(playingTrackIsPaused(!isPaused));
@@ -69,7 +69,7 @@ export function AlbumIndividual() {
 	const handleScroll = (e) => {
 		if (isLoading || window.innerWidth < 1200) return false;
 
-		if (window.scrollY > 100 && albumTracks.length >= 5) {
+		if (window.scrollY > 100 && album.tracks.length >= 5) {
 			$albumCover.current.style.position = "fixed";
 			$albumCover.current.style.top = "100px";
 
@@ -126,7 +126,7 @@ export function AlbumIndividual() {
 											isLoading
 												? "example"
 												: api().getUri({
-												url: `/tracks/${album?.coverTrackId}/cover/600`
+														url: `/tracks/${album?.idCover}/cover/600`
 												  })
 										}
 										fallback={`fallback--album-cover`}
@@ -140,7 +140,7 @@ export function AlbumIndividual() {
 						<div className="album-side" ref={$albumSide}>
 							<div className="album-metadata">
 								<h2>
-									{isLoading ? <Skeleton width={300} /> : album?.title}
+									{isLoading ? <Skeleton width={300} /> : album.album}
 								</h2>
 								<p>
 									{isLoading ? (
@@ -152,10 +152,10 @@ export function AlbumIndividual() {
 													color: color
 												}}
 											>
-											{album?.year}
+												{album.year}
 											</span>
 											{" - "}
-										{album?.artist}
+											{album.album_artist}
 										</>
 									)}
 								</p>
@@ -229,10 +229,10 @@ export function AlbumIndividual() {
 									))}
 
 								{!isLoading &&
-									albumTracks.map((track, key) => {
+									album.tracks.map((track, key) => {
 										return (
 											<Track
-												track={track}
+												index={tracksMap[track]}
 												trackNumber={key + 1}
 												key={key}
 											/>

@@ -1,10 +1,10 @@
+import sha1 from "crypto-js/sha1";
 import React from "react";
 import { isMobile } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { animated, useSpring } from "@react-spring/web";
 
-import { useTrack } from "catalog";
 import { useColor } from "lib/hooks";
 import { api } from "lib/index";
 import { playingTrackIsPaused } from "state/actions";
@@ -18,9 +18,8 @@ export function FloatingAlbumCover() {
 	const navigate = useNavigate();
 
 	// Track and session data from store
-	const libraryId = useSelector((state) => state.music.library.selected);
-	const playingTrackId = useSelector((state) => state.session.playing.trackId);
-	const { data: track } = useTrack(libraryId, playingTrackId);
+	const playingIndex = useSelector((state) => state.session.playing.index);
+	const track = useSelector((state) => state.music.tracks?.[playingIndex]);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
 
 	const color = useColor();
@@ -34,7 +33,10 @@ export function FloatingAlbumCover() {
 	const handleGoToAlbum = (e) => {
 		e.stopPropagation();
 		if (track) {
-			navigate("/albums/" + track.albumId);
+			const albumId = sha1(
+				track.metadata.album + track.metadata.album_artist
+			).toString();
+			navigate("/albums/" + albumId);
 		}
 	};
 

@@ -56,20 +56,32 @@ test("persists stable IDs when pushing, removing, and reordering", async () => {
 	expect(JSON.parse(localStorage.getItem("queue/v2/main"))).toEqual(["track-b"]);
 });
 
-test("preserves queued identities until catalog-backed playback resolves them", async () => {
+test("preserves queued identities across reindexing and drops deleted tracks", async () => {
 	localStorage.setItem(
 		"queue/v2/main",
 		JSON.stringify(["track-b", "deleted-track", "track-a"])
 	);
 
-	const { default: musicReducer } = await loadReducer();
+	const { LIBRARY_FETCH_SUCCESS, default: musicReducer } = await loadReducer();
 	const initialState = musicReducer(undefined, { type: "@@INIT" });
-	const state = musicReducer(initialState, { type: "CATALOG_REFRESHED" });
+	const state = musicReducer(initialState, {
+		type: LIBRARY_FETCH_SUCCESS,
+		payload: {
+			libraries: [{ id: "main", name: "Main" }],
+			tracks: [{ id: "track-a" }, { id: "track-b" }],
+			tracks_map: {
+				"track-a": 0,
+				"track-b": 1
+			},
+			albums: {},
+			decades: [],
+			genres: []
+		}
+	});
 
-	expect(state.queue).toEqual(["track-b", "deleted-track", "track-a"]);
+	expect(state.queue).toEqual(["track-b", "track-a"]);
 	expect(JSON.parse(localStorage.getItem("queue/v2/main"))).toEqual([
 		"track-b",
-		"deleted-track",
 		"track-a"
 	]);
 });

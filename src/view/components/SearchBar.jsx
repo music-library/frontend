@@ -3,7 +3,6 @@ import { isMobile } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { useLibraryTracks } from "catalog";
 import { useColor } from "lib/hooks";
 import { updateUserSearch } from "state/actions";
 
@@ -14,12 +13,9 @@ export function SearchBar() {
 	const color = useColor();
 
 	// Search input value in store
-	const libraryId = useSelector((state) => state.music.library.selected);
+	const tracks = useSelector((state) => state.music.tracks);
 	const filter = useSelector((state) => state.music.filter);
-	const { data: tracks = [] } = useLibraryTracks(libraryId);
-	const { data: filteredTracks = [] } = useLibraryTracks(libraryId, {
-		tags: filter.tags
-	});
+	const filteredData = useSelector((state) => state.music.filteredData);
 
 	// Input state
 	const [search, setSearch] = useState("");
@@ -27,7 +23,7 @@ export function SearchBar() {
 
 	let tracksLength = tracks.length;
 	if (filter.tags.length > 0)
-		tracksLength = `${filteredTracks.length} / ${tracks.length}`;
+		tracksLength = `${filteredData.length} / ${tracks.length}`;
 	if (tracksLength === 0) tracksLength = "loading";
 
 	const handleSearch = (evt) => {

@@ -1,29 +1,58 @@
-import React from "react";
+import { orderBy } from "lodash";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
-import { usePopularTracks } from "catalog";
 
 import TrackBig from "./Tracks/TrackBig";
 
-const visibleTrackCount = () => {
-	if (window.innerWidth < 1000) return 8;
-	if (window.innerWidth < 1400) return 9;
-	if (window.innerWidth < 1800) return 12;
-	return 15;
-};
-
 export function PopularTracks() {
-	const libraryId = useSelector((state) => state.music.library.selected);
-	const { data: tracks = [] } = usePopularTracks(libraryId, visibleTrackCount());
+	// Get tracks from store
+	const tracks = useSelector((state) => state.music.tracks);
+	const [tracksToRender, setTracksToRender] = useState([]);
 
-	if (tracks.length <= 2) return null;
+	// Find the top most listened to tracks
+	useEffect(() => {
+		let stats = [];
+		let numberOfTracks = 15;
+
+		for (const i in tracks) {
+			const timesPlayed = tracks[i].stats.timesPlayed;
+			if (timesPlayed > 1) {
+				stats.push([i, tracks[i].stats.timesPlayed]);
+			}
+		}
+
+		stats = orderBy(stats, [1], ["desc", "asc"]);
+
+		if (window.innerWidth < 1000) {
+			numberOfTracks = 8;
+		} else if (window.innerWidth < 1400) {
+			numberOfTracks = 9;
+		} else if (window.innerWidth < 1800) {
+			numberOfTracks = 12;
+		}
+
+		setTracksToRender(stats.slice(0, numberOfTracks));
+	}, [tracks]);
+
 	return (
-		<div className="popular-tracks">
-			<h2>Popular Tracks</h2>
-			<div className="track-container grid grid-tracks-big">
-				{tracks.map((track) => <TrackBig track={track} size="big" key={track.id} />)}
-			</div>
-		</div>
+		<>
+			{tracksToRender.length > 2 && (
+				<div className="popular-tracks">
+					<h2>Popular Tracks</h2>
+					<div className="track-container grid grid-tracks-big">
+						{tracksToRender.map((track, index) => {
+							return (
+								<TrackBig
+									index={parseInt(track[0])}
+									size="big"
+									key={index}
+								/>
+							);
+						})}
+					</div>
+				</div>
+			)}
+		</>
 	);
 }
 

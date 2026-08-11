@@ -7,13 +7,6 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 
 import Album from "./Album";
 
-const catalogMocks = vi.hoisted(() => ({
-	useAlbum: vi.fn(() => ({ data: undefined })),
-	useTrack: vi.fn(() => ({ data: undefined }))
-}));
-
-vi.mock("catalog", () => catalogMocks);
-
 vi.mock("lib/hooks", () => ({
 	useColor: () => "#ffffff"
 }));
@@ -21,6 +14,11 @@ vi.mock("lib/hooks", () => ({
 vi.mock("lib/index", () => ({
 	api: () => ({
 		getUri: ({ url }) => url
+	}),
+	getAlbum: () => ({
+		album: "Album name",
+		album_artist: "Album artist",
+		idCover: "cover-id"
 	})
 }));
 
@@ -36,21 +34,17 @@ vi.mock("view/components", () => ({
 
 const state = {
 	music: {
-		library: { selected: "main" }
+		didError: false,
+		tracksMap: {
+			"track-1": { id: "track-1" }
+		}
 	},
 	session: {
 		playing: {
 			isPaused: false,
-			trackId: null
+			track: {}
 		}
 	}
-};
-
-const album = {
-	id: "album-1",
-	coverTrackId: "track-1",
-	title: "Album name",
-	artist: "Album artist"
 };
 
 const renderAlbum = (props = {}) => {
@@ -59,7 +53,7 @@ const renderAlbum = (props = {}) => {
 	return render(
 		<Provider store={store}>
 			<MemoryRouter>
-				<Album album={album} albumId="album-1" {...props} />
+				<Album albumId="album-1" albumTracks={["track-1"]} {...props} />
 			</MemoryRouter>
 		</Provider>
 	);
@@ -111,7 +105,7 @@ describe("album navigation capture", () => {
 		render(
 			<Provider store={store}>
 				<MemoryRouter>
-					<Album album={undefined} onNavigate={onNavigate} />
+					<Album onNavigate={onNavigate} />
 				</MemoryRouter>
 			</Provider>
 		);

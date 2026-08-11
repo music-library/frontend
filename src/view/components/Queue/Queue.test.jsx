@@ -8,20 +8,13 @@ const mocks = vi.hoisted(() => ({
 	state: {
 		music: {
 			queue: ["track-b", "track-a"],
-			library: { selected: "main" },
-			filter: { tags: [] }
+			tracksMap: { "track-a": 0, "track-b": 1 },
+			isFetching: false
 		},
 		session: {
-			playing: { trackId: "track-a" }
+			playing: { index: 0 }
 		}
 	}
-}));
-
-vi.mock("catalog", () => ({
-	useLibraryTracks: () => ({
-		data: [{ id: "track-a" }, { id: "track-b" }, { id: "track-c" }],
-		isLoading: false
-	})
 }));
 
 vi.mock("react-redux", () => ({
@@ -54,8 +47,8 @@ vi.mock("view/components", () => ({
 			{data.map((item) => <RenderWith key={item.id} {...item} />)}
 		</div>
 	),
-	TrackBig: ({ trackId }) => (
-		<div data-testid={`track-${trackId}`} />
+	TrackBig: ({ id, index }) => (
+		<div data-testid={id ? `queued-${id}` : `preview-${index}`} data-index={index} />
 	)
 }));
 
@@ -65,15 +58,15 @@ beforeEach(() => {
 	vi.clearAllMocks();
 });
 
-test("renders queued IDs through catalog records and preserves IDs when reordering", () => {
+test("renders queued IDs through tracksMap and preserves IDs when reordering", () => {
 	render(<Queue />);
 
 	expect(screen.getByTestId("queue-grid")).toHaveAttribute(
 		"data-track-ids",
 		"track-b,track-a"
 	);
-	expect(screen.getAllByTestId("track-track-b").length).toBeGreaterThan(0);
-	expect(screen.getAllByTestId("track-track-a").length).toBeGreaterThan(0);
+	expect(screen.getByTestId("queued-track-b")).toHaveAttribute("data-index", "1");
+	expect(screen.getByTestId("queued-track-a")).toHaveAttribute("data-index", "0");
 
 	fireEvent.click(screen.getByRole("button", { name: "reorder" }));
 

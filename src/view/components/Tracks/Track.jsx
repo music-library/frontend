@@ -2,60 +2,79 @@ import moment from "moment";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { useTrack } from "catalog";
 import { useColor } from "lib/hooks";
 import { playTrack, queuePush, queueRemove } from "state/actions";
 
 import { Halo, Icon, Ripple } from "view/components";
 
-export function Track({ track: suppliedTrack, trackId, trackNumber, size, hideIfNonExistent = false }) {
+export function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
 	const dispatch = useDispatch();
 	const color = useColor();
-	const libraryId = useSelector((state) => state.music.library.selected);
-	const { data: queriedTrack } = useTrack(libraryId, trackId);
-	const track = suppliedTrack || queriedTrack;
+
+	// Track and session data from store
+	const track = useSelector((state) => state.music.tracks[index]);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
-	const playingId = useSelector((state) => state.session.playing.trackId);
+	const playingId = useSelector((state) => state.session.playing.track.id);
 	const playingDidError = useSelector((state) => state.session.playing.didError);
 	const queuePosition = useSelector((state) => state.music.queue.indexOf(track?.id));
 
+	// Hide if track doesn't exist
 	if (!track && hideIfNonExistent) return null;
-	if (!track) return <div className={`track${size ? ` ${size}` : ""}`} />;
 
+	// Is this track currently playing?
 	const isTrackPlaying = track.id === playingId;
 	const isTrackPaused = isTrackPlaying && isPaused;
-	const didError = isTrackPlaying && playingDidError;
 
-	const handleTrackQueue = (event) => {
-		event.preventDefault();
-		event.stopPropagation();
-		dispatch(queuePosition === -1 ? queuePush(track.id) : queueRemove(track.id));
+	const didPlayingTrackError = playingDidError;
+	const didError = isTrackPlaying && didPlayingTrackError;
+
+	// Play this track
+	const playInSession = (e) => {
+		dispatch(playTrack(index));
 	};
 
-	const classList = [size, isTrackPlaying && "playing", isTrackPaused && "paused", didError && "error"]
-		.filter(Boolean)
-		.join(" ");
+	// Toggle track in queue
+	const handleTrackQueue = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (queuePosition === -1) {
+			dispatch(queuePush(track.id));
+		} else {
+			dispatch(queueRemove(track.id));
+		}
+	};
+
+	// Dynamic class list
+	let classList = "";
+	classList += size ? ` ${size}` : "";
+	classList += isTrackPlaying ? " playing" : "";
+	classList += isTrackPaused ? " paused" : "";
+	classList += didError ? " error" : "";
 
 	return (
 		<Ripple style={{ margin: "5px 0" }}>
 			<Halo>
 				<div
 					id={track.id}
-					className={`track ${classList}`}
-					onClick={() => dispatch(playTrack(track.id))}
+					className={`track${classList}`}
+					onClick={playInSession}
 					onContextMenu={handleTrackQueue}
 				>
 					<div className="track-col play-state">
-						{isTrackPlaying && !isTrackPaused && !didError ? <Icon name="pause" /> : <Icon name="play" />}
+						{isTrackPlaying && !isTrackPaused && !didError ? (
+							<Icon name="pause" />
+						) : (
+							<Icon name="play" />
+						)}
 					</div>
 					<div className="track-col name">
-						{track.title}
-						<div className="artist">{track.artist}</div>
+						{track.metadata.title}
+						<div className="artist">{track.metadata.artist}</div>
 					</div>
-					<div className="track-col length" style={{ color }}>
-						{moment.utc(track.duration * 1000).format("mm:ss")}
+					<div className="track-col length" style={{ color: color }}>
+						{moment.utc(track.metadata.duration * 1000).format("mm:ss")}
 					</div>
-					<div className="track-col queue-state" style={{ color }}>
+					<div className="track-col queue-state" style={{ color: color }}>
 						{queuePosition >= 0 && queuePosition + 1}
 					</div>
 				</div>

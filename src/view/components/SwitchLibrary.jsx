@@ -3,7 +3,6 @@ import cx from "classnames";
 import { useLocation } from "react-router-dom";
 import { animated, useTrail } from "@react-spring/web";
 
-import { useLibraries } from "catalog";
 import { useDispatch, useSelector } from "lib/hooks";
 import { switchLibrary } from "state/actions";
 
@@ -12,9 +11,8 @@ export function SwitchLibrary() {
 	const location = useLocation();
 	const visible = location?.pathname === "/";
 	const library = useSelector((state) => state.music.library);
-	const { data: options = [] } = useLibraries();
 
-	const trail = useTrail(options.length, {
+	const trail = useTrail(library.options?.length, {
 		from: { opacity: 0, y: 20 },
 		to: { opacity: 1, y: 0 },
 		reverse: !visible,
@@ -23,10 +21,10 @@ export function SwitchLibrary() {
 
 	return (
 		<>
-			{options.length > 1 && (
+			{library.options?.length > 1 && (
 				<div className={cx(libraryOptions, "tags")}>
 					{trail.map((props, index) => {
-						const option = options[index];
+						const option = library.options?.[index];
 						if (!option?.id) return null;
 
 						return (

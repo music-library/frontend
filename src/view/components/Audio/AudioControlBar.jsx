@@ -1,9 +1,9 @@
+import sha1 from "crypto-js/sha1";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { animated, useSpring } from "@react-spring/web";
 
-import { useTrack } from "catalog";
 import { useColor } from "lib/hooks";
 import { api } from "lib/index";
 import {
@@ -27,9 +27,8 @@ export function AudioControlBar(props) {
 	const color = useColor();
 
 	// Get session state from store
-	const libraryId = useSelector((state) => state.music.library.selected);
-	const playingTrackId = useSelector((state) => state.session.playing.trackId);
-	const { data: track } = useTrack(libraryId, playingTrackId);
+	const playingIndex = useSelector((state) => state.session.playing.index);
+	const track = useSelector((state) => state.music.tracks[playingIndex]);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
 	const doesShuffle = useSelector((state) => state.session.actions.shuffle);
 	const doesRepeat = useSelector((state) => state.session.actions.repeat);
@@ -51,7 +50,10 @@ export function AudioControlBar(props) {
 	const handleGoToAlbum = (e) => {
 		e.stopPropagation();
 		if (track) {
-			navigate("/albums/" + track.albumId);
+			const albumId = sha1(
+				track.metadata.album + track.metadata.album_artist
+			).toString();
+			navigate("/albums/" + albumId);
 		}
 	};
 
@@ -108,9 +110,9 @@ export function AudioControlBar(props) {
 							/>
 						</div>
 						<div className="track-metadata">
-							{track ? track.title : "~"}
+							{track ? track.metadata.title : "~"}
 							<div className="artist">
-								{track ? track.artist : "~"}
+								{track ? track.metadata.artist : "~"}
 							</div>
 						</div>
 					</div>

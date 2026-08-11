@@ -6,33 +6,6 @@ import { Provider } from "react-redux";
 import { Link, MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-const catalogMocks = vi.hoisted(() => ({
-	tracks: [],
-	albums: []
-}));
-
-vi.mock("catalog", () => ({
-	getDistinctAlbumIds: (tracks) => [...new Set(tracks.map((track) => track.albumId))],
-	useCatalogRefreshState: () => ({ isRefreshing: false, didError: false }),
-	useLibraryAlbums: () => ({ data: catalogMocks.albums }),
-	useLibraryTracks: (_libraryId, options = {}) => {
-		let data = catalogMocks.tracks;
-		if (options.tags?.length) {
-			const genres = options.tags.filter((tag) => !/^\d{4}$/.test(tag));
-			const decades = options.tags.filter((tag) => /^\d{4}$/.test(tag));
-			data = data.filter((track) =>
-				(!genres.length || genres.includes(track.genre)) &&
-				(!decades.length || decades.includes(track.decade))
-			);
-		}
-		if (options.includeSearch && options.search) {
-			const search = options.search.toLowerCase();
-			data = data.filter((track) => track.title.toLowerCase().includes(search));
-		}
-		return { data, isLoading: false };
-	}
-}));
-
 import RandomSelection from "../RandomSelection";
 import AlbumList from "./AlbumList";
 import {
@@ -65,16 +38,28 @@ const originalScrollY = Object.getOwnPropertyDescriptor(window, "scrollY");
 
 const createState = () => ({
 	music: {
-		library: { selected: "main" },
+		tracks: albumIds.map((albumId, index) => ({
+			id: `track-${index}`,
+			id_album: albumId,
+			metadata: {
+				title: `Track ${index}`
+			}
+		})),
 		filter: {
 			tags: [],
 			search: ""
 		},
-		queue: []
+		filteredData: [],
+		albumsMap: Object.fromEntries(
+			albumIds.map((albumId, index) => [albumId, [`track-${index}`]])
+		),
+		tracksMap: {},
+		isFetching: false,
+		didError: false
 	},
 	session: {
 		playing: {
-			trackId: null,
+			track: {},
 			isPaused: false
 		}
 	},
@@ -157,14 +142,6 @@ function AlbumDetailRoute() {
 
 beforeEach(() => {
 	albumScrollRestorations.clear();
-	catalogMocks.tracks = albumIds.map((albumId, index) => ({
-		id: `track-${index}`,
-		albumId,
-		title: `Track ${index}`,
-		genre: "",
-		decade: ""
-	}));
-	catalogMocks.albums = albumIds.map((id) => ({ id }));
 	useWindowVirtualizer.mockImplementation(createVirtualizer);
 });
 
@@ -195,8 +172,7 @@ describe("responsive album rows", () => {
 		expect(useWindowVirtualizer).toHaveBeenCalledWith(
 			expect.objectContaining({
 				count: 4,
-				overscan: 2,
-				useFlushSync: false
+				overscan: 2
 			})
 		);
 		expect(screen.getAllByTestId("album").map((album) => album.textContent)).toEqual([
@@ -508,10 +484,15 @@ describe("album filter scrolling", () => {
 			{},
 			createUpdatableStateReducer()
 		);
-		catalogMocks.tracks = catalogMocks.tracks.map((track, index) => ({
-			...track,
-			genre: index < 6 ? "Rock" : "Jazz"
-		}));
+		const rockTracks = createState()
+			.music.tracks.slice(0, 6)
+			.map((track) => ({
+				...track,
+				metadata: {
+					...track.metadata,
+					genre: "Rock"
+				}
+			}));
 
 		window.scrollTo(0, 350);
 		scrollTo.mockClear();
@@ -521,7 +502,8 @@ describe("album filter scrolling", () => {
 			store.dispatch({
 				type: "test/update-music",
 				payload: {
-					filter: { search: "", tags: ["Rock"] }
+					filter: { search: "", tags: ["Rock"] },
+					filteredData: rockTracks
 				}
 			});
 		});
@@ -535,7 +517,8 @@ describe("album filter scrolling", () => {
 			store.dispatch({
 				type: "test/update-music",
 				payload: {
-					filter: { search: "", tags: [] }
+					filter: { search: "", tags: [] },
+					filteredData: []
 				}
 			});
 		});

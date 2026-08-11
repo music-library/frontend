@@ -53,7 +53,7 @@ const makeStore = () => {
 	});
 	store.dispatch({
 		type: "SESSION_PLAY_TRACK",
-		payload: { trackId: track.id }
+		payload: { trackIndex: 0, track }
 	});
 	return store;
 };

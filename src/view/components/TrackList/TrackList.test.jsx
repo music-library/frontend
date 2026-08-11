@@ -3,36 +3,41 @@ import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { configureStore } from "@reduxjs/toolkit";
 import { cleanup, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-
-const catalogMocks = vi.hoisted(() => ({
-	getDistinctAlbumIds: (tracks) => [...new Set(tracks.map((track) => track.albumId))],
-	isLoading: false,
-	refresh: { isRefreshing: false, didError: false },
-	useLibraryTracks: vi.fn(() => ({ data: [], isLoading: catalogMocks.isLoading })),
-	useLibraryAlbums: vi.fn(() => ({ data: [] })),
-	useCatalogRefreshState: vi.fn(() => catalogMocks.refresh),
-	useAlbum: vi.fn(() => ({ data: undefined })),
-	useAlbumTracks: vi.fn(() => ({ data: [] })),
-	useTrack: vi.fn(() => ({ data: undefined }))
-}));
-
-vi.mock("catalog", () => catalogMocks);
+import { afterEach, describe, expect, test } from "vitest";
 
 import AlbumList from "./AlbumList";
 import TrackList from "./TrackList";
 
-const createState = () => ({
+const createState = ({ isFetching = false, didError = false } = {}) => ({
 	music: {
-		library: { selected: "main" },
-		filter: { tags: [], search: "" }
+		tracks: [],
+		filter: {
+			tags: [],
+			search: ""
+		},
+		filteredData: [],
+		albumsMap: {},
+		tracksMap: {},
+		isFetching,
+		didError
 	},
-	session: { playing: { trackId: null, isPaused: false } },
-	color: { colors: ["#ffffff"], current: 0 }
+	session: {
+		playing: {
+			track: {},
+			isPaused: false
+		}
+	},
+	color: {
+		colors: ["#ffffff"],
+		current: 0
+	}
 });
 
-const renderWithState = (ui) => {
-	const store = configureStore({ reducer: () => createState() });
+const renderWithState = (ui, state) => {
+	const store = configureStore({
+		reducer: () => state
+	});
+
 	return render(
 		<Provider store={store}>
 			<MemoryRouter>{ui}</MemoryRouter>
@@ -40,33 +45,31 @@ const renderWithState = (ui) => {
 	);
 };
 
-beforeEach(() => {
-	catalogMocks.isLoading = false;
-	catalogMocks.refresh = { isRefreshing: false, didError: false };
+afterEach(() => {
+	cleanup();
 });
-
-afterEach(() => cleanup());
 
 describe.each([
 	["AlbumList", AlbumList],
 	["TrackList", TrackList]
-])("%s", (_name, List) => {
-	test("renders loading placeholders while the empty catalog hydrates", () => {
-		catalogMocks.isLoading = true;
-		const { container } = renderWithState(<List />);
+])("%s", (name, List) => {
+	test("renders loading placeholders while music is fetching", () => {
+		const { container } = renderWithState(<List />, createState({ isFetching: true }));
+
 		expect(container.querySelectorAll(".loading").length).toBeGreaterThan(0);
 		expect(container.querySelectorAll(".error")).toHaveLength(0);
 	});
 
-	test("retains the empty error presentation when refresh fails without cache", () => {
-		catalogMocks.refresh = { isRefreshing: false, didError: true };
-		const { container } = renderWithState(<List />);
+	test("renders error placeholders when the music request fails", () => {
+		const { container } = renderWithState(<List />, createState({ didError: true }));
+
 		expect(container.querySelectorAll(".loading").length).toBeGreaterThan(0);
 		expect(container.querySelectorAll(".error").length).toBeGreaterThan(0);
 	});
 
-	test("does not render placeholders after catalog hydration settles", () => {
-		const { container } = renderWithState(<List />);
+	test("does not render placeholders after the music request settles", () => {
+		const { container } = renderWithState(<List />, createState());
+
 		expect(container.querySelectorAll(".loading")).toHaveLength(0);
 		expect(container.querySelectorAll(".error")).toHaveLength(0);
 	});

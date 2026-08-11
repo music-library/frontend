@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { animated, useTrail } from "@react-spring/web";
 
-import { useLibraryTracks } from "catalog";
+import { getNextTrack } from "lib/index";
 import { queueNew } from "state/actions";
 
 import { Grid, GridDnd, TrackBig } from "view/components";
@@ -12,11 +12,9 @@ import { Grid, GridDnd, TrackBig } from "view/components";
 export function Queue({ className, ...props }) {
 	const dispatch = useDispatch();
 	const queue = useSelector((state) => state.music.queue);
-	const libraryId = useSelector((state) => state.music.library.selected);
-	const tags = useSelector((state) => state.music.filter.tags);
-	const playingTrackId = useSelector((state) => state.session.playing.trackId);
-	const { data: tracks = [], isLoading } = useLibraryTracks(libraryId, { tags });
-	const tracksById = useMemo(() => new Map(tracks.map((track) => [track.id, track])), [tracks]);
+	const tracksMap = useSelector((state) => state.music.tracksMap);
+	const isFetching = useSelector((state) => state.music.isFetching);
+	const playingIndex = useSelector((state) => state.session.playing.index);
 
 	const newQueue = queue.map((trackId) => ({ id: trackId }));
 
@@ -24,36 +22,39 @@ export function Queue({ className, ...props }) {
 		dispatch(queueNew(newNewQueue(newQueue).map((track) => track.id)));
 	};
 
-	// Array of the next five track IDs to play after the final queue track
+	// Array of the next five track indexes to play after the final queue track
 	const nextQueueItems = useMemo(() => {
 		const arr = [];
-		if (isLoading || tracks.length === 0) return arr;
+		if (isFetching) return arr;
 
-		const lastQueuedTrackId = [...queue].reverse().find((trackId) => tracksById.has(trackId));
-		const anchorId = lastQueuedTrackId || playingTrackId;
-		let index = tracks.findIndex((track) => track.id === anchorId);
+		const lastQueuedTrackId = [...queue].reverse().find((trackId) => (
+			Object.prototype.hasOwnProperty.call(tracksMap, trackId)
+		));
+		let index = lastQueuedTrackId == null
+			? playingIndex
+			: tracksMap[lastQueuedTrackId];
 
-		if (index < 0) return arr;
+		if (index == null || index < 0) return arr;
 
 		for (let i = 0; i < 5; i++) {
-			index = (index + 1) % tracks.length;
-			arr.push(tracks[index].id);
+			index = getNextTrack(index);
+			arr.push(index);
 		}
 
 		return arr;
-	}, [queue, tracks, tracksById, playingTrackId, isLoading]);
+	}, [queue, tracksMap, playingIndex, isFetching]);
 
 	const trail = useTrail(queue?.length + nextQueueItems?.length, {
 		from: { opacity: 0, y: 20 },
 		to: { opacity: 1, y: 0 },
-		reverse: !(!isLoading || !!queue?.length || playingTrackId),
+		reverse: !(playingIndex !== -1 || !!queue?.length || !isFetching),
 		config: { mass: 2, tension: 4000, friction: 200 }
 	});
 
 	return (
 		<div className={cx("track-container", className)} {...props}>
-			{playingTrackId && (
-				<TrackBig size="big" trackId={playingTrackId} className={queueTrack} />
+			{playingIndex !== -1 && (
+				<TrackBig size="big" index={playingIndex} className={queueTrack} />
 			)}
 
 			<GridDnd
@@ -61,7 +62,7 @@ export function Queue({ className, ...props }) {
 				setData={setNewQueue}
 				renderWith={(props) => (
 					<TrackBig
-						trackId={props?.id}
+						index={tracksMap?.[props?.id]}
 						className={queueTrack}
 						size="big"
 						hideIfNonExistent={true}
@@ -77,17 +78,17 @@ export function Queue({ className, ...props }) {
 
 			<hr className={separator} />
 
-			{(playingTrackId || !!queue?.length) && (
+			{(playingIndex !== -1 || !!queue?.length) && (
 				<Grid gutter={5} minWidth={"100%"} maxWidth={"1fr"}>
 					{trail.slice(queue?.length).map((props, index) => {
-						const trackId = nextQueueItems?.[index];
-						if (!trackId) return null;
+						const trackIndex = nextQueueItems?.[index];
+						if (trackIndex == null) return null;
 
 						return (
-							<animated.div key={trackId + index} style={props}>
+							<animated.div key={trackIndex + index} style={props}>
 								<TrackBig
 									size="big"
-									trackId={trackId}
+									index={trackIndex}
 									className={queueTrack}
 									hideIfNonExistent={true}
 								/>

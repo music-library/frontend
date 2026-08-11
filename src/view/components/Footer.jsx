@@ -2,13 +2,14 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 export function Footer() {
-	const trackId = useSelector((state) => state.session.playing.trackId);
+	const playingIndex = useSelector((state) => state.session.playing.index);
+	const track = useSelector((state) => state.music.tracks[playingIndex]);
 
 	const styles = { marginBottom: 120 };
 
 	// Change Footer margin if a track is playing.
 	// This is to keep the margin consistent when the AudioControlBar is active
-	if (trackId) {
+	if (track) {
 		styles.marginBottom = 120 + 70;
 	}
 
