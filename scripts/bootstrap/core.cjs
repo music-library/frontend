@@ -3,6 +3,9 @@ const util = require("util");
 const exec = require("child_process").exec;
 const execAwait = util.promisify(exec);
 
+const PROD_COMMANDS = new Set(["build", "preview"]);
+const TEST_COMMANDS = new Set(["vitest", "cosmos"]);
+
 /**
  * Validate args
  * @note CURRENTLY NOT IN USE
@@ -181,13 +184,78 @@ function runStream(command, path = __dirname) {
 	});
 }
 
+function isProd(args = []) {
+	const command = args[1];
+	return !!command && PROD_COMMANDS.has(command);
+}
+
+function isTest(args = []) {
+	const command = args[0];
+	return !!command && TEST_COMMANDS.has(command);
+}
+
+function isDev(args = []) {
+	return !isProd(args) && !isTest(args);
+}
+
+/**
+ * Determine `NODE_ENV` from args passed to the script.
+ *
+ * @returns `NODE_ENV` value
+ */
+function getNodeEnv(args = []) {
+	if (isProd(args)) return "production";
+	if (isTest(args)) return "test";
+	return "development";
+}
+
+/**
+ * Returns version string including app name, version, git branch, and commit hash.
+ *
+ * This has been refactored from `/src/lib/global/version.ts`. @TODO make shared function and remove this one.
+ *
+ * E.g `App [Version 1.0.0 (development 4122b6...dc7c)]`
+ */
+function versionString (
+	appName = undefined,
+	appVersion = undefined,
+	gitBranch = undefined,
+	gitCommitHash = undefined
+)  {
+	if (!appVersion) {
+		return `${appName} [Version unknown]`;
+	}
+
+	let versionString = `${appName} [Version ${appVersion}`;
+
+	if (gitCommitHash) {
+		versionString += ` (`;
+
+		// Branch name
+		versionString += `${gitBranch || "unknown"}/`;
+
+		// Commit hash
+		versionString += `${gitCommitHash})`;
+	}
+
+	versionString += `]`;
+
+	return versionString;
+};
+
+
 module.exports = {
 	bootstrap,
 	buildENV,
 	getArgScript,
 	getGitBranch,
+	getNodeEnv,
+	isDev,
+	isProd,
+	isTest,
 	overrideHardcodedENV,
 	run,
 	runStream,
-	shorten
+	shorten,
+	versionString,
 };

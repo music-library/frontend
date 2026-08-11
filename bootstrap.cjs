@@ -2,8 +2,8 @@
 const core = require("./scripts/bootstrap/core.cjs");
 const packageJSON = require("./package.json");
 
-const path = __dirname;
-const args = process.argv.slice(2);
+const pathRoot = __dirname;
+const args = [...process.argv.slice(2)];
 
 // Run bootrap
 bootstrap();
@@ -12,9 +12,10 @@ bootstrap();
 // Run anything you like, here we get the app version from the package.json + the current commit hash.
 // prettier-ignore
 async function bootstrap() {
-	const gitCommitHash = await core.run(`git rev-parse HEAD`, path, '');
-	const gitCommitHashShort = gitCommitHash ? core.shorten(gitCommitHash) : '';
-	const gitBranch = await core.getGitBranch(path);
+	const isDev = core.isDev(args);
+	const gitCommitHash = await core.run(`git rev-parse HEAD`, pathRoot, '');
+	const gitCommitHashShort = core.shorten(gitCommitHash) || '';
+	const gitBranch = await core.getGitBranch(pathRoot);
 	const appVersion = packageJSON?.version;
 	const appName = packageJSON?.name;
 
@@ -23,19 +24,16 @@ async function bootstrap() {
 
 	// Set ENV array to inject, key/value
 	const env = [
-		["NODE_ENV", "development"],
-		["GENERATE_SOURCEMAP", false],
+		["NODE_ENV", core.getNodeEnv(args)],
+		["GENERATE_SOURCEMAP", isDev],
 		["REACT_APP_NAME", appName],
 		["REACT_APP_VERSION", appVersion],
 		["REACT_APP_GIT_BRANCH", gitBranch],
 		["REACT_APP_GIT_COMMIT", gitCommitHashShort],
 	];
 
-	const isProd = args.length >= 2 && (args[1] === "build" || args[1] === "preview");
-	if (isProd) env[0][1] = "production";
+	// Log app name and version info
+	console.log(core.versionString(appName, appVersion, gitBranch, gitCommitHashShort), "\n");
 
-	const isTest = args.length >= 1 && args[0] === "vitest";
-	if (isTest) env[0][1] = "test";
-
-	core.bootstrap(env, allowEnvOverride, args, path);
+	core.bootstrap(env, allowEnvOverride, args, pathRoot);
 }
