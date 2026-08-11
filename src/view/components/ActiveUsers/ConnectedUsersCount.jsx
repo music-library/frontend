@@ -1,8 +1,8 @@
 import { css } from "@linaria/core";
-import React from "react";
-import { useSelector } from "react-redux";
 import { animated, useSpring } from "@react-spring/web";
+import React from "react";
 
+import { useSelector } from "lib/hooks";
 import { usePrevious } from "lib/hooks";
 
 export function ConnectedUsersCount() {

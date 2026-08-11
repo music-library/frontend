@@ -1,11 +1,10 @@
 import axios from "axios";
 
-import store from "state/index";
+import { store } from "state/store";
 
 export const api = (library = undefined) => {
 	if (!library) {
-		const state = store.getState();
-		library = state.music.library.selected;
+		library = store.state.music.library.selected;
 	}
 
 	return axios.create({

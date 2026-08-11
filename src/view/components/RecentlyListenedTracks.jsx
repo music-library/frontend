@@ -1,6 +1,7 @@
 import { orderBy } from "lodash";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+
+import { useSelector } from "lib/hooks";
 
 import TrackBig from "./Tracks/TrackBig";
 

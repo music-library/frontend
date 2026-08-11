@@ -1,40 +1,16 @@
+/* eslint-disable no-console */
 import dayjs from "dayjs";
 
-import { $global } from "./utils";
 import { padChar } from "lib/strings";
 
-// @TODO:
-// export interface Logger {
-// 	filter(level: string, tags: string[]): boolean;
-// 	format: (tags: string[], message: string, location?: string) => string;
-// 	log(message: any, ...optionalParams: any[]): void;
-// 	error(message: any, ...optionalParams: any[]): void;
-// 	warn(message: any, ...optionalParams: any[]): void;
-// 	debug(message: any, ...optionalParams: any[]): void;
-// 	verbose(message: any, ...optionalParams: any[]): void;
-// }
+import { $global, setGlobalValue } from "./utils";
 
-enum ConsoleFunctions {
-	debug = "debug",
-	error = "error",
-	info = "info",
-	log = "log",
-	table = "table",
-	trace = "trace",
-	warn = "warn",
-	group = "group",
-	groupEnd = "groupEnd"
-}
-
-type chars = string | number;
-const styles = ["color: #888"].join(";");
-const timestamp = () => dayjs().format("HH:mm:ss.SSS");
-const padStr = (str: chars = "", c = 5) => padChar(str, c, " ", true);
-
-// Internal log store class. Keeps track of log times and counts per namespace.
-//
-// Injects into global object as `$global.logStore`.
-class LogStore {
+/**
+ * Internal log store class. Keeps track of log times and counts per namespace.
+ *
+ * Injects into global object as `$global.logStore`.
+ */
+export class LogStore {
 	defaultNamespace: string;
 	logStore: Record<string, [number, number]>;
 
@@ -68,6 +44,48 @@ class LogStore {
 
 export type LogStoreType = LogStore;
 
+export type LogLevels = 0 | 1 | 2 | 3 | 4;
+export type LogLevelOff = 0;
+export type LogLevelError = 1;
+export type LogLevelWarn = 2;
+export type LogLevelInfo = 3;
+export type LogLevelDebug = 4;
+
+enum ConsoleFunctions {
+	debug = "debug",
+	error = "error",
+	info = "info",
+	log = "log",
+	table = "table",
+	trace = "trace",
+	warn = "warn",
+	group = "group",
+	groupEnd = "groupEnd",
+	groupCollapsed = "groupCollapsed"
+}
+
+type chars = string | number;
+const styles = ["color: #888"].join(";");
+const timestamp = () => dayjs().format("HH:mm:ss.SSS");
+const padStr = (str: chars = "", c = 5) => padChar(str, c, " ", true);
+
+const populateLogFn = (logFn: LogFn | LognFn, fnHasNamespace = false) => {
+	for (const funcName of Object.values(ConsoleFunctions)) {
+		if (typeof console[funcName] === "function") {
+			if (fnHasNamespace) {
+				logFn[funcName] = ((namespace: string, ...args: any[]) =>
+					_log(namespace, funcName, ...args)) as LognFn;
+			} else {
+				logFn[funcName] = (...args: any[]) =>
+					_log($global.logStore.defaultNamespace, funcName, ...args);
+			}
+		} else {
+			// Handle cases where a method might not exist in all environments
+			logFn[funcName] = (..._: any) => {};
+		}
+	}
+};
+
 const timestampString = (diff: chars, namespace?: string) => {
 	const ts = `%c${timestamp()} +${padStr(diff)}%s`;
 
@@ -75,56 +93,122 @@ const timestampString = (diff: chars, namespace?: string) => {
 		return ts;
 	}
 
-	// Log Count (not being used):
-	// x${padStr($global.logStore.getCount(namespace), 3)}
+	const ns = padStr(namespace, 10);
+	// const count = `x${padStr($global.logStore.getCount(namespace), 4)}`; // Log Count (not being used)
 
-	return `${ts} ${padStr(namespace, 10)}`;
+	return `${ts} ${ns}`;
 };
 
-const _log = (namespace: string, logLevel: any, ...args: any[]) => {
-	if (import.meta.env.MODE === "production") return;
+/**
+ * Enforce current log level
+ */
+const logLevelIsValid = (consoleFn: ConsoleFunctions) => {
+	if (
+		$global.logLevel === 0 ||
+		($global.logLevel <= 3 && consoleFn === ConsoleFunctions.debug) ||
+		($global.logLevel <= 2 &&
+			(consoleFn === ConsoleFunctions.info ||
+				consoleFn === ConsoleFunctions.log)) ||
+		($global.logLevel <= 1 && consoleFn === ConsoleFunctions.warn)
+	)
+		return false;
+	return true;
+};
 
+/**
+ * Internal log function. Handles namespace, timestamp, and log level.
+ */
+const _log = (namespace: string, consoleFn: any, ...args: any[]) => {
+	if (!logLevelIsValid(consoleFn)) return;
 	const timeElapsed = dayjs().diff($global.logStore.getTime(namespace), "millisecond");
 	const stringToLog = timestampString(timeElapsed, namespace);
 	$global.logStore.increment(namespace);
 
 	// Special case for table. No timestamp or styles as it messes with the table.
-	if (logLevel === "table") {
+	if (consoleFn === "table") {
 		return console.table(...args);
 	}
 
-	if (ConsoleFunctions[logLevel as ConsoleFunctions]) {
-		console[ConsoleFunctions[logLevel as ConsoleFunctions]](
+	if (ConsoleFunctions[consoleFn as ConsoleFunctions]) {
+		console[ConsoleFunctions[consoleFn as ConsoleFunctions]](
 			stringToLog,
 			styles,
 			"",
 			...args
 		);
 	} else {
-		console.log(stringToLog, styles, "", logLevel, ...args);
+		console.log(stringToLog, styles, "", consoleFn, ...args);
 	}
 };
 
+type LogMethods = {
+	[K in ConsoleFunctions]: (typeof console)[K];
+};
+type LognMethods = {
+	[K in ConsoleFunctions]: (
+		namespace: string,
+		message?: any,
+		...optionalParams: any[]
+	) => void;
+};
+
+type LogCallable = typeof console.log;
+type LognCallable = (namespace: string, ...args: Parameters<typeof console.log>) => void;
+
+export type LogFn = LogCallable & LogMethods;
+export type LognFn = LognCallable & LognMethods;
+
 /**
- * log in development only (`NODE_ENV !== "production"`)
+ * log.
  *
  * Adds a timestamp and timediff to each log automatically.
  */
-export const log = (logLevel: any, ...args: any[]) => {
-	_log($global.logStore.defaultNamespace, logLevel, ...args);
+const logFn: LogCallable = (...args: any[]) => {
+	_log($global.logStore.defaultNamespace, "log", ...args);
 };
 
 /**
- * Alias for `log`, plus namespaces logs to keep them separate.
+ * Namespaced `log`.
  *
  * @example debug("socket", "msg received") -> "[socket] msg recieved"
  */
-export const debug = (namespace: string, logLevel: any, ...args: any[]) => {
-	_log(namespace, logLevel, ...args);
+const lognFn: LognCallable = (namespace: string, ...args: any[]) => {
+	_log(namespace, "log", ...args);
 };
+
+/**
+ * Log in development only (`NODE_ENV !== "production"`)
+ */
+const debugFn: LogCallable = (...args: any[]) => {
+	if (env.isProd) return;
+	_log($global.logStore.defaultNamespace, "debug", ...args);
+};
+
+/**
+ * Namespaced `debug`.
+ *
+ * @example debugn("socket", "msg received") -> "[socket] msg recieved"
+ */
+const debugnFn: LognCallable = (namespace: string, ...args: any[]) => {
+	if (env.isProd) return;
+	_log(namespace, "debug", ...args);
+};
+
+populateLogFn(logFn as LogFn, false);
+populateLogFn(lognFn as LognFn, true);
+populateLogFn(debugFn as LogFn, false);
+populateLogFn(debugnFn as LognFn, true);
+
+export const log = logFn as LogFn;
+export const logn = lognFn as LognFn;
+export const debug = debugFn as LogFn;
+export const debugn = debugnFn as LognFn;
 
 export const injectLog = () => {
 	$global.logStore = new LogStore();
-	$global.log = log;
-	$global.debug = debug;
+	setGlobalValue("logLevel", 4, true);
+	setGlobalValue("log", log);
+	setGlobalValue("logn", logn);
+	setGlobalValue("debug", debug);
+	setGlobalValue("debugn", debugn);
 };

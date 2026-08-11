@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 import { isFirefox } from "lib/device";
+import { useSelector } from "lib/hooks";
 import { api } from "lib/index";
 import {
 	muteVolume,
@@ -19,8 +19,6 @@ const video = document.createElement("video");
 video.muted = true;
 
 export function Audio() {
-	const dispatch = useDispatch();
-
 	// Get session state from store
 	const track = useSelector((state) => state.session.playing.track);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
@@ -30,39 +28,34 @@ export function Audio() {
 	const showPip = useSelector((state) => state.session.actions.showPip);
 
 	const handlePlayNextTrack = useCallback(() => {
-		dispatch(playNextTrackBasedOnSession(true));
-	}, [dispatch]);
+		playNextTrackBasedOnSession(true);
+	}, []);
 
 	const handlePlayPreviousTrack = useCallback(() => {
-		dispatch(playNextTrackBasedOnSession(false));
-	}, [dispatch]);
+		playNextTrackBasedOnSession(false);
+	}, []);
 
-	const handlePlaying = useCallback(
-		(audio) => {
-			dispatch(
-				sessionUpdatePlayingStatus({
-					duration: audio.duration,
-					position: audio.time
-				})
-			);
-		},
-		[dispatch]
-	);
+	const handlePlaying = useCallback((audio) => {
+		sessionUpdatePlayingStatus({
+			duration: audio.duration,
+			position: audio.time
+		});
+	}, []);
 
 	const handleTrackPause = useCallback(() => {
-		dispatch(playingTrackIsPaused(true));
-	}, [dispatch]);
+		playingTrackIsPaused(true);
+	}, []);
 	const handleTrackPlay = useCallback(() => {
-		dispatch(playingTrackIsPaused(false));
-	}, [dispatch]);
+		playingTrackIsPaused(false);
+	}, []);
 
 	const handleVolumeMuteToggle = useCallback(() => {
 		if (isMute) {
-			dispatch(muteVolume(false));
+			muteVolume(false);
 		} else {
-			dispatch(muteVolume(true));
+			muteVolume(true);
 		}
-	}, [dispatch, isMute]);
+	}, [isMute]);
 
 	const handlePictureInPicture = useCallback(async () => {
 		try {
@@ -125,7 +118,7 @@ export function Audio() {
 				// "p" = PIP, picture-in-picture
 				if (e.code === "KeyP") {
 					e.preventDefault();
-					dispatch(pipToggle());
+					pipToggle();
 				}
 
 				// // "-" = decrease volume
@@ -133,7 +126,7 @@ export function Audio() {
 				//     e.preventDefault();
 				//     let newVolume = volume - 10;
 				//     if (newVolume < 0) newVolume = 0;
-				//     dispatch(changeVolume(newVolume));
+				//     changeVolume(newVolume);
 				// }
 
 				// // "+" = increase volume
@@ -141,12 +134,11 @@ export function Audio() {
 				//     e.preventDefault();
 				//     let newVolume = volume + 10;
 				//     if (newVolume > 100) newVolume = 100;
-				//     dispatch(changeVolume(newVolume));
+				//     changeVolume(newVolume);
 				// }
 			}
 		},
 		[
-			dispatch,
 			handlePlayNextTrack,
 			handlePlayPreviousTrack,
 			handleTrackPause,

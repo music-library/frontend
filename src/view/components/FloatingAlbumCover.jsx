@@ -1,11 +1,10 @@
 import { animated, useSpring } from "@react-spring/web";
 import sha1 from "crypto-js/sha1";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { isMobile } from "lib/device";
-import { useColor } from "lib/hooks";
+import { useColor, useSelector } from "lib/hooks";
 import { api } from "lib/index";
 import { playingTrackIsPaused } from "state/actions";
 
@@ -14,7 +13,6 @@ import { Icon } from "view/components";
 import Image from "./Image";
 
 export function FloatingAlbumCover() {
-	const dispatch = useDispatch();
 	const navigate = useNavigate();
 
 	// Track and session data from store
@@ -43,7 +41,7 @@ export function FloatingAlbumCover() {
 	// Play/Pause track
 	const handlePause = (e) => {
 		e.stopPropagation();
-		dispatch(playingTrackIsPaused(!isPaused));
+		playingTrackIsPaused(!isPaused);
 	};
 
 	const styles = useSpring({

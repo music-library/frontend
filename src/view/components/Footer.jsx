@@ -1,5 +1,6 @@
 import React from "react";
-import { useSelector } from "react-redux";
+
+import { useSelector } from "lib/hooks";
 
 export function Footer() {
 	const playingIndex = useSelector((state) => state.session.playing.index);

@@ -1,16 +1,19 @@
 import { useEffect, useRef } from "react";
 import Skeleton from "react-loading-skeleton";
-import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 
+import { useSelector } from "lib/hooks";
 import { useColor } from "lib/hooks";
 import { api, getAlbum } from "lib/index";
-import { playTrack, playingTrackIsPaused } from "state/actions";
+import {
+	playTrack,
+	playingTrackIsPaused,
+	useShouldRenderTrackCache
+} from "state/actions";
 
 import { Halo, Icon, Image, Ripple, Track } from "view/components";
 
 export function AlbumIndividual() {
-	const dispatch = useDispatch();
 	const color = useColor();
 
 	const $albumCover = useRef(null);
@@ -24,6 +27,7 @@ export function AlbumIndividual() {
 	const isFetching = useSelector((state) => state.music.isFetching);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
 	const playingAlbum = useSelector((state) => state.session.playing.track.id_album);
+	const shouldRenderTrackCache = useShouldRenderTrackCache();
 
 	// Search for album
 	const album = getAlbum(id);
@@ -36,7 +40,7 @@ export function AlbumIndividual() {
 		isAlbumPlaying = true;
 
 	//
-	const isLoading = !album?.id || isFetching || didError;
+	const isLoading = !shouldRenderTrackCache && (!album?.id || isFetching || didError);
 
 	// Build external links
 	let linkSearch = "";
@@ -56,10 +60,10 @@ export function AlbumIndividual() {
 		if (album) {
 			if (!isAlbumPlaying) {
 				// Play first track in album
-				dispatch(playTrack(tracksMap[album.tracks[0]]));
+				playTrack(tracksMap[album.tracks[0]]);
 			} else {
 				// Pause track
-				dispatch(playingTrackIsPaused(!isPaused));
+				playingTrackIsPaused(!isPaused);
 			}
 		}
 	};
@@ -127,7 +131,7 @@ export function AlbumIndividual() {
 												? "example"
 												: api().getUri({
 														url: `/tracks/${album?.idCover}/cover/600`
-												  })
+													})
 										}
 										fallback={`fallback--album-cover`}
 										alt="album-cover"

@@ -4,6 +4,7 @@
 
 export * from "./api";
 export * from "./device";
+export * from "./scheduler";
 export * from "./socket";
 export * from "./sortTracks";
 export * from "./type-assertions";

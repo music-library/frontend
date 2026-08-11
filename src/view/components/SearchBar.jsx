@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { isMobile } from "lib/device";
-import { useColor } from "lib/hooks";
+import { useColor, useSelector } from "lib/hooks";
 import { updateUserSearch } from "state/actions";
 
 export function SearchBar() {
-	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const color = useColor();
@@ -30,7 +28,7 @@ export function SearchBar() {
 		evt.preventDefault();
 		if (filter.search !== evt.target.value) {
 			setSearch(evt.target.value);
-			// dispatch(updateUserSearch(evt.target.value));
+			// updateUserSearch(evt.target.value);
 		}
 	};
 
@@ -42,7 +40,7 @@ export function SearchBar() {
 		setTimer(
 			setTimeout(
 				function () {
-					dispatch(updateUserSearch(search));
+					updateUserSearch(search);
 
 					// Switch to /albums route if searching from an album
 					// or in the base route '/'
@@ -62,7 +60,7 @@ export function SearchBar() {
 		// Clear search input value after selecting an album
 		if (location.pathname.match(/\/albums\/.*/)) {
 			setSearch("");
-			dispatch(updateUserSearch(""));
+			updateUserSearch("");
 		}
 	}, [location]);
 

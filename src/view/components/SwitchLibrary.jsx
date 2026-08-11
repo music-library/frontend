@@ -1,13 +1,12 @@
 import { css } from "@linaria/core";
+import { animated, useTrail } from "@react-spring/web";
 import cx from "classnames";
 import { useLocation } from "react-router-dom";
-import { animated, useTrail } from "@react-spring/web";
 
-import { useDispatch, useSelector } from "lib/hooks";
+import { useSelector } from "lib/hooks";
 import { switchLibrary } from "state/actions";
 
 export function SwitchLibrary() {
-	const dispatch = useDispatch();
 	const location = useLocation();
 	const visible = location?.pathname === "/";
 	const library = useSelector((state) => state.music.library);
@@ -35,7 +34,7 @@ export function SwitchLibrary() {
 								})}
 								onClick={() => {
 									if (!visible) return;
-									dispatch(switchLibrary(option.id));
+									switchLibrary(option.id);
 								}}
 								style={{
 									...props,

@@ -1,6 +1,7 @@
 import cx from "classnames";
 import React from "react";
-import { useSelector } from "react-redux";
+
+import { useSelector } from "lib/hooks";
 
 import TrackBig from "../Tracks/TrackBig";
 import ConnectedUsersCount from "./ConnectedUsersCount";

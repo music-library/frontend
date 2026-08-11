@@ -1,13 +1,11 @@
 import { init as bugcatchInit } from "@bug-catch/browser";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Provider as Redux } from "react-redux";
 import { BrowserRouter as Router } from "react-router-dom";
 
 import { api } from "lib/index";
 import "lib/styles/index.scss";
 import "react-loading-skeleton/dist/skeleton.css";
-import store from "state/index";
 
 import { HaloProvider } from "view/components";
 
@@ -19,7 +17,7 @@ import App from "./App";
 if (feature("bugcatch")) {
 	bugcatchInit({
 		baseUrl: api().getUri({ url: `/bugcatch` }),
-		release: appVersion
+		release: env.appVersion
 	});
 }
 
@@ -28,13 +26,11 @@ const root = createRoot(rootElement as HTMLElement);
 
 root.render(
 	<StrictMode>
-		<Redux store={store}>
-			<Router>
-				<HaloProvider>
-					<App />
-				</HaloProvider>
-			</Router>
-		</Redux>
+		<Router>
+			<HaloProvider>
+				<App />
+			</HaloProvider>
+		</Router>
 	</StrictMode>
 );
 

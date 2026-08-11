@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 
 import { useInterval } from "lib/hooks";
 import { colorNext } from "state/actions";
 
 export function GlobalColor() {
-	const dispatch = useDispatch();
 	const location = useLocation();
 
 	const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
 	const updateGlobalColor = () => {
-		dispatch(colorNext());
+		colorNext();
 	};
 
 	// Update global color every 30 seconds

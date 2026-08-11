@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
 
-import { useDispatch, useSelector } from "lib/hooks";
+import { useSelector } from "lib/hooks";
 import { socketEventParse } from "lib/index";
 import { socketConnectedUserCount, socketGlobalPlaying } from "state/actions";
 
 export function SocketGlobal() {
-	const dispatch = useDispatch();
 	const socket = useSelector((state) => state.socket.connection);
 
 	useEffect(() => {
@@ -17,10 +16,10 @@ export function SocketGlobal() {
 
 			switch (event.type) {
 				case "ws:connectionCount":
-					dispatch(socketConnectedUserCount(event.data));
+					socketConnectedUserCount(event.data);
 					break;
 				case "music:playingTracks":
-					dispatch(socketGlobalPlaying(event.data));
+					socketGlobalPlaying(event.data);
 					break;
 				default:
 					break;
@@ -32,7 +31,7 @@ export function SocketGlobal() {
 		return () => {
 			socket.off("message", onMessage);
 		};
-	}, [dispatch, socket]);
+	}, [socket]);
 
 	return <></>;
 }

@@ -11,19 +11,34 @@
  * @Warning - Since the window object is exposed, don't put anything remotely sensitive in here.
  */
 import { injectDevTools } from "./devTools";
+import { injectEnv } from "./env";
 import { injectFeature } from "./featureFlags";
 import { injectLog } from "./log";
-import { injectVersion, versionString } from "./version";
+import { getGlobal, injectRun, setGlobalValue } from "./utils";
+import { versionString } from "./version";
 
 export const globalInit = () => {
-	if (import.meta.env.MODE !== "test")
-		console.log(`%c${versionString()}`, "font-size: 1.1em;");
+	// Prevent double initialization
+	if (getGlobal().__init) return;
+	setGlobalValue("__init", true);
 
 	// Inject global functions.
+	injectRun();
+	injectEnv();
 	injectLog();
 	injectFeature();
-	injectVersion();
-	if (import.meta.env.MODE !== "production") injectDevTools();
+
+	// Log app name+version. Hide for tests to reduce clutter in console.
+	if (!env.isTest) {
+		// eslint-disable-next-line no-console
+		console.log(`%c${versionString()}`, "font-size: 1.1em;padding: 1rem 0;");
+	}
+
+	if (env.isDev) {
+		injectDevTools();
+		// eslint-disable-next-line no-console
+		console.log("env", env);
+	}
 };
 
 globalInit();

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
+import { useSelector } from "lib/hooks";
 import { filterTracks, groupTracksIntoAlbums } from "lib/index";
+import { useShouldRenderTrackCache } from "state/actions";
 
 import TrackAlbum from "../Tracks/TrackAlbum";
 
@@ -13,7 +14,8 @@ export function TrackList() {
 	const albumsMap = useSelector((state) => state.music.albumsMap);
 	const isFetching = useSelector((state) => state.music.isFetching);
 	const didError = useSelector((state) => state.music.didError);
-	const isLoading = isFetching || didError;
+	const shouldRenderTrackCache = useShouldRenderTrackCache();
+	const isLoading = (isFetching || didError) && !shouldRenderTrackCache;
 
 	// Use pre-filtered tracks.data if tags applied
 	const tracksData = filter.tags.length > 0 ? filteredData : tracks;

@@ -2,8 +2,8 @@ import cx from "classnames";
 import moment from "moment";
 import React from "react";
 import Skeleton from "react-loading-skeleton";
-import { useDispatch, useSelector } from "react-redux";
 
+import { useSelector } from "lib/hooks";
 import { api } from "lib/index";
 import { playTrack, queuePush, queueRemove } from "state/actions";
 
@@ -16,8 +16,6 @@ export function TrackBig({
 	className,
 	...props
 }) {
-	const dispatch = useDispatch();
-
 	// Track and session data from store
 	const track = useSelector((state) => state.music.tracks[index]);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
@@ -52,7 +50,7 @@ export function TrackBig({
 
 	// Play track in session
 	const playInSession = (e) => {
-		dispatch(playTrack(index));
+		playTrack(index);
 	};
 
 	// Toggle track in queue
@@ -60,9 +58,9 @@ export function TrackBig({
 		e.preventDefault();
 		e.stopPropagation();
 		if (queuePosition === -1) {
-			dispatch(queuePush(track.id));
+			queuePush(track.id);
 		} else {
-			dispatch(queueRemove(track.id));
+			queueRemove(track.id);
 		}
 	};
 

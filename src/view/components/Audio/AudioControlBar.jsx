@@ -1,9 +1,9 @@
+import { animated, useSpring } from "@react-spring/web";
 import sha1 from "crypto-js/sha1";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { animated, useSpring } from "@react-spring/web";
 
+import { useSelector } from "lib/hooks";
 import { useColor } from "lib/hooks";
 import { api } from "lib/index";
 import {
@@ -22,7 +22,6 @@ import Slider from "../Slider";
 import AudioPositionElement from "./AudioPositionElement";
 
 export function AudioControlBar(props) {
-	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const color = useColor();
 
@@ -43,7 +42,7 @@ export function AudioControlBar(props) {
 	// Play/Pause track
 	const handlePause = (e) => {
 		e.stopPropagation();
-		dispatch(playingTrackIsPaused(!isPaused));
+		playingTrackIsPaused(!isPaused);
 	};
 
 	// Goto album of playing track
@@ -58,28 +57,28 @@ export function AudioControlBar(props) {
 	};
 
 	const handlePlayNextTrack = () => {
-		dispatch(playNextTrackBasedOnSession(true));
+		playNextTrackBasedOnSession(true);
 	};
 
 	const handlePlayPreviousTrack = () => {
-		dispatch(playNextTrackBasedOnSession(false));
+		playNextTrackBasedOnSession(false);
 	};
 
 	const handleVolumeChange = (value) => {
-		dispatch(changeVolume(value));
-		dispatch(muteVolume(false));
+		changeVolume(value);
+		muteVolume(false);
 	};
 
 	const handleVolumeMuteToggle = () => {
 		if (isMute) {
-			dispatch(muteVolume(false));
+			muteVolume(false);
 		} else {
-			dispatch(muteVolume(true));
+			muteVolume(true);
 		}
 	};
 
-	const handleShuffleToggle = () => dispatch(shuffleToggle());
-	const handleRepeatToggle = () => dispatch(repeatToggle());
+	const handleShuffleToggle = () => shuffleToggle();
+	const handleRepeatToggle = () => repeatToggle();
 
 	const hideFromRender = (render, element) => {
 		if (!render || render.includes("all") || render.includes(element)) return false;

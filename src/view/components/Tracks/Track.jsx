@@ -1,14 +1,13 @@
 import moment from "moment";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
 
+import { useSelector } from "lib/hooks";
 import { useColor } from "lib/hooks";
 import { playTrack, queuePush, queueRemove } from "state/actions";
 
 import { Halo, Icon, Ripple } from "view/components";
 
 export function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
-	const dispatch = useDispatch();
 	const color = useColor();
 
 	// Track and session data from store
@@ -30,7 +29,7 @@ export function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
 
 	// Play this track
 	const playInSession = (e) => {
-		dispatch(playTrack(index));
+		playTrack(index);
 	};
 
 	// Toggle track in queue
@@ -38,9 +37,9 @@ export function Track({ index, trackNumber, size, hideIfNonExistent = false }) {
 		e.preventDefault();
 		e.stopPropagation();
 		if (queuePosition === -1) {
-			dispatch(queuePush(track.id));
+			queuePush(track.id);
 		} else {
-			dispatch(queueRemove(track.id));
+			queueRemove(track.id);
 		}
 	};
 

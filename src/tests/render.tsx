@@ -1,31 +1,30 @@
 import { ReactElement, JSXElementConstructor } from "react";
-import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 import { render as reactRender } from "@testing-library/react";
 
-import store from "state";
+export type Element = ReactElement<any, string | JSXElementConstructor<any>>;
 
-type element = ReactElement<any, string | JSXElementConstructor<any>>;
+type WrapperType = JSXElementConstructor<{
+	children: React.ReactNode;
+}>;
 
 type children = {
-	children: element;
+	children: Element;
 };
 
-export const render = (ui: element, route = "") => {
+const internalTestId = "__routerHasMounted";
+
+export const render = (ui: Element, route = "") => {
 	const Wrapper = ({ children }: children) => {
-		return (
-			<Provider store={store}>
-				<MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>
-			</Provider>
-		);
+		return <MemoryRouter initialEntries={[route]}>{children}</MemoryRouter>;
 	};
 
 	return reactRender(ui, { wrapper: Wrapper });
 };
 
-export const renderBasic = (ui: element) => {
-	const Wrapper = ({ children }: children) => {
-		return <Provider store={store}>{children}</Provider>;
+export const renderBasic = (ui: Element) => {
+	const Wrapper: WrapperType = ({ children }) => {
+		return <div data-testid={internalTestId}>{children}</div>;
 	};
 
 	return reactRender(ui, { wrapper: Wrapper });

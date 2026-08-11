@@ -1,7 +1,7 @@
 import React from "react";
 import Skeleton from "react-loading-skeleton";
-import { useSelector } from "react-redux";
 
+import { useSelector } from "lib/hooks";
 import { getAlbum } from "lib/index";
 
 import Track from "./Track";

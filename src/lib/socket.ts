@@ -1,11 +1,10 @@
-import store from "state/index";
+import { store } from "state/store";
 
 /*
  * Sends an event message to the server
  */
 export const socketSend = (type: string, data: any = null) => {
-	const state = store.getState();
-	const socket = state.socket.connection;
+	const socket = store.state.socket.connection;
 	socket?.send(socketEventStringify(type, data));
 };
 

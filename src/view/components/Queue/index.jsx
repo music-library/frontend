@@ -1,16 +1,15 @@
 import { css } from "@linaria/core";
+import { animated, useTrail } from "@react-spring/web";
 import cx from "classnames";
 import { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { animated, useTrail } from "@react-spring/web";
 
+import { useSelector } from "lib/hooks";
 import { getNextTrack } from "lib/index";
 import { queueNew } from "state/actions";
 
 import { Grid, GridDnd, TrackBig } from "view/components";
 
 export function Queue({ className, ...props }) {
-	const dispatch = useDispatch();
 	const queue = useSelector((state) => state.music.queue);
 	const tracksMap = useSelector((state) => state.music.tracksMap);
 	const isFetching = useSelector((state) => state.music.isFetching);
@@ -19,7 +18,7 @@ export function Queue({ className, ...props }) {
 	const newQueue = queue.map((trackId) => ({ id: trackId }));
 
 	const setNewQueue = (newNewQueue) => {
-		dispatch(queueNew(newNewQueue(newQueue).map((track) => track.id)));
+		queueNew(newNewQueue(newQueue).map((track) => track.id));
 	};
 
 	// Array of the next five track indexes to play after the final queue track
@@ -27,12 +26,11 @@ export function Queue({ className, ...props }) {
 		const arr = [];
 		if (isFetching) return arr;
 
-		const lastQueuedTrackId = [...queue].reverse().find((trackId) => (
-			Object.prototype.hasOwnProperty.call(tracksMap, trackId)
-		));
-		let index = lastQueuedTrackId == null
-			? playingIndex
-			: tracksMap[lastQueuedTrackId];
+		const lastQueuedTrackId = [...queue]
+			.reverse()
+			.find((trackId) => Object.prototype.hasOwnProperty.call(tracksMap, trackId));
+		let index =
+			lastQueuedTrackId == null ? playingIndex : tracksMap[lastQueuedTrackId];
 
 		if (index == null || index < 0) return arr;
 

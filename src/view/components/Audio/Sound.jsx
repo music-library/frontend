@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
+import { useSelector } from "lib/hooks";
 import { useAudio } from "lib/hooks";
 import { api } from "lib/index";
 import {
@@ -23,7 +23,6 @@ const setMediaSessionPlaybackState = (playbackState) => {
 };
 
 export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlaying }) {
-	const dispatch = useDispatch();
 	const playbackFailure = useSelector((state) => state.session.playing.playbackFailure);
 	const trackUrl = api().getUri({ url: `/tracks/${track.id}/audio` });
 	// prettier-ignore
@@ -58,10 +57,10 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 	const handleMediaPlaying = useCallback(() => {
 		retryCountRef.current = 0;
 		terminalFailureRecordedRef.current = false;
-		dispatch(sessionUpdatePlaybackFailure(null));
-		dispatch(playingTrackIsPaused(false));
+		sessionUpdatePlaybackFailure(null);
+		playingTrackIsPaused(false);
 		setMediaSessionPlaybackState("playing");
-	}, [dispatch]);
+	}, []);
 
 	const handleTimeUpdate = useCallback(
 		(event) => {
@@ -83,17 +82,14 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 		onTimeUpdate: handleTimeUpdate
 	});
 
-	const recordTerminalFailure = useCallback(
-		(failure) => {
-			if (terminalFailureRecordedRef.current) return;
+	const recordTerminalFailure = useCallback((failure) => {
+		if (terminalFailureRecordedRef.current) return;
 
-			terminalFailureRecordedRef.current = true;
-			setMediaSessionPlaybackState("none");
-			dispatch(playingTrackDidError(failure));
-			console.error(new Error(`Audio playback failed: ${failure.kind}`), failure);
-		},
-		[dispatch]
-	);
+		terminalFailureRecordedRef.current = true;
+		setMediaSessionPlaybackState("none");
+		playingTrackDidError(failure);
+		console.error(new Error(`Audio playback failed: ${failure.kind}`), failure);
+	}, []);
 
 	const processFailure = useCallback(
 		async (element, error, context) => {
@@ -116,8 +112,8 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 			});
 
 			if (failure.kind === "autoplay-blocked") {
-				dispatch(sessionUpdatePlaybackFailure(failure));
-				dispatch(playingTrackIsPaused(true));
+				sessionUpdatePlaybackFailure(failure);
+				playingTrackIsPaused(true);
 				setMediaSessionPlaybackState("paused");
 				return false;
 			}
@@ -125,7 +121,7 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 			if (isTransientPlaybackFailure(failure) && retryCountRef.current === 0) {
 				retryCountRef.current = 1;
 				retryingRef.current = true;
-				dispatch(sessionUpdatePlaybackFailure({ ...failure, retryAttempt: 1 }));
+				sessionUpdatePlaybackFailure({ ...failure, retryAttempt: 1 });
 				element.load();
 
 				return attemptPlaybackRef.current().finally(() => {
@@ -136,7 +132,7 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 			recordTerminalFailure(failure);
 			return false;
 		},
-		[dispatch, recordTerminalFailure]
+		[recordTerminalFailure]
 	);
 
 	const attemptPlayback = useCallback(
@@ -151,7 +147,7 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 
 			if (userInitiated) {
 				skipNextEffectPlayRef.current = wasPaused;
-				dispatch(playingTrackIsPaused(false));
+				playingTrackIsPaused(false);
 			}
 
 			try {
@@ -167,7 +163,7 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 				});
 			}
 		},
-		[dispatch, ref, track.id]
+		[ref, track.id]
 	);
 
 	useEffect(() => {
@@ -180,8 +176,8 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 		attemptIdRef.current += 1;
 		retryCountRef.current = 0;
 		terminalFailureRecordedRef.current = false;
-		dispatch(sessionUpdatePlaybackFailure(null));
-	}, [dispatch, track.id]);
+		sessionUpdatePlaybackFailure(null);
+	}, [track.id]);
 
 	useEffect(() => {
 		isPausedRef.current = isPaused;
@@ -208,8 +204,8 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 	}, [ref, volume]);
 
 	useEffect(() => {
-		dispatch(sessionUpdateAudioRef(ref));
-	}, [dispatch, ref]);
+		sessionUpdateAudioRef(ref);
+	}, [ref]);
 
 	useEffect(() => {
 		if (!("mediaSession" in navigator)) return undefined;
@@ -221,7 +217,7 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 			attemptIdRef.current += 1;
 			isPausedRef.current = true;
 			ref.current?.pause();
-			dispatch(playingTrackIsPaused(true));
+			playingTrackIsPaused(true);
 			setMediaSessionPlaybackState("paused");
 		};
 
@@ -241,7 +237,7 @@ export function Sound({ track, isPaused, loop, volume, onPlaying, onFinishedPlay
 			}
 			setMediaSessionPlaybackState("none");
 		};
-	}, [attemptPlayback, dispatch, ref]);
+	}, [attemptPlayback, ref]);
 
 	// play: () => Promise<void> | void;
 	// pause: () => void;

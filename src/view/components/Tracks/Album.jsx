@@ -1,9 +1,9 @@
 import React from "react";
 import Skeleton from "react-loading-skeleton";
-import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 import { isMobile } from "lib/device";
+import { useSelector } from "lib/hooks";
 import { useColor } from "lib/hooks";
 import { api, getAlbum } from "lib/index";
 import { playTrack, playingTrackIsPaused } from "state/actions";
@@ -11,7 +11,6 @@ import { playTrack, playingTrackIsPaused } from "state/actions";
 import { Icon, Image } from "view/components";
 
 export function Album({ albumId = false, albumTracks = [], onNavigate }) {
-	const dispatch = useDispatch();
 	const color = useColor();
 
 	const playingAlbum = useSelector((state) => state.session.playing.track.id_album);
@@ -66,10 +65,10 @@ export function Album({ albumId = false, albumTracks = [], onNavigate }) {
 
 		if (!isAlbumPlaying) {
 			// Play first track in album
-			dispatch(playTrack(tracksMap[albumTracks[0]]));
+			playTrack(tracksMap[albumTracks[0]]);
 		} else {
 			// Pause track
-			dispatch(playingTrackIsPaused(!isPaused));
+			playingTrackIsPaused(!isPaused);
 		}
 	};
 

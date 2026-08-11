@@ -7,10 +7,11 @@ import {
 	useRef,
 	useState
 } from "react";
-import { useSelector } from "react-redux";
 import { useLocation, useNavigationType } from "react-router-dom";
 
+import { useSelector } from "lib/hooks";
 import { filterTracks, groupTracksIntoAlbums, numberOfAlbumsOnOneRow } from "lib/index";
+import { useShouldRenderTrackCache } from "state/actions";
 
 import Album from "../Tracks/Album";
 import {
@@ -322,7 +323,8 @@ export function AlbumList() {
 	const albumsMap = useSelector((state) => state.music.albumsMap);
 	const isFetching = useSelector((state) => state.music.isFetching);
 	const didError = useSelector((state) => state.music.didError);
-	const isLoading = isFetching || didError;
+	const shouldRenderTrackCache = useShouldRenderTrackCache();
+	const isLoading = (isFetching || didError) && !shouldRenderTrackCache;
 
 	const albumIds = useMemo(() => {
 		const tracksData = filter.tags.length > 0 ? filteredData : tracks;

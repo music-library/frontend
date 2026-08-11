@@ -1,7 +1,7 @@
 import Chance from "chance";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
+import { useSelector } from "lib/hooks";
 import { nRowsOfAlbums } from "lib/index";
 
 import Album from "./Tracks/Album";

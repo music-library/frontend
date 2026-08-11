@@ -1,7 +1,8 @@
 import cx from "classnames";
 import React from "react";
 import Skeleton from "react-loading-skeleton";
-import { useSelector } from "react-redux";
+
+import { useSelector } from "lib/hooks";
 
 export function Tag({ tag, className, handleOnClick }) {
 	const selectedTags = useSelector((state) => state.music.filter.tags);

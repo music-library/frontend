@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 
 import { isMobile } from "lib/device";
-import { useDispatch, useSelector } from "lib/hooks";
+import { useSelector } from "lib/hooks";
 import { fetchLibrary } from "state/actions";
 
 import {
@@ -24,13 +24,12 @@ import {
 } from "view/screens";
 
 function App() {
-	const dispatch = useDispatch();
 	const libraryId = useSelector((state) => state.music.library.selected);
 	const sessionTrack = useSelector((state) => state.session.playing.track);
 
 	// Fetch tracks index from api
 	useEffect(() => {
-		dispatch(fetchLibrary(libraryId));
+		fetchLibrary(libraryId);
 	}, [libraryId]);
 
 	// Update title with currently playing track

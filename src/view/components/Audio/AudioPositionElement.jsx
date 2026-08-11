@@ -1,7 +1,7 @@
 import React from "react";
-import { useSelector } from "react-redux";
 
 import { isMobile } from "lib/device";
+import { useSelector } from "lib/hooks";
 
 import { Slider } from "view/components";
 

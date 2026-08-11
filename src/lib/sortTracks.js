@@ -1,13 +1,13 @@
 import Fuse from "fuse.js";
 import sha1 from "crypto-js/sha1";
 
-import store from "state/index";
+import { store } from "state/store";
 
 /*
  * Returns Album from Id
  */
 export const getAlbum = (albumIdOrTrackId) => {
-	const state = store.getState();
+	const state = store.state;
 	const tracks = state.music.tracks;
 	const tracksMap = state.music.tracksMap;
 	const albumsMap = state.music.albumsMap;
@@ -42,7 +42,7 @@ export const getAlbum = (albumIdOrTrackId) => {
  * @Note: Does not check queue
  */
 export const getNextTrack = (trackIndex) => {
-	const state = store.getState();
+	const state = store.state;
 	const tracks = state.music.tracks;
 	const filter = state.music.filter;
 
@@ -88,7 +88,7 @@ export const getNextTrack = (trackIndex) => {
  * Get previous track index
  */
 export const getPreviousTrack = (trackIndex) => {
-	const state = store.getState();
+	const state = store.state;
 	const tracks = state.music.tracks;
 	const filter = state.music.filter;
 

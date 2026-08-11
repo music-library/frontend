@@ -1,20 +1,22 @@
-import { useDispatch, useSelector } from "react-redux";
-
+import { useSelector } from "lib/hooks";
 import { useLocalStorage } from "lib/hooks";
-import { filterResetTags, filterToggleTag } from "state/actions";
+import {
+	filterResetTags,
+	filterToggleTag,
+	useShouldRenderTrackCache
+} from "state/actions";
 
 import { Icon } from "view/components";
 
 import Tag from "./Tag";
 
 export function Tags() {
-	const dispatch = useDispatch();
-
 	const genres = useSelector((state) => state.music.genres);
 	const decades = useSelector((state) => state.music.decades);
 	const didError = useSelector((state) => state.music.didError);
 	const isFetching = useSelector((state) => state.music.isFetching);
-	const isLoading = isFetching || didError;
+	const shouldRenderTrackCache = useShouldRenderTrackCache();
+	const isLoading = (isFetching || didError) && !shouldRenderTrackCache;
 
 	// Tags
 	const tags = [...decades, ...genres];
@@ -22,17 +24,19 @@ export function Tags() {
 	const tagsRendered = areTagsHidden ? 6 : tags.length;
 
 	// Toggle tag in filter array
-	const handleToggleTag = (tag) => dispatch(filterToggleTag(tag));
-	const handleResetSelectedTags = () => dispatch(filterResetTags());
+	const handleToggleTag = (tag) => filterToggleTag(tag);
+	const handleResetSelectedTags = () => filterResetTags();
 	const handleToggleTagsRendered = () => setAreTagsHidden(!areTagsHidden);
 
 	return (
 		<div className="tags">
-			{isLoading && [...Array(7)].map((x, key) => <Tag tag={null} key={key} />)}
-
-			{tags.slice(0, tagsRendered).map((tag, key) => {
-				return <Tag tag={tag} handleOnClick={handleToggleTag} key={key} />;
-			})}
+			{isLoading
+				? [...Array(7)].map((x, key) => <Tag tag={null} key={key} />)
+				: tags.slice(0, tagsRendered).map((tag, key) => {
+						return (
+							<Tag tag={tag} handleOnClick={handleToggleTag} key={key} />
+						);
+					})}
 
 			{tags.length > 2 && (
 				<Tag

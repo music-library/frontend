@@ -1,10 +1,4 @@
-import { $global } from "./utils";
-
-export const appName = "Music Library"; // Optionally use `import.meta.env.VITE_NAME`
-export const appVersion = import.meta.env.REACT_APP_VERSION;
-export const gitBranch = import.meta.env.REACT_APP_GIT_BRANCH;
-export const gitCommitHash = import.meta.env.REACT_APP_GIT_COMMIT;
-export const environment = import.meta.env.MODE;
+import { env } from "./env";
 
 /**
  * Returns version string including app name, version, git branch, and commit hash.
@@ -12,38 +6,30 @@ export const environment = import.meta.env.MODE;
  * E.g `App [Version 1.0.0 (development 4122b6...dc7c)]`
  */
 export const versionString = () => {
-	if (!appVersion) {
-		return `${appName} [Version unknown]`;
+	if (!env.appVersion) {
+		return `${env.appName} [Version unknown]`;
 	}
 
-	let versionString = `${appName} [Version ${appVersion}`;
+	let versionString = `${env.appName} [Version ${env.appVersion}`;
 
-	if (gitCommitHash) {
+	if (env.gitCommitHash) {
 		versionString += ` (`;
 
 		// ENV (hide in production)
-		if (environment !== "production") {
-			versionString += `${environment || "unknown"} `;
+		if (!env.isProd) {
+			versionString += `${env.mode || "unknown"} `;
 		}
 
 		// Branch name (hide in production)
-		if (gitBranch !== "master" && environment !== "production") {
-			versionString += `${gitBranch || "unknown"}/`;
+		if (!env.isProd && env.gitBranch !== "master") {
+			versionString += `${env.gitBranch || "unknown"}/`;
 		}
 
 		// Commit hash
-		versionString += `${gitCommitHash})`;
+		versionString += `${env.gitCommitHash})`;
 	}
 
 	versionString += `]`;
 
 	return versionString;
-};
-
-export const injectVersion = () => {
-	$global.appName = appName;
-	$global.appVersion = appVersion;
-	$global.gitBranch = gitBranch;
-	$global.gitCommitHash = gitCommitHash;
-	$global.environment = environment;
 };
