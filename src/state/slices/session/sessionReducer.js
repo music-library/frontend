@@ -35,12 +35,7 @@ const initialState = {
 				? 100
 				: parseJSON(localStorage.getItem("volume")) ?? 50
 		},
-		index: -1,
-		track: {
-			id: null,
-			id_album: null,
-			metadata: {}
-		}
+		trackId: null
 	},
 	selected: {}
 };
@@ -55,14 +50,13 @@ const sessionReducer = (state = initialState, action) => {
 					didError: false,
 					playbackFailure: null,
 					isPaused: false,
-					index: parseInt(action.payload.trackIndex),
-					track: action.payload.track
+					trackId: action.payload.trackId
 				}
 			};
 
 		case SESSION_PLAYING_TOGGLE:
 			// Check if there is a track playing
-			if (!state.playing.track.id) return state;
+			if (!state.playing.trackId) return state;
 
 			return {
 				...state,

@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { isMobile } from "react-device-detect";
 import { Route, Routes } from "react-router-dom";
 
-import { useDispatch, useSelector } from "lib/hooks";
-import { fetchLibrary } from "state/actions";
+import { refreshLibrary, useTrack } from "catalog";
+import { useSelector } from "lib/hooks";
 
 import {
 	Audio,
@@ -24,19 +24,25 @@ import {
 } from "view/screens";
 
 function App() {
-	const dispatch = useDispatch();
 	const libraryId = useSelector((state) => state.music.library.selected);
-	const sessionTrack = useSelector((state) => state.session.playing.track);
+	const sessionTrackId = useSelector((state) => state.session.playing.trackId);
+	const { data: sessionTrack } = useTrack(libraryId, sessionTrackId);
 
 	// Fetch tracks index from api
 	useEffect(() => {
-		dispatch(fetchLibrary(libraryId));
+		refreshLibrary(libraryId);
+	}, [libraryId]);
+
+	useEffect(() => {
+		const refreshWhenOnline = () => refreshLibrary(libraryId);
+		window.addEventListener("online", refreshWhenOnline);
+		return () => window.removeEventListener("online", refreshWhenOnline);
 	}, [libraryId]);
 
 	// Update title with currently playing track
 	useEffect(() => {
-		if (sessionTrack.id) {
-			document.title = `${sessionTrack.metadata.artist} - ${sessionTrack.metadata.title} | Music Library`;
+		if (sessionTrack?.id) {
+			document.title = `${sessionTrack.artist} - ${sessionTrack.title} | Music Library`;
 		}
 	}, [sessionTrack]);
 

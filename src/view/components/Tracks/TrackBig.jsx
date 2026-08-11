@@ -4,102 +4,62 @@ import React from "react";
 import Skeleton from "react-loading-skeleton";
 import { useDispatch, useSelector } from "react-redux";
 
+import { useTrack } from "catalog";
 import { api } from "lib/index";
 import { playTrack, queuePush, queueRemove } from "state/actions";
 
 import { Halo, Image } from "view/components";
 
-export function TrackBig({
-	index,
-	size,
-	hideIfNonExistent = false,
-	className,
-	...props
-}) {
+export function TrackBig({ track: suppliedTrack, trackId, size, hideIfNonExistent = false, className, ...props }) {
 	const dispatch = useDispatch();
-
-	// Track and session data from store
-	const track = useSelector((state) => state.music.tracks[index]);
+	const libraryId = useSelector((state) => state.music.library.selected);
+	const { data: queriedTrack } = useTrack(libraryId, trackId);
+	const track = suppliedTrack || queriedTrack;
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
-	const playingIndex = useSelector((state) => state.session.playing.index);
+	const playingId = useSelector((state) => state.session.playing.trackId);
 	const playingDidError = useSelector((state) => state.session.playing.didError);
 	const queuePosition = useSelector((state) => state.music.queue.indexOf(track?.id));
 
-	// Hide if track doesn't exist
 	if (!track && hideIfNonExistent) return null;
-
-	// Is this track currently playing?
-	let isTrackPlaying = false;
-	if (playingIndex === index) isTrackPlaying = true;
+	const isTrackPlaying = track?.id === playingId;
 	const isTrackPaused = isTrackPlaying && isPaused;
+	const didError = isTrackPlaying && playingDidError;
 
-	const didPlayingTrackError = playingDidError;
-	const didError = isTrackPlaying && didPlayingTrackError;
-
-	// Assume loading state
-	let trackTitle = <Skeleton />;
-	let trackArtist = <Skeleton width="60%" />;
-	let trackDuration = <Skeleton />;
-	let albumCoverId = "example";
-
-	// Track exists
-	if (track) {
-		trackTitle = track.metadata.title;
-		trackArtist = track.metadata.artist;
-		trackDuration = moment.utc(track.metadata.duration * 1000).format("mm:ss");
-		albumCoverId = track.id;
-	}
-
-	// Play track in session
-	const playInSession = (e) => {
-		dispatch(playTrack(index));
+	const handleTrackQueue = (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		if (!track) return;
+		dispatch(queuePosition === -1 ? queuePush(track.id) : queueRemove(track.id));
 	};
-
-	// Toggle track in queue
-	const handleTrackQueue = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		if (queuePosition === -1) {
-			dispatch(queuePush(track.id));
-		} else {
-			dispatch(queueRemove(track.id));
-		}
-	};
-
-	// Dynamic class list
-	const classList = [];
-	if (size) classList.push(size);
-	if (isTrackPlaying) classList.push("playing");
-	if (isTrackPaused) classList.push("paused");
-	if (didError) classList.push("error");
-	if (className) classList.push(className);
 
 	return (
 		<Halo>
 			<div
-				className={cx(`track`, ...classList)}
-				onClick={playInSession}
+				className={cx("track", size, className, {
+					playing: isTrackPlaying,
+					paused: isTrackPaused,
+					error: didError
+				})}
+				onClick={() => track && dispatch(playTrack(track.id))}
 				onContextMenu={handleTrackQueue}
 				{...props}
 			>
 				<div className="track-col image">
 					<Image
-						src={api().getUri({
-							url: `/tracks/${albumCoverId}/cover/50`
-						})}
-						fallback={`fallback--album-cover`}
+						src={api().getUri({ url: `/tracks/${track?.id || "example"}/cover/50` })}
+						fallback="fallback--album-cover"
 						alt="album-cover"
 						draggable="false"
 					/>
 				</div>
 				<div className="track-col name">
-					{trackTitle}
-					<div className="artist">{trackArtist}</div>
+					{track?.title || <Skeleton />}
+					<div className="artist">{track?.artist || <Skeleton width="60%" />}</div>
 				</div>
-				<div className="track-col length">{trackDuration}</div>
-				<div className="track-col queue-state">
-					{queuePosition >= 0 && queuePosition + 1}
+				<div className="track-col length">
+					{track ? moment.utc(track.duration * 1000).format("mm:ss") : <Skeleton />}
 				</div>
+				<div className="track-col queue-state">{queuePosition >= 0 && queuePosition + 1}</div>
 			</div>
 		</Halo>
 	);

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from "react";
 import { isFirefox } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 
+import { useTrack } from "catalog";
 import { api } from "lib/index";
 import {
 	muteVolume,
@@ -22,7 +23,9 @@ export function Audio() {
 	const dispatch = useDispatch();
 
 	// Get session state from store
-	const track = useSelector((state) => state.session.playing.track);
+	const libraryId = useSelector((state) => state.music.library.selected);
+	const trackId = useSelector((state) => state.session.playing.trackId);
+	const { data: track } = useTrack(libraryId, trackId);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
 	const doesRepeat = useSelector((state) => state.session.actions.repeat);
 	const volume = useSelector((state) => state.session.playing.status.volume);
@@ -69,7 +72,7 @@ export function Audio() {
 			if (
 				document.pictureInPictureEnabled &&
 				!video.disablePictureInPicture &&
-				typeof track.id === "string"
+				typeof track?.id === "string"
 			) {
 				if (isFirefox) {
 					video.srcObject = canvas.mozCaptureStream();
@@ -88,7 +91,7 @@ export function Audio() {
 		} catch (err) {
 			console.error(err);
 		}
-	}, [track.id]);
+	}, [track?.id]);
 
 	const handleKeyupToPause = useCallback(
 		(e) => {
@@ -169,11 +172,11 @@ export function Audio() {
 	useEffect(() => {
 		if (!("mediaSession" in navigator)) return undefined;
 
-		if (typeof track.id === "string") {
+		if (typeof track?.id === "string") {
 			navigator.mediaSession.metadata = new window.MediaMetadata({
-				title: track.metadata.title,
-				artist: track.metadata.artist,
-				album: track.metadata.album,
+				title: track.title,
+				artist: track.artist,
+				album: track.albumTitle,
 				artwork: [
 					{
 						src: api().getUri({
@@ -248,7 +251,7 @@ export function Audio() {
 
 	return (
 		<>
-			{typeof track.id === "string" && (
+			{typeof track?.id === "string" && (
 				<Sound
 					track={track}
 					isPaused={isPaused}

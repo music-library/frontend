@@ -6,7 +6,6 @@ import TrackBig from "../Tracks/TrackBig";
 import ConnectedUsersCount from "./ConnectedUsersCount";
 
 export function ActiveUsers() {
-	const tracksMap = useSelector((state) => state.music.tracksMap);
 	const globalPlaying = useSelector((state) => state.socket.global.playing);
 
 	return (
@@ -18,10 +17,7 @@ export function ActiveUsers() {
 
 			<div className="track-container grid grid-tracks-big">
 				{globalPlaying.map((trackId, index) => {
-					const trackIndex = tracksMap?.[trackId];
-					if (trackIndex == null) return null;
-
-					return <TrackBig index={trackIndex} size="big" key={index} />;
+					return <TrackBig trackId={trackId} size="big" hideIfNonExistent key={`${trackId}:${index}`} />;
 				})}
 			</div>
 		</div>

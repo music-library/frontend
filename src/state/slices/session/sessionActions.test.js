@@ -1,103 +1,130 @@
 import { beforeEach, expect, test, vi } from "vitest";
 
-const libMocks = vi.hoisted(() => ({
-	getNextTrack: vi.fn((trackIndex) => trackIndex + 1),
-	getPreviousTrack: vi.fn((trackIndex) => trackIndex - 1),
-	socketSend: vi.fn()
+const catalogMocks = vi.hoisted(() => ({
+	getOrderedTracks: vi.fn(),
+	getTrack: vi.fn(),
+	updateTrackStats: vi.fn()
 }));
 
+const libMocks = vi.hoisted(() => ({ socketSend: vi.fn() }));
+
+vi.mock("catalog", () => catalogMocks);
 vi.mock("lib/index", () => libMocks);
 
 import { QUEUE_NEW } from "state/slices/music/musicReducer";
 
-import { playNextTrack, playTrack } from "./sessionActions";
+import {
+	playNextTrack,
+	playPreviousTrack,
+	playRandomTrack,
+	playTrack
+} from "./sessionActions";
 import { SESSION_PLAY_TRACK } from "./sessionReducer";
 
-const makeState = ({ queue, tracks, tracksMap }) => ({
+const tracks = [{ id: "track-a" }, { id: "track-b" }];
+const makeState = (queue) => ({
 	music: {
-		didError: false,
-		isFetching: false,
-		queue,
-		tracks,
-		tracksMap
+		library: { selected: "main" },
+		filter: { tags: [], search: "" },
+		queue
 	}
 });
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	catalogMocks.getOrderedTracks.mockResolvedValue(tracks);
+	catalogMocks.getTrack.mockImplementation((_libraryId, trackId) =>
+		tracks.find((track) => track.id === trackId)
+	);
 });
 
-test("resolves a queued track ID to its current index after reindexing", () => {
+test("plays a queued stable track ID after catalog reordering", async () => {
 	const dispatch = vi.fn();
-	const state = makeState({
-		queue: ["track-b"],
-		tracks: [{ id: "track-a" }, { id: "track-b" }],
-		tracksMap: { "track-a": 0, "track-b": 1 }
-	});
+	const state = makeState(["track-b"]);
 
-	playNextTrack(0)(dispatch, () => state);
+	await playNextTrack("track-a")(dispatch, () => state);
 
 	expect(dispatch).toHaveBeenCalledWith({ type: QUEUE_NEW, payload: [] });
-	expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({
+	expect(dispatch).toHaveBeenCalledWith({
 		type: SESSION_PLAY_TRACK,
-		payload: {
-			trackIndex: 1,
-			track: state.music.tracks[1]
-		}
-	}));
+		payload: { trackId: "track-b" }
+	});
 });
 
-test("accepts a queued track that resolves to index zero", () => {
+test("accepts a queued track that is first in catalog order", async () => {
 	const dispatch = vi.fn();
-	const state = makeState({
-		queue: ["track-a"],
-		tracks: [{ id: "track-a" }],
-		tracksMap: { "track-a": 0 }
-	});
+	const state = makeState(["track-a"]);
 
-	playNextTrack(4)(dispatch, () => state);
+	await playNextTrack("track-b")(dispatch, () => state);
 
-	expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({
+	expect(dispatch).toHaveBeenCalledWith({
 		type: SESSION_PLAY_TRACK,
-		payload: {
-			trackIndex: 0,
-			track: state.music.tracks[0]
-		}
-	}));
+		payload: { trackId: "track-a" }
+	});
 });
 
-test("skips deleted IDs and plays the next valid queued track", () => {
+test("skips deleted IDs and plays the next valid queued track", async () => {
 	const dispatch = vi.fn();
-	const state = makeState({
-		queue: ["deleted-track", "track-a"],
-		tracks: [{ id: "track-a" }],
-		tracksMap: { "track-a": 0 }
-	});
+	const state = makeState(["deleted-track", "track-a"]);
 
-	playNextTrack(4)(dispatch, () => state);
+	await playNextTrack("track-b")(dispatch, () => state);
 
+	expect(dispatch).toHaveBeenCalledWith({ type: QUEUE_NEW, payload: ["track-a"] });
 	expect(dispatch).toHaveBeenCalledWith({ type: QUEUE_NEW, payload: [] });
-	expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({
+	expect(dispatch).toHaveBeenCalledWith({
 		type: SESSION_PLAY_TRACK,
-		payload: {
-			trackIndex: 0,
-			track: state.music.tracks[0]
-		}
-	}));
+		payload: { trackId: "track-a" }
+	});
 });
 
 test("manual playback removes the matching track ID from the queue", () => {
 	const dispatch = vi.fn();
-	const state = makeState({
-		queue: ["track-b", "track-a"],
-		tracks: [{ id: "track-a" }, { id: "track-b" }],
-		tracksMap: { "track-a": 0, "track-b": 1 }
-	});
+	const state = makeState(["track-b", "track-a"]);
 
-	playTrack(1)(dispatch, () => state);
+	playTrack("track-b")(dispatch, () => state);
 
 	expect(dispatch).toHaveBeenCalledWith({
 		type: QUEUE_NEW,
 		payload: ["track-a"]
+	});
+	expect(dispatch).toHaveBeenCalledWith({
+		type: SESSION_PLAY_TRACK,
+		payload: { trackId: "track-b" }
+	});
+	expect(catalogMocks.updateTrackStats).toHaveBeenCalledWith("main", "track-b");
+});
+
+test("wraps next and previous playback in persisted API order", async () => {
+	const dispatch = vi.fn();
+	const state = makeState([]);
+
+	await playNextTrack("track-b")(dispatch, () => state);
+	await playPreviousTrack("track-a")(dispatch, () => state);
+
+	expect(dispatch).toHaveBeenNthCalledWith(1, {
+		type: SESSION_PLAY_TRACK,
+		payload: { trackId: "track-a" }
+	});
+	expect(dispatch).toHaveBeenNthCalledWith(2, {
+		type: SESSION_PLAY_TRACK,
+		payload: { trackId: "track-b" }
+	});
+});
+
+test("random playback uses tag-filtered catalog tracks but ignores text search", async () => {
+	const dispatch = vi.fn();
+	const state = makeState([]);
+	state.music.filter = { tags: ["Rock", "1990"], search: "not applied" };
+	vi.spyOn(Math, "random").mockReturnValue(0.75);
+
+	await playRandomTrack()(dispatch, () => state);
+
+	expect(catalogMocks.getOrderedTracks).toHaveBeenCalledWith(
+		"main",
+		["Rock", "1990"]
+	);
+	expect(dispatch).toHaveBeenCalledWith({
+		type: SESSION_PLAY_TRACK,
+		payload: { trackId: "track-b" }
 	});
 });

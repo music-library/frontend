@@ -4,118 +4,65 @@ import Skeleton from "react-loading-skeleton";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
+import { useAlbum, useTrack } from "catalog";
 import { useColor } from "lib/hooks";
-import { api, getAlbum } from "lib/index";
+import { api } from "lib/index";
 import { playTrack, playingTrackIsPaused } from "state/actions";
 
 import { Icon, Image } from "view/components";
 
-export function Album({ albumId = false, albumTracks = [], onNavigate }) {
+export function Album({ album: suppliedAlbum, albumId, onNavigate }) {
 	const dispatch = useDispatch();
 	const color = useColor();
-
-	const playingAlbum = useSelector((state) => state.session.playing.track.id_album);
+	const libraryId = useSelector((state) => state.music.library.selected);
+	const { data: queriedAlbum } = useAlbum(libraryId, albumId);
+	const album = suppliedAlbum || queriedAlbum;
+	const playingTrackId = useSelector((state) => state.session.playing.trackId);
+	const { data: playingTrack } = useTrack(libraryId, playingTrackId);
 	const isPaused = useSelector((state) => state.session.playing.isPaused);
-	const tracksMap = useSelector((state) => state.music.tracksMap);
+	const isAlbumPlaying = album?.id === playingTrack?.albumId;
 
-	// If api call failed
-	const didError = useSelector((state) => state.music.didError);
-
-	// Is album playing
-	let isAlbumPlaying = false;
-
-	// Assume loading state
-	let isLoading = true;
-	let albumName = <Skeleton width={"88%"} />;
-	let albumArtist = <Skeleton width={"60%"} />;
-	let albumCoverId = "example";
-
-	// Album exists
-	if (albumId && albumTracks.length > 0) {
-		isLoading = false;
-		const album = getAlbum(albumId);
-		albumName = album?.album;
-		albumArtist = album?.album_artist;
-		albumCoverId = album?.idCover;
-		if (albumId == playingAlbum) isAlbumPlaying = true;
-	}
-
-	// Goto album url
-	const handleAlbumClick = (e) => {
-		if (!albumId) {
-			e.preventDefault();
+	const handleAlbumClick = (event) => {
+		if (!album) {
+			event.preventDefault();
 			return;
 		}
-
-		const target = e.currentTarget.getAttribute("target");
-		const isSameTabNavigation =
-			e.button === 0 &&
-			(!target || target === "_self") &&
-			!e.metaKey &&
-			!e.altKey &&
-			!e.ctrlKey &&
-			!e.shiftKey;
-
-		if (isSameTabNavigation) onNavigate?.();
-	};
-
-	// Action button handler
-	const handleActionButton = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-
-		if (!isAlbumPlaying) {
-			// Play first track in album
-			dispatch(playTrack(tracksMap[albumTracks[0]]));
-		} else {
-			// Pause track
-			dispatch(playingTrackIsPaused(!isPaused));
+		if (event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey) {
+			onNavigate?.();
 		}
 	};
 
-	// Dynamic class list
-	let classList = "";
-	classList += isAlbumPlaying ? " playing" : "";
-	classList += isLoading ? " loading" : "";
-	classList += didError ? " error" : "";
+	const handleActionButton = (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		if (!album) return;
+		if (!isAlbumPlaying) dispatch(playTrack(album.coverTrackId));
+		else dispatch(playingTrackIsPaused(!isPaused));
+	};
 
 	return (
-		<Link to={albumId ? `/albums/${albumId}` : `#`} onClick={handleAlbumClick}>
-			<div className={`album${classList}`}>
+		<Link to={album ? `/albums/${album.id}` : "#"} onClick={handleAlbumClick}>
+			<div className={`album${isAlbumPlaying ? " playing" : ""}${album ? "" : " loading"}`}>
 				<div className="album-cover">
 					<Image
-						src={api().getUri({
-							url: `/tracks/${albumCoverId}/cover/600`
-						})}
-						fallback={`fallback--album-cover`}
+						src={api().getUri({ url: `/tracks/${album?.coverTrackId || "example"}/cover/600` })}
+						fallback="fallback--album-cover"
 						alt="album-cover"
 						draggable="false"
 					/>
-					<div
-						className="album-action"
-						onClick={handleActionButton}
-						style={{ opacity: isMobile && 1 }}
-					>
+					<div className="album-action" onClick={handleActionButton} style={{ opacity: isMobile && 1 }}>
 						<div className="album-action-button">
 							{!isAlbumPlaying || isPaused ? (
-								<Icon
-									name="play"
-									fill={isAlbumPlaying && isPaused ? color : "#fff"}
-								/>
+								<Icon name="play" fill={isAlbumPlaying && isPaused ? color : "#fff"} />
 							) : (
 								<Icon name="pause" fill={color} />
 							)}
 						</div>
 					</div>
 				</div>
-
 				<div className="album-metadata">
-					<div className="album-metadata-album">
-						<p>{albumName}</p>
-					</div>
-					<div className="album-metadata-artist">
-						<p>{albumArtist}</p>
-					</div>
+					<div className="album-metadata-album"><p>{album?.title || <Skeleton width="88%" />}</p></div>
+					<div className="album-metadata-artist"><p>{album?.artist || <Skeleton width="60%" />}</p></div>
 				</div>
 			</div>
 		</Link>

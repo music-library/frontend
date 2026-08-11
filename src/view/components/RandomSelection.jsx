@@ -2,49 +2,37 @@ import Chance from "chance";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
+import { useLibraryAlbums } from "catalog";
 import { nRowsOfAlbums } from "lib/index";
 
 import Album from "./Tracks/Album";
 
 export function RandomSelection() {
-	// Get albums list from store
-	const albumsMap = useSelector((state) => state.music.albumsMap);
-	const albumsMapKeys = Object.keys(albumsMap);
-	const [albumsToRender, setAlbumsToRender] = useState([-1, -1, -1, -1]);
+	const libraryId = useSelector((state) => state.music.library.selected);
+	const { data: albums = [] } = useLibraryAlbums(libraryId);
+	const [albumsToRender, setAlbumsToRender] = useState([]);
 
-	// Generate up-to 10 - unique - random numbers (used as album indexes)
 	useEffect(() => {
+		if (albums.length === 0) {
+			setAlbumsToRender([]);
+			return;
+		}
+		let amount = nRowsOfAlbums(1);
+		if (amount === 2) amount = 4;
+		amount = Math.min(amount, albums.length);
 		const chance = new Chance();
-		let albumsAmmount = nRowsOfAlbums(1);
-		if (albumsAmmount === 2) albumsAmmount = 4;
-		let albumsMaxIndex = albumsAmmount - 1;
-		if (albumsMapKeys.length > 0) albumsMaxIndex = albumsMapKeys.length - 1;
-		if (albumsMapKeys.length > 0 && albumsMapKeys.length < albumsAmmount)
-			albumsAmmount = albumsMapKeys.length;
-
-		setAlbumsToRender(
-			chance.unique(chance.integer, albumsAmmount, {
-				min: 0,
-				max: albumsMaxIndex
-			})
-		);
-	}, [albumsMapKeys.length]);
+		const indexes = chance.unique(chance.integer, amount, {
+			min: 0,
+			max: albums.length - 1
+		});
+		setAlbumsToRender(indexes.map((index) => albums[index]));
+	}, [albums]);
 
 	return (
 		<div className="random-selection">
 			<h2>Random Selection</h2>
 			<div className="track-container grid grid-albums">
-				{albumsToRender.map((albumIndex, index) => {
-					const albumId = albumsMapKeys[albumIndex];
-					const trackIndexes = albumsMap[albumId];
-
-					if (!trackIndexes || typeof trackIndexes == "undefined")
-						return <Album key={index} albumId={false} albumTracks={[]} />;
-
-					return (
-						<Album key={index} albumId={albumId} albumTracks={trackIndexes} />
-					);
-				})}
+				{albumsToRender.map((album) => <Album album={album} key={album.id} />)}
 			</div>
 		</div>
 	);

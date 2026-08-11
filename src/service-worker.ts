@@ -76,7 +76,7 @@ registerRoute(
 );
 
 // Cache the last n tracks' cover images
-const trackCoversToCacheRegex = new RegExp(`.*\/cover/600$`);
+const trackCoversToCacheRegex = new RegExp(`.*\/cover\/(50|400|600)$`);
 registerRoute(
 	({ url }) => url.pathname.match(trackCoversToCacheRegex),
 	new CacheFirst({
@@ -84,7 +84,10 @@ registerRoute(
 		plugins: [
 			// Ensure that once this runtime cache reaches a maximum size the
 			// least-recently used images are removed.
-			new ExpirationPlugin({ maxEntries: 250 })
+			new ExpirationPlugin({
+				maxEntries: 5000,
+				maxAgeSeconds: 30 * 24 * 60 * 60
+			})
 		]
 	})
 );

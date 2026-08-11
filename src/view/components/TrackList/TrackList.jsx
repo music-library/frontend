@@ -1,72 +1,49 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
-import { filterTracks, groupTracksIntoAlbums } from "lib/index";
+import {
+	getDistinctAlbumIds,
+	useCatalogRefreshState,
+	useLibraryAlbums,
+	useLibraryTracks
+} from "catalog";
 
 import TrackAlbum from "../Tracks/TrackAlbum";
 
 export function TrackList() {
-	// Get album list from store
-	const tracks = useSelector((state) => state.music.tracks);
+	const libraryId = useSelector((state) => state.music.library.selected);
 	const filter = useSelector((state) => state.music.filter);
-	const filteredData = useSelector((state) => state.music.filteredData);
-	const albumsMap = useSelector((state) => state.music.albumsMap);
-	const isFetching = useSelector((state) => state.music.isFetching);
-	const didError = useSelector((state) => state.music.didError);
-	const isLoading = isFetching || didError;
-
-	// Use pre-filtered tracks.data if tags applied
-	const tracksData = filter.tags.length > 0 ? filteredData : tracks;
-
-	// #1 Filter tracks using tags or search input
-	let tracksFiltered = filterTracks(tracks.data, tracksData, filter, true);
-
-	// #2 Populate albums from filtered array
-	// #3 Create array of Album components to render
-	let albumsBeingRendered = groupTracksIntoAlbums(tracksFiltered).map(
-		(albumId, key) => {
-			return (
-				<TrackAlbum
-					key={albumId || key}
-					albumId={albumId}
-					albumTracks={albumsMap?.[albumId]}
-				/>
-			);
-		}
-	);
-
-	// # of rendered albums
-	const defaultRenderAmmount = 12;
-	const [renderedAlbumsCount, setRenderedAlbumsCount] = useState(defaultRenderAmmount);
+	const { data: tracks = [], isLoading } = useLibraryTracks(libraryId, {
+		tags: filter.tags,
+		search: filter.search,
+		includeSearch: true
+	});
+	const { data: albums = [] } = useLibraryAlbums(libraryId);
+	const refresh = useCatalogRefreshState(libraryId);
+	const albumsById = useMemo(() => new Map(albums.map((album) => [album.id, album])), [albums]);
+	const albumIds = useMemo(() => getDistinctAlbumIds(tracks), [tracks]);
+	const showLoading = (isLoading || refresh.isRefreshing || refresh.didError) && albums.length === 0;
+	const defaultRenderAmount = 12;
+	const [renderedAlbumsCount, setRenderedAlbumsCount] = useState(defaultRenderAmount);
 
 	useEffect(() => {
-		// Adds more albums as user scrolls to bottom of page
 		const handleScroll = () => {
-			if (
-				window.innerHeight + window.scrollY >=
-				document.body.offsetHeight - (window.innerHeight + 600)
-			) {
-				if (renderedAlbumsCount < albumsBeingRendered.length) {
-					// Add album to render
-					setRenderedAlbumsCount(renderedAlbumsCount + 4);
-				}
+			if (window.innerHeight + window.scrollY >= document.body.offsetHeight - (window.innerHeight + 600)) {
+				setRenderedAlbumsCount((count) => Math.min(albumIds.length, count + 4));
 			} else if (window.scrollY <= 100) {
-				// Reset render count
-				setRenderedAlbumsCount(defaultRenderAmmount);
+				setRenderedAlbumsCount(defaultRenderAmount);
 			}
 		};
-
 		window.addEventListener("scroll", handleScroll);
-		return () => {
-			window.removeEventListener("scroll", handleScroll);
-		};
-	});
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [albumIds.length]);
 
 	return (
-		<div className="track-container">
-			{isLoading && [...Array(4)].map((x, key) => <TrackAlbum key={key} />)}
-
-			{albumsBeingRendered.slice(0, renderedAlbumsCount)}
+		<div className={`track-container${showLoading && refresh.didError ? " error" : ""}`}>
+			{showLoading && [...Array(4)].map((_, key) => <TrackAlbum key={key} />)}
+			{albumIds.slice(0, renderedAlbumsCount).map((albumId) => (
+				<TrackAlbum album={albumsById.get(albumId)} albumId={albumId} key={albumId} />
+			))}
 		</div>
 	);
 }

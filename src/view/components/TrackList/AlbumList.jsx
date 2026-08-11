@@ -10,7 +10,13 @@ import {
 import { useSelector } from "react-redux";
 import { useLocation, useNavigationType } from "react-router-dom";
 
-import { filterTracks, groupTracksIntoAlbums, numberOfAlbumsOnOneRow } from "lib/index";
+import {
+	getDistinctAlbumIds,
+	useCatalogRefreshState,
+	useLibraryAlbums,
+	useLibraryTracks
+} from "catalog";
+import { numberOfAlbumsOnOneRow } from "lib/index";
 
 import Album from "../Tracks/Album";
 import {
@@ -94,13 +100,13 @@ const useAlbumGridMetrics = (gridRef) => {
 	return metrics;
 };
 
-function LoadingAlbumGrid() {
+function LoadingAlbumGrid({ didError = false }) {
 	const gridRef = useRef(null);
 	const { columns } = useAlbumGridMetrics(gridRef);
 
 	return (
 		<div
-			className="track-container grid grid-albums album-grid-loading"
+			className={`track-container grid grid-albums album-grid-loading${didError ? " error" : ""}`}
 			ref={gridRef}
 		>
 			{[...Array(columns * 4)].map((x, key) => (
@@ -110,7 +116,7 @@ function LoadingAlbumGrid() {
 	);
 }
 
-function VirtualAlbumGrid({ albumIds, albumsMap, selectedTags }) {
+function VirtualAlbumGrid({ albumIds, albumsById, selectedTags }) {
 	"use no memo";
 	// TanStack Virtual mutates a stable virtualizer instance as the visible range changes.
 	// React Compiler must not cache render-time reads from that instance.
@@ -150,7 +156,8 @@ function VirtualAlbumGrid({ albumIds, albumsMap, selectedTags }) {
 		initialOffset:
 			initialRestoration.mode === "offset" ? initialRestoration.offset : 0,
 		overscan: 2,
-		scrollMargin: offsetTop
+		scrollMargin: offsetTop,
+		useFlushSync: false
 	});
 
 	const latestState = useRef(null);
@@ -302,8 +309,8 @@ function VirtualAlbumGrid({ albumIds, albumsMap, selectedTags }) {
 					>
 						{rows[virtualRow.index].map((albumId) => (
 							<Album
+								album={albumsById.get(albumId)}
 								albumId={albumId}
-								albumTracks={albumsMap?.[albumId]}
 								key={albumId}
 								onNavigate={captureBeforeAlbumNavigation}
 							/>
@@ -316,26 +323,30 @@ function VirtualAlbumGrid({ albumIds, albumsMap, selectedTags }) {
 }
 
 export function AlbumList() {
-	const tracks = useSelector((state) => state.music.tracks);
+	const libraryId = useSelector((state) => state.music.library.selected);
 	const filter = useSelector((state) => state.music.filter);
-	const filteredData = useSelector((state) => state.music.filteredData);
-	const albumsMap = useSelector((state) => state.music.albumsMap);
-	const isFetching = useSelector((state) => state.music.isFetching);
-	const didError = useSelector((state) => state.music.didError);
-	const isLoading = isFetching || didError;
+	const { data: tracks = [], isLoading } = useLibraryTracks(libraryId, {
+		tags: filter.tags,
+		search: filter.search,
+		includeSearch: true
+	});
+	const { data: albums = [] } = useLibraryAlbums(libraryId);
+	const refresh = useCatalogRefreshState(libraryId);
+	const albumsById = useMemo(
+		() => new Map(albums.map((album) => [album.id, album])),
+		[albums]
+	);
 
-	const albumIds = useMemo(() => {
-		const tracksData = filter.tags.length > 0 ? filteredData : tracks;
-		const tracksFiltered = filterTracks(tracks, tracksData, filter, true);
-		return groupTracksIntoAlbums(tracksFiltered);
-	}, [filter, filteredData, tracks]);
+	const albumIds = useMemo(() => getDistinctAlbumIds(tracks), [tracks]);
 
-	if (isLoading) return <LoadingAlbumGrid />;
+	if ((isLoading || refresh.isRefreshing || refresh.didError) && albums.length === 0) {
+		return <LoadingAlbumGrid didError={refresh.didError} />;
+	}
 
 	return (
 		<VirtualAlbumGrid
 			albumIds={albumIds}
-			albumsMap={albumsMap}
+			albumsById={albumsById}
 			selectedTags={filter.tags}
 		/>
 	);

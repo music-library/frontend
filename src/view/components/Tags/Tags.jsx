@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 
+import { useCatalogRefreshState, useCatalogTags } from "catalog";
 import { useLocalStorage } from "lib/hooks";
 import { filterResetTags, filterToggleTag } from "state/actions";
 
@@ -10,11 +11,10 @@ import Tag from "./Tag";
 export function Tags() {
 	const dispatch = useDispatch();
 
-	const genres = useSelector((state) => state.music.genres);
-	const decades = useSelector((state) => state.music.decades);
-	const didError = useSelector((state) => state.music.didError);
-	const isFetching = useSelector((state) => state.music.isFetching);
-	const isLoading = isFetching || didError;
+	const libraryId = useSelector((state) => state.music.library.selected);
+	const { genres, decades, data, isLoading } = useCatalogTags(libraryId);
+	const refresh = useCatalogRefreshState(libraryId);
+	const showLoading = (isLoading || refresh.isRefreshing || refresh.didError) && data.length === 0;
 
 	// Tags
 	const tags = [...decades, ...genres];
@@ -28,7 +28,7 @@ export function Tags() {
 
 	return (
 		<div className="tags">
-			{isLoading && [...Array(7)].map((x, key) => <Tag tag={null} key={key} />)}
+			{showLoading && [...Array(7)].map((x, key) => <Tag tag={null} key={key} />)}
 
 			{tags.slice(0, tagsRendered).map((tag, key) => {
 				return <Tag tag={tag} handleOnClick={handleToggleTag} key={key} />;

@@ -2,48 +2,29 @@ import React from "react";
 import Skeleton from "react-loading-skeleton";
 import { useSelector } from "react-redux";
 
-import { getAlbum } from "lib/index";
+import { useAlbum, useAlbumTracks } from "catalog";
 
 import Track from "./Track";
 
-export function TrackAlbum({ albumId = false, albumTracks = [] }) {
-	const tracksMap = useSelector((state) => state.music.tracksMap);
-	const didError = useSelector((state) => state.music.didError);
+export function TrackAlbum({ album: suppliedAlbum, albumId }) {
+	const libraryId = useSelector((state) => state.music.library.selected);
+	const { data: queriedAlbum } = useAlbum(libraryId, albumId);
+	const album = suppliedAlbum || queriedAlbum;
+	const { data: tracks = [] } = useAlbumTracks(libraryId, album?.id);
 
-	let isLoading;
-	let $title;
-	let $tracks;
-
-	// If album exists
-	// Render full album
-	if (albumId) {
-		isLoading = false;
-		const album = getAlbum(albumId);
-		$title = `${album.album_artist} - [${album.year}] ${album.album}`;
-		$tracks = albumTracks.map((track, key) => {
-			return <Track index={tracksMap[track]} size="compact" key={key} />;
-		});
-	} else {
-		// Album falsy - render skeleton
-		// Loading state
-		let loadingKey = Math.floor(Math.random() * (8 - 2)) + 2;
-		isLoading = true;
-		$title = <Skeleton width={"80%"} />;
-		$tracks = [...Array(loadingKey)].map((value, key) => {
-			return <Skeleton className="track compact" key={key} />;
-		});
+	if (!album) {
+		return (
+			<div className="track-album loading">
+				<h3><Skeleton width="80%" /></h3>
+				{[...Array(4)].map((_, key) => <Skeleton className="track compact" key={key} />)}
+			</div>
+		);
 	}
 
 	return (
-		<div
-			className={`track-album${isLoading ? " loading" : ""}${
-				didError ? " error" : ""
-			}`}
-		>
-			<div className="album-info">
-				<h2>{$title}</h2>
-			</div>
-			<div className="album-tracks">{$tracks}</div>
+		<div className="track-album">
+			<h3>{`${album.artist} - [${album.year}] ${album.title}`}</h3>
+			{tracks.map((track) => <Track track={track} size="compact" key={track.id} />)}
 		</div>
 	);
 }
