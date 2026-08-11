@@ -1,9 +1,9 @@
 import React from "react";
-import { isMobile } from "react-device-detect";
 import Skeleton from "react-loading-skeleton";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
+import { isMobile } from "lib/device";
 import { useColor } from "lib/hooks";
 import { api, getAlbum } from "lib/index";
 import { playTrack, playingTrackIsPaused } from "state/actions";

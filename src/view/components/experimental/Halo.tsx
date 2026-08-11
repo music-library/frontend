@@ -1,6 +1,6 @@
 import { css, cx } from "@linaria/core";
 import { useEffect, useRef } from "react";
-import { isMobile } from "react-device-detect";
+import { isMobile } from "lib/device";
 
 import { useEventListener } from "lib/hooks";
 

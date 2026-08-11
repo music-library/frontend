@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { isMobile } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { isMobile } from "lib/device";
 import { useColor } from "lib/hooks";
 import { updateUserSearch } from "state/actions";
 

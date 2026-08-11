@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
-import { isFirefox } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 
+import { isFirefox } from "lib/device";
 import { api } from "lib/index";
 import {
 	muteVolume,

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { isMobile } from "react-device-detect";
 import { Route, Routes } from "react-router-dom";
 
+import { isMobile } from "lib/device";
 import { useDispatch, useSelector } from "lib/hooks";
 import { fetchLibrary } from "state/actions";
 

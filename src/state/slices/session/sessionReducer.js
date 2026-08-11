@@ -1,4 +1,4 @@
-import { isMobile } from "react-device-detect";
+import { isMobile } from "lib/device";
 
 import { parseJSON } from "lib/strings";
 

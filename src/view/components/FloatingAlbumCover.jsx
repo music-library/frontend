@@ -1,10 +1,10 @@
+import { animated, useSpring } from "@react-spring/web";
 import sha1 from "crypto-js/sha1";
 import React from "react";
-import { isMobile } from "react-device-detect";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { animated, useSpring } from "@react-spring/web";
 
+import { isMobile } from "lib/device";
 import { useColor } from "lib/hooks";
 import { api } from "lib/index";
 import { playingTrackIsPaused } from "state/actions";

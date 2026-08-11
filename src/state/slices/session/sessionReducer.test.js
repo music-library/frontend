@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const getInitialVolume = async (isMobile = false) => {
-	vi.doMock("react-device-detect", () => ({ isMobile }));
+	vi.doMock("lib/device", () => ({ isMobile, isFirefox: false }));
 
 	const { default: sessionReducer } = await import("./sessionReducer");
 	const state = sessionReducer(undefined, { type: "@@INIT" });

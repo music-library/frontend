@@ -7220,7 +7220,6 @@ __metadata:
     moment: "npm:^2.30.1"
     prettier: "npm:3.9.6"
     react: "npm:^19.2.8"
-    react-device-detect: "npm:^2.2.3"
     react-dom: "npm:^19.2.8"
     react-loading-skeleton: "npm:3.5.0"
     react-redux: "npm:^9.3.0"
