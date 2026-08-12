@@ -22,3 +22,4 @@ export * from "./SearchBar";
 export * from "./Slider";
 export * from "./SocketGlobal";
 export * from "./SwitchLibrary";
+export * from "./UpdateIcon";

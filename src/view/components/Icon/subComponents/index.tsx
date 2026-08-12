@@ -18,6 +18,7 @@ export * from "./Shuffle";
 export * from "./SkipNext";
 export * from "./SkipPrevious";
 export * from "./Spinner";
+export * from "./Update";
 export * from "./VolumeHigh";
 export * from "./VolumeMedium";
 export * from "./VolumeMute";

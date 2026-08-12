@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import { useColor } from "lib/hooks";
 
-import { Icon, SwitchLibrary } from "view/components";
+import { Icon, SwitchLibrary, UpdateIcon } from "view/components";
 
 import NavLinks from "./NavLinks";
 import SearchBar from "./SearchBar";
@@ -42,6 +42,7 @@ export function NavBar() {
 					<div className="navbar-var">
 						<NavLinks />
 					</div>
+					<UpdateIcon />
 				</div>
 			</div>
 
